@@ -1,0 +1,40 @@
+{
+    "folders": [
+      {
+        "path": "."
+      },
+      {
+        "path": "src"
+      },
+      {
+        "path": "models"
+      },
+      {
+        "path": "notebooks"
+      },
+      {
+        "path": "research"
+      },
+      {
+        "path": "docs"
+      },
+      {
+        "path": "logs"
+      },
+      {
+        "path": "data"
+      }
+    ],
+    "settings": {
+      "python.pythonPath": "venv/bin/python",  // Will auto-adjust if you use a virtual environment
+      "files.exclude": {
+        "**/__pycache__": true,
+        "**/*.pyc": true
+      },
+      "editor.formatOnSave": true,
+      "editor.tabSize": 4,
+      "editor.rulers": [80, 120],
+      "terminal.integrated.cwd": "${workspaceFolder}"
+    }
+  }
+  

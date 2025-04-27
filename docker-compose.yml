@@ -1,0 +1,11 @@
+version: "3"
+services:
+  trading-ai:
+    build: .
+    volumes:
+      - .:/app
+    container_name: trading_ai_dev
+    environment:
+      - PYTHONUNBUFFERED=1
+    ports:
+      - "8888:8888" # For Jupyter if needed
