@@ -2,7 +2,7 @@
 
 ## 📌 Purpose
 
-Lay the strategic and operational foundation of the Trading AI Empire.  
+Lay the strategic and operational foundation of the Trading AI.  
 No code yet — only structure, documentation, and project architecture.
 
 ---
