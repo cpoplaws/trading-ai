@@ -23,3 +23,16 @@ venv/
 # OS Files
 .DS_Store
 Thumbs.db
+docs/Enterprise_Readiness.md
+docs/Launch_Strategy_Plan.md
+docs/phase_guides/phase_12_business_scaling.md
+docs/phase_guides/phase_11_user_experience_trust.md
+docs/phase_guides/phase_10_supercharged_ai.md
+docs/phase_guides/phase_9_enhanced_intelligence.md
+docs/phase_guides/phase_8_frontier_research.md
+docs/phase_guides/phase_7_infrastructure_mastery.md
+docs/phase_guides/phase_6_command_center.md
+docs/phase_guides/phase_5_smart_execution.md
+docs/phase_guides/phase_4_ai_powerup.md
+docs/phase_guides/phase_3_intelligence_network.md
+docs/phase_guides/phase_2_trading_system.md

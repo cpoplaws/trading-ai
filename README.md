@@ -13,7 +13,7 @@ Build a scalable, modular, fully autonomous AI trading system capable of evolvin
 - **Phase 4:** Transformer and Ensemble Model Deployment
 - **Phase 5:** Reinforcement Learning Execution Agents
 - **Phase 6:** Full Command Center Deployment
-- **Phase 7–12:** Advanced Enhancements (Quantum ML, Federated Learning, Alternative Data, AR Visualization, Blockchain Audit)
+- **Phase 7–12:** Advanced Enhancements
 
 ## 🛠️ Technology Stack
 - Python 3.11+
