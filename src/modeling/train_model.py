@@ -3,35 +3,32 @@ import joblib
 import pandas as pd
 from sklearn.ensemble import RandomForestClassifier
 
-# Train the Random Forest model to predict UP/DOWN movement
-def train_model(file_path, save_path='./models/'):
+def train_model(df=None, file_path=None, save_path='./models/'):
     # Ensure the save directory exists
     os.makedirs(save_path, exist_ok=True)
-    
-    # Load the dataset
-    df = pd.read_csv(file_path, index_col=0, parse_dates=True)
-    
-    # Create the target column (1 if next day's Close > today's Close, else 0)
+
+    # Load data if not provided
+    if df is None:
+        if file_path is None:
+            raise ValueError("Must provide either a DataFrame or file_path")
+        df = pd.read_csv(file_path, index_col=0, parse_dates=True)
+
+    # Create the target column
     df['Target'] = (df['Close'].shift(-1) > df['Close']).astype(int)
-    
-    # Define the features to use for training
+
     features = ['SMA_10', 'SMA_30', 'RSI_14', 'Volatility_20']
-    X = df[features]
-    y = df['Target']
-    
-    # Drop rows with missing values
-    X = X.dropna()
-    y = y.loc[X.index]
-    
-    # Initialize and train the Random Forest Classifier
+    X = df[features].dropna()
+    y = df.loc[X.index, 'Target']
+
     model = RandomForestClassifier(n_estimators=100, random_state=42)
     model.fit(X, y)
-    
-    # Save the trained model
-    model_filename = os.path.join(save_path, f"model_{os.path.basename(file_path).split('.')[0]}.joblib")
+
+    # Save model using file_path if provided, else fallback
+    filename = file_path if file_path else "in_memory"
+    model_filename = os.path.join(save_path, f"model_{os.path.basename(filename).split('.')[0]}.joblib")
     joblib.dump(model, model_filename)
     print(f"Model trained and saved to {model_filename}")
 
 if __name__ == "__main__":
     # Example usage
-    train_model('./data/processed/AAPL.csv')
+    train_model(file_path='./data/processed/AAPL.csv')

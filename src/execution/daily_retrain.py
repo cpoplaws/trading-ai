@@ -19,12 +19,11 @@ def daily_pipeline():
     for ticker in tickers:
         raw_path = f'./data/raw/{ticker}.csv'
         df = pd.read_csv(raw_path, index_col=0, parse_dates=True)
-        df.rename(columns={'Close': 'close'}, inplace=True)
         fg = FeatureGenerator(df)
-        fg.generate_features()
+        features_df = fg.generate_features()
         processed_path = f'./data/processed/{ticker}.csv'
         fg.save_features(processed_path)
-        train_model(processed_path)
+        train_model(df=features_df)
         model_path = f'./models/model_{ticker}.joblib'
         generate_signals(model_path, processed_path)
         signal_file = f'./signals/{ticker}_signals.csv'
