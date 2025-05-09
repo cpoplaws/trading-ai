@@ -1,15 +1,19 @@
 import logging
 import os
+from datetime import datetime
 
-def setup_logger(logfile='./logs/system.log'):
-    os.makedirs(os.path.dirname(logfile), exist_ok=True)
-    logging.basicConfig(
-        filename=logfile,
-        level=logging.INFO,
-        format='%(asctime)s [%(levelname)s] %(message)s'
-    )
-    return logging.getLogger()
+def setup_logger(name='trading_ai_logger', log_dir='./logs/'):
+    os.makedirs(log_dir, exist_ok=True)
+    logfile = os.path.join(log_dir, f"{datetime.today().strftime('%Y-%m-%d')}.log")
 
-if __name__ == "__main__":
-    logger = setup_logger()
-    logger.info("Logger initialized successfully.")
+    logger = logging.getLogger(name)
+    logger.setLevel(logging.INFO)
+
+    if not logger.handlers:
+        fh = logging.FileHandler(logfile)
+        fh.setLevel(logging.INFO)
+        formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
+        fh.setFormatter(formatter)
+        logger.addHandler(fh)
+
+    return logger
