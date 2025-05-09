@@ -1,4 +1,3 @@
-# logger.py - Simple structured logger
 import logging
 import os
 
