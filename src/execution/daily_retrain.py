@@ -1,3 +1,7 @@
+import sys
+import os
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../..')))
+
 # daily_retrain.py - Automates daily data fetch ➔ feature ➔ train
 from data_ingestion.fetch_data import fetch_data
 from feature_engineering.feature_generator import generate_features
