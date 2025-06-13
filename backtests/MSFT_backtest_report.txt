@@ -1,0 +1,16 @@
+BACKTEST REPORT - MSFT
+==================================================
+
+Test Period: 1338 days
+Initial Capital: $10,000.00
+Final Value: $22,372.70
+Total Return: 123.73%
+Buy & Hold Return: 168.43%
+Excess Return: -44.70%
+Volatility (Annual): 5.90%
+Sharpe Ratio: 20.645
+Max Drawdown: -8.61%
+Total Trades: 1196
+Win Rate: 81.2%
+Final Cash: $17,105.13
+Final Positions: {'MSFT': 11}

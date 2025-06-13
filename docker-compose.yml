@@ -1,11 +1,62 @@
-version: "3"
+version: "3.8"
+
 services:
   trading-ai:
-    build: .
+    build: 
+      context: .
+      dockerfile: Dockerfile
     volumes:
       - .:/app
+      - ./data:/app/data
+      - ./models:/app/models
+      - ./logs:/app/logs
+      - ./signals:/app/signals
     container_name: trading_ai_dev
     environment:
       - PYTHONUNBUFFERED=1
+      - PYTHONPATH=/app/src
+      - TZ=US/Eastern
     ports:
-      - "8888:8888" # For Jupyter if needed
+      - "8888:8888"  # For Jupyter if needed
+      - "8000:8000"  # For web interface (future)
+    working_dir: /app
+    networks:
+      - trading_network
+    restart: unless-stopped
+    
+  # Future services for scaling
+  redis:
+    image: redis:7-alpine
+    container_name: trading_redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - trading_network
+    profiles:
+      - full  # Only start with --profile full
+      
+  postgres:
+    image: postgres:15-alpine
+    container_name: trading_postgres
+    environment:
+      - POSTGRES_DB=trading_ai
+      - POSTGRES_USER=trader
+      - POSTGRES_PASSWORD=secure_password
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - trading_network
+    profiles:
+      - full  # Only start with --profile full
+
+networks:
+  trading_network:
+    driver: bridge
+
+volumes:
+  redis_data:
+  postgres_data:
