@@ -405,9 +405,25 @@ class ModelTrainer:
     def _convert_for_json(self, obj: Any) -> Any:
         """
         Convert numpy types to native Python types for JSON serialization.
+        Excludes non-serializable objects like trained models and scalers.
         """
-        if isinstance(obj, dict):
-            return {key: self._convert_for_json(value) for key, value in obj.items()}
+        # Skip non-serializable objects
+        if hasattr(obj, 'fit') and hasattr(obj, 'predict'):  # ML models
+            return f"<Model: {type(obj).__name__}>"
+        elif hasattr(obj, 'transform') and hasattr(obj, 'fit_transform'):  # Scalers
+            return f"<Scaler: {type(obj).__name__}>"
+        elif isinstance(obj, dict):
+            result = {}
+            for key, value in obj.items():
+                # Skip model and scaler objects in dictionaries
+                if key in ['model', 'scaler'] and (
+                    (hasattr(value, 'fit') and hasattr(value, 'predict')) or
+                    (hasattr(value, 'transform') and hasattr(value, 'fit_transform')) or
+                    value is None
+                ):
+                    continue  # Skip these keys entirely
+                result[key] = self._convert_for_json(value)
+            return result
         elif isinstance(obj, list):
             return [self._convert_for_json(item) for item in obj]
         elif isinstance(obj, np.integer):
