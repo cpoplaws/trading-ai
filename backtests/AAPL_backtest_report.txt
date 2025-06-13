@@ -1,0 +1,16 @@
+BACKTEST REPORT - AAPL
+==================================================
+
+Test Period: 1338 days
+Initial Capital: $10,000.00
+Final Value: $28,983.24
+Total Return: 189.83%
+Buy & Hold Return: 157.65%
+Excess Return: 32.18%
+Volatility (Annual): 6.99%
+Sharpe Ratio: 26.863
+Max Drawdown: -27.95%
+Total Trades: 1276
+Win Rate: 78.7%
+Final Cash: $22,608.84
+Final Positions: {'AAPL': 32}

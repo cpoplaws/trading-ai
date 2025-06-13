@@ -1,0 +1,16 @@
+BACKTEST REPORT - SPY
+==================================================
+
+Test Period: 1338 days
+Initial Capital: $10,000.00
+Final Value: $17,586.35
+Total Return: 75.86%
+Buy & Hold Return: 93.97%
+Excess Return: -18.11%
+Volatility (Annual): 4.19%
+Sharpe Ratio: 17.623
+Max Drawdown: -28.91%
+Total Trades: 1146
+Win Rate: 80.1%
+Final Cash: $13,360.10
+Final Positions: {'SPY': 7}
