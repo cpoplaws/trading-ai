@@ -13,3 +13,9 @@ requests>=2.31.0
 tensorflow>=2.16.0
 seaborn>=0.12.0
 plotly>=5.15.0
+
+# DeFi and Blockchain dependencies
+web3>=6.15.0
+eth-account>=0.10.0
+eth-keys>=0.4.0
+eth-utils>=3.0.0

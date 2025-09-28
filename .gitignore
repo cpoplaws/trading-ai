@@ -39,3 +39,6 @@ docs/phase_guides/phase_2_trading_system.md
 docs/phase_guides/ignore_docs/phase_guides/phase_0_command_center.md
 docs/phase_guides/ignore_docs/phase_guides/phase_1_base_system.md
 docs/phase_guides/ignore_phase_1_base_system.md
+
+#Ignore vscode AI rules
+.github/instructions/codacy.instructions.md
