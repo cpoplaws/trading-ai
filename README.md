@@ -6,9 +6,25 @@ Welcome to the Trading-AI Project — an autonomous, adaptive, next-generation A
 
 Build a scalable, modular, fully autonomous AI trading system capable of evolving over time — from daily retraining models to cutting-edge innovations like Quantum ML, Federated Learning, and Neurosymbolic AI.
 
-## � Quick Start
+## 🚀 Quick Start
 
-### Option 1: Docker (Recommended)
+### Option 1: GitHub Codespaces (Easiest)
+
+**Running in Codespaces right now?**
+
+```bash
+# One-command setup
+bash START_HERE.sh
+
+# Or manual steps
+make install
+make test
+make pipeline
+```
+
+📖 **See [CODESPACES.md](CODESPACES.md) for Codespaces-specific guide**
+
+### Option 2: Docker (Recommended for Local)
 
 ```bash
 # Clone and setup
@@ -19,7 +35,7 @@ cd trading-ai
 docker-compose up --build
 ```
 
-### Option 2: Local Development
+### Option 3: Local Development
 
 ```bash
 # Setup environment
