@@ -90,8 +90,30 @@ environment:
 # API keys (set via environment variables)
 api_keys:
   alpha_vantage: "${ALPHA_VANTAGE_API_KEY}"
-  alpaca: "${ALPACA_API_KEY}"
+  alpaca:
+    api_key: "${ALPACA_API_KEY}"
+    secret_key: "${ALPACA_SECRET_KEY}"
+    base_url: "${ALPACA_BASE_URL}"  # Paper: https://paper-api.alpaca.markets, Live: https://api.alpaca.markets
   ib: "${IB_API_KEY}"
+  newsapi: "${NEWSAPI_API_KEY}"
+  reddit:
+    client_id: "${REDDIT_CLIENT_ID}"
+    client_secret: "${REDDIT_CLIENT_SECRET}"
+    user_agent: "${REDDIT_USER_AGENT}"
+
+# Broker settings
+broker:
+  default: "alpaca"
+  mode: "paper"  # paper or live
+  alpaca:
+    paper_url: "https://paper-api.alpaca.markets"
+    live_url: "https://api.alpaca.markets"
+    timeout: 30
+    max_retries: 3
+  risk_limits:
+    max_order_value: 10000  # USD
+    max_daily_trades: 20
+    max_position_concentration: 0.25  # 25% max per position
 
 # Alerts and notifications
 notifications:

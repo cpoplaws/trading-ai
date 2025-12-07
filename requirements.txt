@@ -14,6 +14,15 @@ tensorflow>=2.16.0
 seaborn>=0.12.0
 plotly>=5.15.0
 
+# Phase 2: Broker Integration
+alpaca-trade-api>=3.0.0
+
+# Phase 3: Intelligence Network
+beautifulsoup4>=4.12.0
+praw>=7.7.0
+vaderSentiment>=3.3.2
+newsapi-python>=0.2.7
+
 # DeFi and Blockchain dependencies
 web3>=6.15.0
 eth-account>=0.10.0

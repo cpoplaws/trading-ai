@@ -1,16 +1,21 @@
-# fetch_data.py - Pulls daily OHLCV data for selected tickers
-import yfinance as yf
-import pandas as pd
+"""Data ingestion module for fetching OHLCV market data."""
 import os
 from datetime import datetime
 from typing import List, Optional
-import logging
 
-# Set up logging
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger(__name__)
+import pandas as pd
+import yfinance as yf
 
-def fetch_data(tickers: List[str], start_date: str, end_date: Optional[str] = None, save_path: str = './data/raw/') -> bool:
+from utils.logger import setup_logger
+
+logger = setup_logger(__name__)
+
+def fetch_data(
+    tickers: List[str],
+    start_date: str,
+    end_date: Optional[str] = None,
+    save_path: str = "./data/raw/",
+) -> bool:
     """
     Fetch OHLCV data for given tickers and save to CSV files.
     
@@ -32,8 +37,14 @@ def fetch_data(tickers: List[str], start_date: str, end_date: Optional[str] = No
     for ticker in tickers:
         try:
             logger.info(f"Fetching data for {ticker}...")
-            df = yf.download(ticker, start=start_date, end=end_date, progress=False)
-            
+            df = yf.download(
+                ticker,
+                start=start_date,
+                end=end_date,
+                progress=False,
+                auto_adjust=True,
+            )
+
             if df is not None and not df.empty:
                 file_path = os.path.join(save_path, f"{ticker}.csv")
                 df.to_csv(file_path)

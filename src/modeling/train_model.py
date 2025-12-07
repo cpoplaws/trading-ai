@@ -1,17 +1,22 @@
+"""Model training module for ML-based trading signal prediction."""
 import os
+from typing import Dict, Optional, Tuple
+
 import joblib
-import pandas as pd
 import numpy as np
+import pandas as pd
 from sklearn.ensemble import RandomForestClassifier
+from sklearn.metrics import accuracy_score, classification_report
 from sklearn.model_selection import train_test_split
-from sklearn.metrics import classification_report, accuracy_score
-from typing import Optional, Tuple
-import logging
 
-# Set up logging
-logger = logging.getLogger(__name__)
+from utils.logger import setup_logger
 
-def train_model(df: Optional[pd.DataFrame] = None, file_path: Optional[str] = None, 
+logger = setup_logger(__name__)
+
+
+def train_model(
+    df: Optional[pd.DataFrame] = None,
+    file_path: Optional[str] = None, 
                 save_path: str = './models/', test_size: float = 0.2) -> Tuple[bool, dict]:
     """
     Train a machine learning model for trading signals.

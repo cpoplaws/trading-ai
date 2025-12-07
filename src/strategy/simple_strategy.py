@@ -1,12 +1,14 @@
-import joblib
-import pandas as pd
-import numpy as np
+"""Trading strategy module for signal generation and analysis."""
 import os
-from typing import Optional, Dict, Any
-import logging
+from typing import Any, Dict, Optional
 
-# Set up logging
-logger = logging.getLogger(__name__)
+import joblib
+import numpy as np
+import pandas as pd
+
+from utils.logger import setup_logger
+
+logger = setup_logger(__name__)
 
 def generate_signals(model_path: str, data_path: str, save_path: str = './signals/') -> bool:
     """

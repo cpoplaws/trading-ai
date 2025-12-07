@@ -1,11 +1,14 @@
-import pandas as pd
-import numpy as np
+"""Feature engineering module for generating technical indicators and multimodal features."""
 import os
-from typing import Optional
-import logging
+from typing import Optional, Tuple, Dict
 
-# Set up logging
-logger = logging.getLogger(__name__)
+import numpy as np
+import pandas as pd
+
+from utils.logger import setup_logger
+
+logger = setup_logger(__name__)
+
 
 class FeatureGenerator:
     def __init__(self, data: pd.DataFrame):
@@ -19,6 +22,7 @@ class FeatureGenerator:
         if 'close' not in data.columns:
             raise ValueError("Input data must contain a 'close' column.")
         self.data = data.copy()
+        self.multimodal_data = {}  # Store macro, news, sentiment data
 
     def calculate_sma(self, window: int) -> pd.Series:
         """Calculate Simple Moving Average (SMA)."""
@@ -116,6 +120,80 @@ class FeatureGenerator:
         except Exception as e:
             logger.error(f"Error generating features: {str(e)}")
             raise
+            
+    def add_macro_features(self, macro_data: Dict[str, float]) -> None:
+        """
+        Add macroeconomic indicators as features.
+        
+        Args:
+            macro_data: Dictionary of macro indicators (e.g., {'fed_funds_rate': 5.5, 'inflation_cpi': 3.2})
+        """
+        try:
+            for key, value in macro_data.items():
+                self.data[f'macro_{key}'] = value
+                
+            logger.info(f"Added {len(macro_data)} macro features")
+            self.multimodal_data['macro'] = macro_data
+            
+        except Exception as e:
+            logger.error(f"Error adding macro features: {str(e)}")
+            
+    def add_news_sentiment(self, news_sentiment: float, news_volume: int) -> None:
+        """
+        Add news sentiment features.
+        
+        Args:
+            news_sentiment: Sentiment score (-1 to 1)
+            news_volume: Number of news articles
+        """
+        try:
+            self.data['news_sentiment'] = news_sentiment
+            self.data['news_volume'] = news_volume
+            self.data['news_volume_ma'] = news_volume  # Can be enhanced with rolling avg
+            
+            logger.info(f"Added news sentiment features: sentiment={news_sentiment:.3f}, volume={news_volume}")
+            self.multimodal_data['news'] = {'sentiment': news_sentiment, 'volume': news_volume}
+            
+        except Exception as e:
+            logger.error(f"Error adding news sentiment: {str(e)}")
+            
+    def add_social_sentiment(self, reddit_sentiment: float, reddit_mentions: int) -> None:
+        """
+        Add social media sentiment features.
+        
+        Args:
+            reddit_sentiment: Reddit sentiment score (-1 to 1)
+            reddit_mentions: Number of Reddit mentions
+        """
+        try:
+            self.data['reddit_sentiment'] = reddit_sentiment
+            self.data['reddit_mentions'] = reddit_mentions
+            self.data['reddit_buzz'] = np.log1p(reddit_mentions)  # Log transform for better distribution
+            
+            logger.info(f"Added social sentiment features: sentiment={reddit_sentiment:.3f}, mentions={reddit_mentions}")
+            self.multimodal_data['social'] = {'sentiment': reddit_sentiment, 'mentions': reddit_mentions}
+            
+        except Exception as e:
+            logger.error(f"Error adding social sentiment: {str(e)}")
+            
+    def add_market_regime(self, regime: str) -> None:
+        """
+        Add market regime indicator.
+        
+        Args:
+            regime: Market regime ('expansion', 'recession', 'stagflation', 'recovery', 'neutral')
+        """
+        try:
+            # One-hot encode the regime
+            regimes = ['expansion', 'recession', 'stagflation', 'recovery', 'neutral']
+            for r in regimes:
+                self.data[f'regime_{r}'] = 1 if regime == r else 0
+                
+            logger.info(f"Added market regime: {regime}")
+            self.multimodal_data['regime'] = regime
+            
+        except Exception as e:
+            logger.error(f"Error adding market regime: {str(e)}")
 
     def save_features(self, save_path: str) -> bool:
         """

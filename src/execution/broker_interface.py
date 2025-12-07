@@ -1,355 +1,446 @@
 """
-Alpaca broker integration for paper trading.
+Abstract base class for broker interfaces and implementations.
+
+This module provides a standard interface for connecting to different brokers
+(Alpaca, Interactive Brokers, etc.) for paper and live trading.
 """
 import os
-import requests
-import pandas as pd
-import json
-from typing import Dict, List, Optional, Tuple, Union
-import logging
-from datetime import datetime, timedelta
+from abc import ABC, abstractmethod
+from dataclasses import dataclass
+from datetime import datetime
+from enum import Enum
+from typing import Dict, List, Optional, Union
+
 from dotenv import load_dotenv
 
-# Load environment variables
+from utils.logger import setup_logger
+
 load_dotenv()
+logger = setup_logger(__name__)
 
-# Set up logging
-logger = logging.getLogger(__name__)
 
-class AlpacaBroker:
+class OrderSide(Enum):
+    """Order side (buy/sell)."""
+
+    BUY = "buy"
+    SELL = "sell"
+
+
+class OrderType(Enum):
+    """Order type."""
+
+    MARKET = "market"
+    LIMIT = "limit"
+    STOP = "stop"
+    STOP_LIMIT = "stop_limit"
+
+
+class OrderStatus(Enum):
+    """Order status."""
+
+    NEW = "new"
+    PARTIALLY_FILLED = "partially_filled"
+    FILLED = "filled"
+    DONE_FOR_DAY = "done_for_day"
+    CANCELED = "canceled"
+    EXPIRED = "expired"
+    REPLACED = "replaced"
+    PENDING_CANCEL = "pending_cancel"
+    PENDING_REPLACE = "pending_replace"
+    REJECTED = "rejected"
+    SUSPENDED = "suspended"
+    PENDING_NEW = "pending_new"
+    ACCEPTED = "accepted"
+
+
+class TimeInForce(Enum):
+    """Time in force for orders."""
+
+    DAY = "day"
+    GTC = "gtc"  # Good till canceled
+    OPG = "opg"  # Market on open
+    CLS = "cls"  # Market on close
+    IOC = "ioc"  # Immediate or cancel
+    FOK = "fok"  # Fill or kill
+
+
+@dataclass
+class Order:
+    """Order data class."""
+
+    order_id: str
+    symbol: str
+    qty: float
+    side: OrderSide
+    order_type: OrderType
+    time_in_force: TimeInForce
+    status: OrderStatus
+    created_at: datetime
+    filled_qty: float = 0.0
+    filled_avg_price: float = 0.0
+    limit_price: Optional[float] = None
+    stop_price: Optional[float] = None
+
+
+@dataclass
+class Position:
+    """Position data class."""
+
+    symbol: str
+    qty: float
+    avg_entry_price: float
+    current_price: float
+    market_value: float
+    unrealized_pl: float
+    unrealized_plpc: float  # Unrealized profit/loss percentage
+    side: str  # "long" or "short"
+
+
+@dataclass
+class Account:
+    """Account data class."""
+
+    account_number: str
+    cash: float
+    portfolio_value: float
+    buying_power: float
+    equity: float
+    last_equity: float
+    long_market_value: float
+    short_market_value: float
+
+
+class BrokerInterface(ABC):
     """
-    Alpaca broker interface for paper trading.
+    Abstract base class for broker integrations.
+    
+    All broker implementations must implement these methods.
     """
-    
-    def __init__(self, paper_trading: bool = True):
+
+    @abstractmethod
+    def connect(self) -> bool:
         """
-        Initialize Alpaca broker connection.
-        
-        Args:
-            paper_trading: Whether to use paper trading (True) or live trading (False)
-        """
-        self.paper_trading = paper_trading
-        
-        # API credentials
-        self.api_key = os.getenv('ALPACA_API_KEY')
-        self.secret_key = os.getenv('ALPACA_SECRET_KEY')
-        
-        if not self.api_key or not self.secret_key:
-            logger.warning("Alpaca API keys not found in environment variables")
-            self.api_key = "YOUR_API_KEY_HERE"
-            self.secret_key = "YOUR_SECRET_KEY_HERE"
-        
-        # Base URLs
-        if paper_trading:
-            self.base_url = "https://paper-api.alpaca.markets"
-            self.data_url = "https://data.alpaca.markets"
-        else:
-            self.base_url = "https://api.alpaca.markets"
-            self.data_url = "https://data.alpaca.markets"
-        
-        # Headers for API requests
-        self.headers = {
-            'APCA-API-KEY-ID': self.api_key,
-            'APCA-API-SECRET-KEY': self.secret_key,
-            'Content-Type': 'application/json'
-        }
-        
-        self.session = requests.Session()
-        self.session.headers.update(self.headers)
-        
-        logger.info(f"Alpaca broker initialized (Paper Trading: {paper_trading})")
-    
-    def check_connection(self) -> bool:
-        """
-        Test the connection to Alpaca API.
+        Establish connection to broker API.
         
         Returns:
             True if connection successful, False otherwise
         """
-        try:
-            response = self.session.get(f"{self.base_url}/v2/account")
-            if response.status_code == 200:
-                account_data = response.json()
-                logger.info(f"✅ Connected to Alpaca. Account: {account_data.get('account_number', 'N/A')}")
-                return True
-            else:
-                logger.error(f"❌ Connection failed: {response.status_code} - {response.text}")
-                return False
-        except Exception as e:
-            logger.error(f"❌ Connection error: {str(e)}")
-            return False
-    
-    def get_account_info(self) -> Dict:
+        pass
+
+    @abstractmethod
+    def disconnect(self) -> None:
+        """Disconnect from broker API."""
+        pass
+
+    @abstractmethod
+    def get_account_info(self) -> Account:
         """
         Get account information.
         
         Returns:
-            Dictionary with account details
+            Account object with account details
         """
-        try:
-            response = self.session.get(f"{self.base_url}/v2/account")
-            if response.status_code == 200:
-                return response.json()
-            else:
-                logger.error(f"Failed to get account info: {response.text}")
-                return {}
-        except Exception as e:
-            logger.error(f"Error getting account info: {str(e)}")
-            return {}
-    
-    def get_portfolio_value(self) -> float:
+        pass
+
+    @abstractmethod
+    def get_positions(self) -> List[Position]:
         """
-        Get current portfolio value.
+        Get all open positions.
         
         Returns:
-            Current portfolio value in USD
+            List of Position objects
         """
-        account = self.get_account_info()
-        return float(account.get('portfolio_value', 0))
-    
-    def get_buying_power(self) -> float:
-        """
-        Get available buying power.
-        
-        Returns:
-            Available buying power in USD
-        """
-        account = self.get_account_info()
-        return float(account.get('buying_power', 0))
-    
-    def get_positions(self) -> List[Dict]:
-        """
-        Get current positions.
-        
-        Returns:
-            List of position dictionaries
-        """
-        try:
-            response = self.session.get(f"{self.base_url}/v2/positions")
-            if response.status_code == 200:
-                return response.json()
-            else:
-                logger.error(f"Failed to get positions: {response.text}")
-                return []
-        except Exception as e:
-            logger.error(f"Error getting positions: {str(e)}")
-            return []
-    
-    def get_position(self, symbol: str) -> Optional[Dict]:
+        pass
+
+    @abstractmethod
+    def get_position(self, symbol: str) -> Optional[Position]:
         """
         Get position for a specific symbol.
         
         Args:
-            symbol: Stock symbol
+            symbol: Stock ticker symbol
             
         Returns:
-            Position dictionary or None if not found
+            Position object or None if no position exists
         """
-        try:
-            response = self.session.get(f"{self.base_url}/v2/positions/{symbol}")
-            if response.status_code == 200:
-                return response.json()
-            else:
-                return None
-        except Exception as e:
-            logger.error(f"Error getting position for {symbol}: {str(e)}")
-            return None
-    
-    def place_order(self, symbol: str, qty: int, side: str, order_type: str = "market",
-                   time_in_force: str = "day") -> Optional[Dict]:
+        pass
+
+    @abstractmethod
+    def place_order(
+        self,
+        symbol: str,
+        qty: float,
+        side: OrderSide,
+        order_type: OrderType = OrderType.MARKET,
+        time_in_force: TimeInForce = TimeInForce.DAY,
+        limit_price: Optional[float] = None,
+        stop_price: Optional[float] = None,
+    ) -> Optional[Order]:
         """
         Place an order.
         
         Args:
-            symbol: Stock symbol
+            symbol: Stock ticker symbol
             qty: Quantity of shares
-            side: 'buy' or 'sell'
-            order_type: Order type ('market', 'limit', etc.)
-            time_in_force: Time in force ('day', 'gtc', etc.)
+            side: Buy or sell
+            order_type: Market, limit, stop, etc.
+            time_in_force: Day, GTC, etc.
+            limit_price: Limit price for limit orders
+            stop_price: Stop price for stop orders
             
         Returns:
-            Order response dictionary or None if failed
+            Order object or None if failed
         """
-        try:
-            order_data = {
-                'symbol': symbol,
-                'qty': qty,
-                'side': side,
-                'type': order_type,
-                'time_in_force': time_in_force
-            }
-            
-            response = self.session.post(f"{self.base_url}/v2/orders", json=order_data)
-            
-            if response.status_code == 201:
-                order = response.json()
-                logger.info(f"✅ Order placed: {side.upper()} {qty} {symbol}")
-                return order
-            else:
-                logger.error(f"❌ Order failed: {response.text}")
-                return None
-                
-        except Exception as e:
-            logger.error(f"Error placing order: {str(e)}")
-            return None
-    
-    def buy_shares(self, symbol: str, qty: int) -> Optional[Dict]:
-        """
-        Buy shares using market order.
-        
-        Args:
-            symbol: Stock symbol
-            qty: Number of shares to buy
-            
-        Returns:
-            Order response or None
-        """
-        return self.place_order(symbol, qty, 'buy')
-    
-    def sell_shares(self, symbol: str, qty: int) -> Optional[Dict]:
-        """
-        Sell shares using market order.
-        
-        Args:
-            symbol: Stock symbol
-            qty: Number of shares to sell
-            
-        Returns:
-            Order response or None
-        """
-        return self.place_order(symbol, qty, 'sell')
-    
-    def execute_signal(self, symbol: str, signal: str, confidence: float, 
-                      position_size: float = 0.1) -> bool:
-        """
-        Execute a trading signal.
-        
-        Args:
-            symbol: Stock symbol
-            signal: 'BUY' or 'SELL'
-            confidence: Signal confidence (0-1)
-            position_size: Fraction of portfolio to allocate
-            
-        Returns:
-            True if executed successfully, False otherwise
-        """
-        try:
-            # Adjust position size by confidence
-            adjusted_size = position_size * confidence
-            
-            if signal == 'BUY':
-                # Calculate how many shares to buy
-                buying_power = self.get_buying_power()
-                max_investment = buying_power * adjusted_size
-                
-                # Get current price (simplified - use a reasonable estimate)
-                current_price = 100  # Placeholder - in real implementation, get from API
-                shares_to_buy = int(max_investment / current_price)
-                
-                if shares_to_buy > 0:
-                    order = self.buy_shares(symbol, shares_to_buy)
-                    return order is not None
-                else:
-                    logger.warning(f"Insufficient buying power for {symbol}")
-                    return False
-                    
-            elif signal == 'SELL':
-                # Sell partial position based on confidence
-                position = self.get_position(symbol)
-                if position and int(position['qty']) > 0:
-                    current_shares = int(position['qty'])
-                    shares_to_sell = max(1, int(current_shares * confidence))
-                    order = self.sell_shares(symbol, shares_to_sell)
-                    return order is not None
-                else:
-                    logger.warning(f"No position to sell for {symbol}")
-                    return False
-            
-            return False
-            
-        except Exception as e:
-            logger.error(f"Error executing signal for {symbol}: {str(e)}")
-            return False
+        pass
 
-class MockBroker:
+    @abstractmethod
+    def cancel_order(self, order_id: str) -> bool:
+        """
+        Cancel an open order.
+        
+        Args:
+            order_id: Order ID to cancel
+            
+        Returns:
+            True if canceled successfully, False otherwise
+        """
+        pass
+
+    @abstractmethod
+    def get_order(self, order_id: str) -> Optional[Order]:
+        """
+        Get order details.
+        
+        Args:
+            order_id: Order ID
+            
+        Returns:
+            Order object or None if not found
+        """
+        pass
+
+    @abstractmethod
+    def get_orders(self, status: Optional[OrderStatus] = None) -> List[Order]:
+        """
+        Get orders, optionally filtered by status.
+        
+        Args:
+            status: Filter by order status (optional)
+            
+        Returns:
+            List of Order objects
+        """
+        pass
+
+    @abstractmethod
+    def get_current_price(self, symbol: str) -> Optional[float]:
+        """
+        Get current market price for a symbol.
+        
+        Args:
+            symbol: Stock ticker symbol
+            
+        Returns:
+            Current price or None if unavailable
+        """
+        pass
+
+
+class MockBroker(BrokerInterface):
     """
-    Mock broker for testing when Alpaca credentials are not available.
-    """
+    Mock broker for testing without real API credentials.
     
-    def __init__(self, initial_capital: float = 10000):
-        self.initial_capital = initial_capital
+    Simulates broker operations for development and testing.
+    """
+
+    def __init__(self, initial_capital: float = 100000.0):
+        """
+        Initialize mock broker.
+        
+        Args:
+            initial_capital: Starting cash balance
+        """
         self.cash = initial_capital
-        self.positions = {}
-        self.orders = []
-        logger.info("Mock broker initialized for testing")
-    
-    def check_connection(self) -> bool:
-        logger.info("✅ Mock broker connection successful")
-        return True
-    
-    def get_account_info(self) -> Dict:
-        return {
-            'account_number': 'MOCK123',
-            'portfolio_value': self.cash + sum(pos['qty'] * 100 for pos in self.positions.values()),
-            'buying_power': self.cash,
-            'cash': self.cash
-        }
-    
-    def get_portfolio_value(self) -> float:
-        return self.get_account_info()['portfolio_value']
-    
-    def get_buying_power(self) -> float:
-        return self.cash
-    
-    def execute_signal(self, symbol: str, signal: str, confidence: float, 
-                      position_size: float = 0.1) -> bool:
-        # Mock implementation
-        logger.info(f"MOCK: {signal} signal for {symbol} (confidence: {confidence:.2f})")
+        self.initial_capital = initial_capital
+        self.positions: Dict[str, Position] = {}
+        self.orders: Dict[str, Order] = {}
+        self.order_counter = 0
+        self.connected = False
+        logger.info(f"MockBroker initialized with ${initial_capital:,.2f}")
+
+    def connect(self) -> bool:
+        """Establish mock connection."""
+        self.connected = True
+        logger.info("✅ MockBroker connected successfully")
         return True
 
-def create_broker(paper_trading: bool = True, mock: bool = False) -> Union[AlpacaBroker, MockBroker]:
-    """
-    Factory function to create a broker instance.
-    
-    Args:
-        paper_trading: Whether to use paper trading
-        mock: Whether to use mock broker for testing
-        
-    Returns:
-        Broker instance
-    """
-    if mock:
-        return MockBroker()
-    else:
-        return AlpacaBroker(paper_trading=paper_trading)
+    def disconnect(self) -> None:
+        """Disconnect from mock broker."""
+        self.connected = False
+        logger.info("MockBroker disconnected")
 
-# Legacy class for backward compatibility
-class BrokerInterface:
-    def __init__(self, api_key: str, secret_key: str, base_url: str):
-        self.broker = AlpacaBroker(paper_trading=True)
-        logger.info("Legacy BrokerInterface created")
+    def get_account_info(self) -> Account:
+        """Get mock account information."""
+        portfolio_value = self.cash
+        long_market_value = 0.0
 
-    def connect(self):
-        return self.broker.check_connection()
+        for pos in self.positions.values():
+            long_market_value += pos.market_value
 
-if __name__ == "__main__":
-    # Test broker functionality
-    print("🏦 Testing Alpaca Broker Integration...")
-    
-    # Try real broker first
-    broker = create_broker(paper_trading=True, mock=False)
-    
-    if not broker.check_connection():
-        print("⚠️  Alpaca connection failed, using mock broker")
-        broker = create_broker(mock=True)
-        broker.check_connection()
-    
-    # Test basic functionality
-    account = broker.get_account_info()
-    print(f"Account Info: {account}")
-    
-    # Test signal execution
-    success = broker.execute_signal('AAPL', 'BUY', 0.8, 0.1)
-    print(f"Signal execution: {'✅ Success' if success else '❌ Failed'}")
-    
-    print("🎉 Broker integration test complete!")
+        portfolio_value += long_market_value
+
+        return Account(
+            account_number="MOCK123456",
+            cash=self.cash,
+            portfolio_value=portfolio_value,
+            buying_power=self.cash,
+            equity=portfolio_value,
+            last_equity=self.initial_capital,
+            long_market_value=long_market_value,
+            short_market_value=0.0,
+        )
+
+    def get_positions(self) -> List[Position]:
+        """Get all mock positions."""
+        return list(self.positions.values())
+
+    def get_position(self, symbol: str) -> Optional[Position]:
+        """Get mock position for symbol."""
+        return self.positions.get(symbol)
+
+    def place_order(
+        self,
+        symbol: str,
+        qty: float,
+        side: OrderSide,
+        order_type: OrderType = OrderType.MARKET,
+        time_in_force: TimeInForce = TimeInForce.DAY,
+        limit_price: Optional[float] = None,
+        stop_price: Optional[float] = None,
+    ) -> Optional[Order]:
+        """Place mock order."""
+        if not self.connected:
+            logger.error("Cannot place order: not connected")
+            return None
+
+        self.order_counter += 1
+        order_id = f"MOCK_{self.order_counter:06d}"
+
+        # Simulate immediate fill for market orders
+        current_price = self.get_current_price(symbol) or 100.0
+        filled_qty = qty
+        filled_avg_price = current_price
+
+        order = Order(
+            order_id=order_id,
+            symbol=symbol,
+            qty=qty,
+            side=side,
+            order_type=order_type,
+            time_in_force=time_in_force,
+            status=OrderStatus.FILLED,
+            created_at=datetime.now(),
+            filled_qty=filled_qty,
+            filled_avg_price=filled_avg_price,
+            limit_price=limit_price,
+            stop_price=stop_price,
+        )
+
+        self.orders[order_id] = order
+
+        # Update positions and cash
+        if side == OrderSide.BUY:
+            cost = filled_qty * filled_avg_price
+            if cost > self.cash:
+                logger.error(f"Insufficient funds: need ${cost:,.2f}, have ${self.cash:,.2f}")
+                order.status = OrderStatus.REJECTED
+                return order
+
+            self.cash -= cost
+
+            if symbol in self.positions:
+                pos = self.positions[symbol]
+                total_qty = pos.qty + filled_qty
+                total_cost = (pos.qty * pos.avg_entry_price) + cost
+                new_avg_price = total_cost / total_qty
+                pos.qty = total_qty
+                pos.avg_entry_price = new_avg_price
+                pos.current_price = current_price
+                pos.market_value = total_qty * current_price
+                pos.unrealized_pl = (current_price - new_avg_price) * total_qty
+                pos.unrealized_plpc = (current_price / new_avg_price - 1) * 100
+            else:
+                self.positions[symbol] = Position(
+                    symbol=symbol,
+                    qty=filled_qty,
+                    avg_entry_price=filled_avg_price,
+                    current_price=current_price,
+                    market_value=filled_qty * current_price,
+                    unrealized_pl=0.0,
+                    unrealized_plpc=0.0,
+                    side="long",
+                )
+
+            logger.info(f"✅ BUY {filled_qty} {symbol} @ ${filled_avg_price:.2f}")
+
+        elif side == OrderSide.SELL:
+            if symbol not in self.positions:
+                logger.error(f"Cannot sell: no position in {symbol}")
+                order.status = OrderStatus.REJECTED
+                return order
+
+            pos = self.positions[symbol]
+            if pos.qty < filled_qty:
+                logger.error(f"Cannot sell {filled_qty}: only have {pos.qty} shares")
+                order.status = OrderStatus.REJECTED
+                return order
+
+            proceeds = filled_qty * filled_avg_price
+            self.cash += proceeds
+
+            pos.qty -= filled_qty
+            if pos.qty == 0:
+                del self.positions[symbol]
+            else:
+                pos.current_price = current_price
+                pos.market_value = pos.qty * current_price
+                pos.unrealized_pl = (current_price - pos.avg_entry_price) * pos.qty
+                pos.unrealized_plpc = (current_price / pos.avg_entry_price - 1) * 100
+
+            logger.info(f"✅ SELL {filled_qty} {symbol} @ ${filled_avg_price:.2f}")
+
+        return order
+
+    def cancel_order(self, order_id: str) -> bool:
+        """Cancel mock order."""
+        if order_id in self.orders:
+            order = self.orders[order_id]
+            if order.status in [OrderStatus.NEW, OrderStatus.ACCEPTED]:
+                order.status = OrderStatus.CANCELED
+                logger.info(f"✅ Order {order_id} canceled")
+                return True
+        logger.warning(f"Cannot cancel order {order_id}")
+        return False
+
+    def get_order(self, order_id: str) -> Optional[Order]:
+        """Get mock order."""
+        return self.orders.get(order_id)
+
+    def get_orders(self, status: Optional[OrderStatus] = None) -> List[Order]:
+        """Get mock orders."""
+        if status:
+            return [o for o in self.orders.values() if o.status == status]
+        return list(self.orders.values())
+
+    def get_current_price(self, symbol: str) -> Optional[float]:
+        """Get mock current price (random walk simulation)."""
+        import random
+
+        # Simple mock: random price between 50-150
+        base_price = 100.0
+        if symbol in self.positions:
+            base_price = self.positions[symbol].current_price
+
+        # Add small random variation
+        variation = random.uniform(-2, 2)
+        return max(1.0, base_price + variation)
