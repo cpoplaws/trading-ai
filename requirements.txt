@@ -28,3 +28,15 @@ web3>=6.15.0
 eth-account>=0.10.0
 eth-keys>=0.4.0
 eth-utils>=3.0.0
+
+# Dashboard and UI
+streamlit>=1.28.0
+plotly>=5.15.0
+
+# Real Data APIs
+newsapi-python>=0.2.7
+praw>=7.7.1
+fredapi>=0.5.1
+
+# Additional utilities
+python-dateutil>=2.8.2

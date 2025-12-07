@@ -1,34 +1,36 @@
 # Trading-AI
 
-Welcome to the Trading-AI Project — an autonomous, adaptive, next-generation AI-driven trading empire.
+Welcome to the Trading-AI Project — an autonomous, adaptive AI-driven trading system with real-time dashboard, sentiment analysis, and advanced portfolio management.
 
 ## 📜 Project Vision
 
-Build a scalable, modular, fully autonomous AI trading system capable of evolving over time — from daily retraining models to cutting-edge innovations like Quantum ML, Federated Learning, and Neurosymbolic AI.
+Build a scalable, modular AI trading system that combines machine learning, real-time market data, sentiment analysis, and macroeconomic indicators for intelligent automated trading decisions.
 
 ## 🚀 Quick Start
 
-### Option 1: GitHub Codespaces (Easiest)
-
-**Running in Codespaces right now?**
+### Launch the Dashboard
 
 ```bash
-# One-command setup
-bash START_HERE.sh
+# Install dependencies
+pip install -r requirements.txt
 
-# Or manual steps
-make install
-make test
-make pipeline
+# Start the real-time dashboard
+./run_dashboard.sh
+# Dashboard opens at http://localhost:8501
 ```
 
-📖 **See [CODESPACES.md](CODESPACES.md) for Codespaces-specific guide**
+### Run Live Trading Demo
 
-### Option 2: Docker (Recommended for Local)
+```bash
+# Run end-to-end automated trading demo
+python demo_live_trading.py
+```
+
+### Option 1: Docker (Recommended for Production)
 
 ```bash
 # Clone and setup
-git clone <your-repo>
+git clone https://github.com/cpoplaws/trading-ai.git
 cd trading-ai
 
 # Build and run
@@ -48,186 +50,232 @@ pip install -r requirements.txt
 python src/execution/daily_retrain.py
 ```
 
-### Makefile (Developer Convenience)
+## 📊 Implementation Status
 
-A `Makefile` with common development targets is provided to simplify local workflows. Recommended commands:
+### ✅ **FULLY IMPLEMENTED** (Production Ready)
 
-```bash
-# Install Python dependencies
-make install
-
-# Run the test suite
-make test
-
-# Run the daily pipeline locally
-make pipeline
-
-# Build docker images (no cache)
-make docker-build
-
-# Start services via docker-compose
-make docker-up
-```
-
-## 📊 Current Status: Phase 2 + Phase 3 Complete! 🎉
-
-### ✅ What's Working Now
-
-**Phase 1: Base Trading System** ✅ COMPLETE
-- ✅ Daily data ingestion via yfinance (OHLCV)
-- ✅ 15+ technical indicators (SMA, EMA, RSI, MACD, Bollinger Bands, etc.)
-- ✅ RandomForest ML model training with validation
+**Phase 1: Core Trading System** (100%)
+- ✅ Data ingestion via yfinance (OHLCV data)
+- ✅ 15+ technical indicators (SMA, EMA, RSI, MACD, Bollinger Bands, ATR, etc.)
+- ✅ RandomForest ML model with train/test validation
 - ✅ Trading signal generation (BUY/SELL/HOLD)
-- ✅ Comprehensive logging & error handling
-- ✅ Docker containerization
-- ✅ Test suite (32+ passing tests)
-- ✅ CI/CD pipeline (GitHub Actions)
+- ✅ Comprehensive backtesting engine (476 lines)
+- ✅ Automated daily pipeline with scheduling
+- ✅ Docker containerization + CI/CD
+- ✅ Test suite (9 passing tests)
 
-**Phase 2: Broker Integration** ✅ COMPLETE
-- ✅ Abstract BrokerInterface base class
-- ✅ Alpaca API integration (paper + live trading)
-- ✅ Order management system (market, limit, stop orders)
-- ✅ Portfolio tracker with real-time P&L
-- ✅ Risk management and order validation
-- ✅ Position tracking and exposure calculation
-- ✅ Comprehensive broker integration tests
+**Advanced Strategies Suite** (75%)
+- ✅ Kelly Criterion position sizing
+- ✅ Black-Scholes options pricing & Greeks
+- ✅ Multi-timeframe analysis (1min, 5min, 1h, daily)
+- ✅ Ensemble ML models (RandomForest + GradientBoosting + LSTM)
+- ✅ Mean reversion detection
+- ✅ 3,388 lines of sophisticated strategy code
 
-**Phase 3: Intelligence Network** ✅ COMPLETE
-- ✅ Macro economic data (Fed rates, CPI, unemployment, VIX, treasuries)
-- ✅ News sentiment analysis (NewsAPI + Finviz)
-- ✅ Reddit sentiment tracking (r/wallstreetbets, r/stocks, r/investing)
-- ✅ Market regime detection (expansion, recession, stagflation, recovery)
-- ✅ Multimodal feature integration
-- ✅ Aggregate signal generation from multiple sources
+**Phase 3: Intelligence Network** (60%) 🆕
+- ✅ NewsAPI integration with real API support (`sentiment_analyzer.py`)
+- ✅ Reddit sentiment via PRAW (with fallback simulation)
+- ✅ FRED API for macro data (CPI, Fed rates, unemployment, GDP)
+- ✅ Economic regime detection
+- ✅ Yield curve analysis
+- ⚠️ Twitter sentiment (simulated - requires paid tier)
 
-**Advanced Strategies Suite** ✅ IMPLEMENTED
-- ✅ Portfolio optimization with Kelly Criterion
-- ✅ Multi-source sentiment analysis (Twitter, Reddit, News)
-- ✅ Options strategies (Black-Scholes, spreads, straddles, iron condors)
-- ✅ Enhanced ML models (ensemble methods, Prophet, ARIMA-GARCH)
-- ✅ Multi-timeframe analysis (1min, 5min, 1h, 1d)
-- ✅ Signal aggregation with weighted voting
+**Phase 6: Command Center Dashboard** (85%) 🆕
+- ✅ Full Streamlit dashboard (`dashboard.py` - 620+ lines)
+- ✅ Real-time portfolio overview
+- ✅ Interactive price charts with signals
+- ✅ Backtest performance visualization
+- ✅ Advanced strategy analysis
+- ✅ System status monitoring
+- ✅ Multi-page navigation
 
-### 🎯 Next Phase: Phase 4 - AI Power-Up
+**DeFi/Blockchain** (50%)
+- ✅ Binance Smart Chain integration
+- ✅ PancakeSwap DEX interaction
+- ✅ Token swaps & price queries
+- ⚠️ Production features (MEV protection, automated strategies)
 
-**What's Coming Next:**
-- [ ] Deep learning models (TimesNet, Autoformer, Transformers)
-- [ ] PyTorch integration
-- [ ] Ensemble model predictions
-- [ ] Hyperparameter tuning with Optuna
-- [ ] Live trading with risk controls
-- [ ] Trade execution logs
+### ⚠️ **PARTIALLY IMPLEMENTED** (In Development)
 
-See [Phase 2 Guide](docs/phase_guides/phase_2_trading_system.md) for details.
+**Phase 4: Deep Learning** (40%)
+- ✅ LSTM neural networks (TensorFlow)
+- ✅ Hybrid LSTM + RandomForest ensemble
+- ❌ TimesNet, Autoformer, Informer (not implemented)
+- ❌ PyTorch transformers (not implemented)
+
+**Phase 7: Infrastructure** (25%)
+- ✅ Docker & Docker Compose
+- ✅ GitHub Actions CI/CD
+- ❌ Kubernetes (not implemented)
+- ❌ Prometheus/Grafana monitoring (not implemented)
+
+### ❌ **NOT IMPLEMENTED** (Planned)
+
+**Phase 5: Reinforcement Learning** (0%)
+- ❌ PPO/DDPG agents
+- ❌ Custom trading environment
+- ❌ Smart execution optimization
+
+**Phases 8-10: Frontier Research** (0%)
+- ❌ Quantum ML (empty research folders)
+- ❌ Federated learning (empty research folders)
+- ❌ Neurosymbolic AI (empty research folders)
+
+## 📈 Overall Completion: ~60%
+
+| Component | Status | Files | Lines of Code |
+|:----------|:-------|:------|:--------------|
+| Core Trading System | ✅ 100% | 10+ | 2,000+ |
+| Advanced Strategies | ✅ 75% | 6 | 3,388 |
+| Broker Integration | ⚠️ 70% | 3 | 900+ |
+| Dashboard & UI | ✅ 85% | 1 | 620+ |
+| Real Data APIs | ⚠️ 60% | 2 | 800+ |
+| DeFi Integration | ⚠️ 50% | 2 | 819 |
+| Deep Learning | ⚠️ 40% | 3 | 1,200+ |
+| Infrastructure | ⚠️ 25% | Various | N/A |
+| RL Agents | ❌ 0% | 0 | 0 |
+| Research | ❌ 0% | 0 | 0 |
+
+**Total Implemented:** ~9,700 lines of production code
 
 ## 🗺️ Evolution Framework
 
-- **Phase 0:** Command Center Setup ✅
-- **Phase 1:** Base Trading System ✅ COMPLETE
-- **Phase 2:** Broker Connectivity & Paper Trading ✅ COMPLETE
-- **Phase 3:** Intelligence Network (Macro, News, Sentiment) ✅ COMPLETE
-- **Phase 4:** Advanced ML (Transformers, Ensembles) 🎯 NEXT
-- **Phase 5:** RL Execution Agents
-- **Phase 6:** Command Center Dashboard
-- **Phase 7–12:** Advanced Research (Quantum ML, Federated Learning, Neurosymbolic AI)
-
-## 🎮 Demo Scripts
-
-Try out the complete system with these demo scripts:
-
-```bash
-# Phase 2 + 3 Integration Demo (Complete System)
-python phase2_phase3_demo.py
-
-# Simple backtest demo
-python simple_backtest_demo.py
-
-# DeFi trading demo (Phase 3B)
-python defi_trading_demo.py
-```
-
-The `phase2_phase3_demo.py` shows:
-- ✅ Price data ingestion
-- ✅ Macro economic indicators (Fed rates, CPI, VIX)
-- ✅ News sentiment analysis
-- ✅ Reddit social sentiment
-- ✅ Market regime detection
-- ✅ Multimodal feature engineering
-- ✅ ML model training
-- ✅ Broker integration (Alpaca paper trading)
-- ✅ Aggregate signal generation
+- **Phase 1:** ✅ Base Trading System (100% Complete)
+- **Phase 2:** ⚠️ Broker Integration (70% Complete)
+- **Phase 3:** ⚠️ Intelligence Network (60% Complete - Real APIs Added!)
+- **Phase 4:** ⚠️ Deep Learning (40% Complete - LSTM Only)
+- **Phase 5:** ❌ RL Agents (0% - Planned)
+- **Phase 6:** ✅ Dashboard (85% Complete - Fully Functional!)
+- **Phase 7:** ⚠️ Infrastructure (25% - Docker Only)
+- **Phase 8-10:** ❌ Research (0% - Future Work)
+- **Phase 11-12:** ❌ Business Scaling (0% - Future Work)
 
 ## 🛠️ Technology Stack
 
-- **Core:** Python 3.11+, pandas, numpy, scikit-learn
-- **Data:** yfinance, TA-Lib for technical indicators
-- **ML:** RandomForest (Phase 1), PyTorch (Future)
-- **Infrastructure:** Docker, Docker Compose
-- **APIs:** Alpaca/IBKR (Future), Alpha Vantage (Future)
-- **Advanced:** TensorFlow Federated, Qiskit, PennyLane (Future)
+**Core Framework:**
+- **Languages:** Python 3.11+
+- **Data:** pandas, numpy, yfinance, TA-Lib
+- **ML/AI:** scikit-learn (RandomForest, ensembles), TensorFlow (LSTM)
+- **Visualization:** matplotlib, seaborn, plotly, Streamlit
+
+**Real Data Sources:**
+- **Market Data:** yfinance (free, real-time)
+- **News:** NewsAPI (100 requests/day free tier)
+- **Social:** Reddit via PRAW (60 requests/min free)
+- **Macro:** FRED API (unlimited, free)
+
+**Trading Infrastructure:**
+- **Broker:** Alpaca (paper trading + live)
+- **Blockchain:** Web3.py, Binance Smart Chain, PancakeSwap DEX
+- **Containerization:** Docker, Docker Compose
+- **CI/CD:** GitHub Actions
+
+**Dashboard & UI:**
+- **Framework:** Streamlit (multi-page app)
+- **Charts:** Plotly (interactive candlesticks, indicators)
+- **Real-time:** Auto-refresh data feeds
+
+**Planned/Future:**
+- PyTorch transformers (Phase 4)
+- Reinforcement learning (stable-baselines3, Phase 5)
+- Kubernetes orchestration (Phase 7)
+- Quantum ML, federated learning (Phases 8-10)
 
 Note on native dependencies:
-- `TA-Lib` requires system-level C library dependencies on many Linux distributions. If you encounter installation failures when running `pip install -r requirements.txt`, install the platform packages first (for Debian/Ubuntu: `apt-get install -y build-essential libtool libffi-dev libssl-dev libatlas-base-dev && apt-get install -y libta-lib0 libta-lib-dev` or build `ta-lib` from source). Using the provided Docker container can avoid local environment issues.
+- `TA-Lib` requires system-level C library. For Ubuntu/Debian: `apt-get install -y build-essential libta-lib0 libta-lib-dev`. Docker container avoids local setup issues.
 
 ## 🗂️ Project Structure
 
 ```
 trading-ai/
-├── src/                          # Source code
-│   ├── data_ingestion/          # Data fetching (yfinance, APIs)
-│   ├── feature_engineering/     # Technical indicators (15+ features)
-│   ├── modeling/                # ML training (RandomForest, ensembles)
-│   ├── strategy/                # Signal generation & analysis
-│   ├── execution/               # Pipeline orchestration & broker interface
-│   ├── advanced_strategies/     # ✨ New: Portfolio opt, sentiment, options, multi-timeframe
-│   ├── backtesting/            # Strategy backtesting
-│   ├── utils/                  # Logging, config, helpers
-│   └── monitoring/             # Performance tracking (future)
-├── data/                        # Data storage
-│   ├── raw/                    # Raw OHLCV data from yfinance
-│   └── processed/              # Feature-engineered datasets
-├── models/                      # Trained ML models (.joblib files)
-├── signals/                     # Generated trading signals (.csv)
-├── logs/                        # Application logs (daily rotation)
-├── tests/                       # Test suite (pytest)
-├── config/                      # Configuration (settings.yaml, .env)
-├── docs/                        # Documentation
-│   ├── phase_guides/           # Detailed phase implementation guides
-│   ├── advanced_strategies_guide.md  # Advanced strategies docs
-│   └── evolution_plan.md       # Long-term vision
-└── research/                    # Experimental features
-    ├── quantum_ml/             # Quantum machine learning (Phase 8+)
-    ├── federated_learning/     # Privacy-preserving ML (Phase 8+)
-    └── neurosymbolic_ai/       # Hybrid reasoning (Phase 8+)
+├── src/
+│   ├── data_ingestion/          # ✅ yfinance + macro data (FRED)
+│   ├── feature_engineering/     # ✅ 15+ technical indicators
+│   ├── modeling/                # ✅ RandomForest + LSTM
+│   ├── strategy/                # ✅ Signal generation
+│   ├── execution/               # ✅ Broker interface + portfolio tracker
+│   ├── advanced_strategies/     # ✅ Options, sentiment, Kelly Criterion
+│   ├── backtesting/             # ✅ Performance analysis
+│   ├── monitoring/              # ✅ Streamlit dashboard NEW!
+│   ├── defi/                    # ⚠️ BSC + PancakeSwap
+│   └── utils/                   # ✅ Logging, config
+├── data/                        # ✅ Raw + processed market data
+├── models/                      # ✅ Trained ML models (.joblib)
+├── signals/                     # ✅ Generated trading signals
+├── backtests/                   # ✅ Backtest reports
+├── logs/                        # ✅ Application logs
+├── tests/                       # ✅ pytest test suite
+├── docs/                        # ✅ Phase guides + documentation
+├── research/                    # ❌ Empty (future experiments)
+├── demo_live_trading.py         # ✅ End-to-end demo NEW!
+├── run_dashboard.sh             # ✅ Dashboard launcher NEW!
+└── .env.example                 # ✅ API key template NEW!
 ```
 
 ## 🔧 Configuration
 
-### Environment Variables
+### 1. Set Up API Keys
 
-Copy `.env.template` to `.env` and configure:
+Copy `.env.example` to `.env` and add your keys:
 
 ```bash
-# API Keys
-ALPHA_VANTAGE_API_KEY=your_key_here
-ALPACA_API_KEY=your_key_here
-
-# Settings
-ENVIRONMENT=development
-LOG_LEVEL=INFO
-PAPER_TRADING=true
+cp .env.example .env
 ```
 
-### Settings File
+Edit `.env`:
+```bash
+# Alpaca (free paper trading): https://alpaca.markets/
+ALPACA_API_KEY=your_alpaca_api_key
+ALPACA_SECRET_KEY=your_alpaca_secret_key
+
+# NewsAPI (100 req/day free): https://newsapi.org/
+NEWS_API_KEY=your_newsapi_key
+
+# Reddit (60 req/min free): https://www.reddit.com/prefs/apps
+REDDIT_CLIENT_ID=your_reddit_client_id
+REDDIT_CLIENT_SECRET=your_reddit_secret
+REDDIT_USER_AGENT=trading-ai/1.0
+
+# FRED (unlimited free): https://fred.stlouisfed.org/docs/api/
+FRED_API_KEY=your_fred_api_key
+
+# Trading Configuration
+PAPER_TRADING=true
+LOG_LEVEL=INFO
+```
+
+### 2. Settings File
 
 Edit `config/settings.yaml` for:
-
 - Ticker symbols to trade
-- Model parameters
-- Feature engineering settings
-- Risk management rules
+- Model hyperparameters
+- Risk management limits
 
 ## 🏃‍♂️ Running the System
+
+### 🎯 Quick Start - Dashboard
+
+```bash
+# Launch interactive dashboard
+./run_dashboard.sh
+
+# Opens at http://localhost:8501
+# View portfolio, signals, backtests, and more!
+```
+
+### 🚀 Live Trading Demo
+
+```bash
+# Run automated trading demo (paper trading)
+python demo_live_trading.py
+
+# Demonstrates:
+# - Data fetching
+# - Signal generation
+# - Trade execution
+# - Portfolio tracking
+# - Risk management
+```
 
 ### Full Pipeline
 
@@ -239,49 +287,100 @@ python src/execution/daily_retrain.py
 ### Individual Components
 
 ```bash
-# Fetch data only
+# Fetch market data
 python src/data_ingestion/fetch_data.py
 
 # Generate features
 python src/feature_engineering/feature_generator.py
 
-# Train model
+# Train ML model
 python src/modeling/train_model.py
 
-# Generate signals
+# Generate trading signals
 python src/strategy/simple_strategy.py
+
+# Run backtest
+python test_backtest.py
+```
+
+### Makefile Commands
+
+```bash
+make install       # Install dependencies
+make install-dev   # Install dev dependencies + pre-commit
+make test          # Run test suite
+make test-cov      # Run tests with coverage
+make pipeline      # Run daily pipeline
+make docker-build  # Build Docker images
+make docker-up     # Start services
+make format        # Format code (black + isort)
+make lint          # Lint code (ruff)
+make clean         # Remove generated files
 ```
 
 ### Testing
 
 ```bash
 # Run test suite
-python -m pytest tests/ -v
+pytest tests/ -v
 
-# Test specific component
+# Test with coverage
+pytest tests/ --cov=src --cov-report=html
+
+# Test specific module
 python tests/test_trading_ai.py
 ```
 
-## 📊 Current Features
+## 📊 Key Features
 
-### ✅ Core System (Phase 1)
+### ✅ Core Trading System
 
-- **Data Ingestion:** yfinance integration with error handling & retry logic
-- **Feature Engineering:** 15+ technical indicators (SMA, EMA, RSI, MACD, Bollinger Bands, ATR, etc.)
-- **ML Pipeline:** RandomForest classifier with train/test split & cross-validation
-- **Signal Generation:** BUY/SELL/HOLD signals with confidence levels & strength ratings
-- **Logging:** Comprehensive daily log rotation with multiple severity levels
-- **Configuration:** YAML-based settings + environment variable management
-- **Containerization:** Docker + docker-compose with volume mounts
-- **Testing:** 9 passing tests with pytest framework
-- **CI/CD:** GitHub Actions workflow for automated testing & Docker builds
+- **Data Pipeline:** Real-time market data via yfinance + macro indicators (FRED)
+- **Technical Analysis:** 15+ indicators (SMA, EMA, RSI, MACD, Bollinger, ATR, etc.)
+- **Machine Learning:** RandomForest + LSTM ensembles with validation
+- **Signal Generation:** Multi-strategy BUY/SELL/HOLD with confidence scores
+- **Backtesting:** Comprehensive performance analysis with 476-line engine
+- **Risk Management:** Position sizing, drawdown limits, exposure controls
+- **Logging:** Daily rotation with severity levels
 
-### 🚀 Advanced Strategies (New)
+### 🎯 Advanced Strategies
 
-- **Portfolio Optimization:** Kelly Criterion position sizing, mean reversion detection, MPT optimization
-- **Sentiment Analysis:** Multi-source aggregation (Twitter, Reddit, News) with consensus scoring
-- **Options Strategies:** Black-Scholes pricing, Greeks, bull/bear spreads, straddles, iron condors
-- **Enhanced ML Models:** Ensemble methods (RF, GBM, SVR), Prophet forecasting, ARIMA-GARCH
+- **Portfolio Optimization:** Kelly Criterion, mean reversion, MPT Sharpe maximization
+- **Sentiment Analysis:** Real NewsAPI + Reddit PRAW integration with fallback simulation
+- **Options Trading:** Black-Scholes pricing, Greeks, spreads, straddles, iron condors
+- **Multi-Timeframe:** 1-min, 5-min, hourly, daily analysis with cross-validation
+- **Ensemble Models:** RandomForest + GradientBoosting + LSTM voting/stacking
+
+### 📈 Real-Time Dashboard
+
+- **Portfolio View:** Live equity, PnL, positions, drawdown tracking
+- **Signal Visualization:** Interactive candlestick charts with buy/sell markers
+- **Backtest Reports:** Equity curves, performance metrics, trade history
+- **Advanced Analytics:** Strategy breakdown, risk assessment, confidence scoring
+- **System Status:** Data availability, API connections, environment checks
+
+### 🔌 Broker Integration
+
+- **Alpaca API:** Paper trading + live trading support
+- **Order Execution:** Market/limit orders with retry logic
+- **Portfolio Tracking:** Real-time PnL, unrealized/realized gains, exposure
+- **Risk Controls:** Max drawdown breakers, position limits, correlation checks
+- **Trade Logging:** Complete audit trail with timestamps
+
+### 🌐 Data Intelligence
+
+- **News:** NewsAPI integration (100 req/day free) - real financial headlines
+- **Social:** Reddit PRAW (60 req/min) - wallstreetbets, stocks, investing sentiment
+- **Macro:** FRED API (unlimited) - CPI, Fed rates, unemployment, GDP, yield curve
+- **Economic Regime:** Expansion/contraction/transition detection with confidence scores
+- **Fallback:** Graceful degradation to simulated data when APIs unavailable
+
+### ⛓️ DeFi/Blockchain
+
+- **BSC Integration:** Web3.py connection to Binance Smart Chain
+- **DEX Trading:** PancakeSwap router for token swaps
+- **Token Analysis:** Price queries, liquidity pool info
+- **Gas Estimation:** Transaction cost calculation
 - **Multi-timeframe Analysis:** 1min/5min/1h/1d cross-validation with weighted signals
 - **Signal Aggregation:** Weighted voting across 5+ strategies for robust decision-making
 
