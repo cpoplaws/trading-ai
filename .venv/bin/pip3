@@ -1,4 +1,4 @@
-#!/home/user/trading-ai/.venv/bin/python
+#!/workspaces/trading-ai/.venv/bin/python3
 # -*- coding: utf-8 -*-
 import re
 import sys
