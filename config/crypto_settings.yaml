@@ -1,0 +1,284 @@
+# Crypto Trading AI Configuration
+
+# Trading mode
+trading:
+  mode: paper  # paper | live
+  default_chain: ethereum
+  max_gas_gwei: 100
+  slippage_tolerance: 0.5  # 0.5%
+  max_leverage: 3
+  
+# Blockchain configurations
+chains:
+  ethereum:
+    enabled: true
+    rpc_urls:
+      - https://eth-mainnet.g.alchemy.com/v2/${ALCHEMY_API_KEY}
+      - https://mainnet.infura.io/v3/${INFURA_API_KEY}
+      - https://cloudflare-eth.com
+    chain_id: 1
+    native_token: ETH
+    explorer: https://etherscan.io
+    
+  polygon:
+    enabled: true
+    rpc_urls:
+      - https://polygon-mainnet.g.alchemy.com/v2/${ALCHEMY_API_KEY}
+      - https://polygon-rpc.com
+      - https://rpc-mainnet.matic.network
+    chain_id: 137
+    native_token: MATIC
+    explorer: https://polygonscan.com
+    
+  arbitrum:
+    enabled: true
+    rpc_urls:
+      - https://arb-mainnet.g.alchemy.com/v2/${ALCHEMY_API_KEY}
+      - https://arb1.arbitrum.io/rpc
+    chain_id: 42161
+    native_token: ETH
+    explorer: https://arbiscan.io
+    
+  optimism:
+    enabled: true
+    rpc_urls:
+      - https://opt-mainnet.g.alchemy.com/v2/${ALCHEMY_API_KEY}
+      - https://mainnet.optimism.io
+    chain_id: 10
+    native_token: ETH
+    explorer: https://optimistic.etherscan.io
+    
+  base:
+    enabled: true
+    rpc_urls:
+      - https://mainnet.base.org
+      - https://base.llamarpc.com
+    chain_id: 8453
+    native_token: ETH
+    explorer: https://basescan.org
+    
+  bsc:
+    enabled: true
+    rpc_urls:
+      - https://bsc-dataseed1.binance.org
+      - https://bsc-dataseed2.binance.org
+    chain_id: 56
+    native_token: BNB
+    explorer: https://bscscan.com
+    
+  avalanche:
+    enabled: true
+    rpc_urls:
+      - https://api.avax.network/ext/bc/C/rpc
+      - https://avalanche.public-rpc.com
+    chain_id: 43114
+    native_token: AVAX
+    explorer: https://snowtrace.io
+    
+  solana:
+    enabled: true
+    rpc_urls:
+      - https://api.mainnet-beta.solana.com
+      - https://solana-api.projectserum.com
+    chain_id: 0
+    native_token: SOL
+    explorer: https://explorer.solana.com
+
+# Token watchlist
+tokens:
+  watchlist:
+    - symbol: BTC
+      coingecko_id: bitcoin
+      binance_symbol: BTCUSDT
+      
+    - symbol: ETH
+      coingecko_id: ethereum
+      binance_symbol: ETHUSDT
+      address_ethereum: "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2"  # WETH
+      
+    - symbol: SOL
+      coingecko_id: solana
+      binance_symbol: SOLUSDT
+      
+    - symbol: BNB
+      coingecko_id: binancecoin
+      binance_symbol: BNBUSDT
+      
+    - symbol: ADA
+      coingecko_id: cardano
+      binance_symbol: ADAUSDT
+      
+    - symbol: AVAX
+      coingecko_id: avalanche-2
+      binance_symbol: AVAXUSDT
+      
+    - symbol: MATIC
+      coingecko_id: matic-network
+      binance_symbol: MATICUSDT
+      address_polygon: "0x0d500B1d8E8eF31E21C99d1Db9A6444d3ADf1270"  # WMATIC
+      
+    - symbol: LINK
+      coingecko_id: chainlink
+      binance_symbol: LINKUSDT
+      
+    - symbol: DOT
+      coingecko_id: polkadot
+      binance_symbol: DOTUSDT
+      
+    - symbol: UNI
+      coingecko_id: uniswap
+      binance_symbol: UNIUSDT
+
+# Trading strategies
+strategies:
+  enabled:
+    - funding_rate_arbitrage
+    - cross_dex_arbitrage
+    - momentum_breakout
+    - whale_following
+    - grid_trading
+  
+  funding_rate_arbitrage:
+    min_rate_threshold: 0.01  # 1% funding rate
+    position_size_pct: 5
+    max_positions: 3
+    rebalance_hours: 8
+    
+  cross_dex_arbitrage:
+    min_profit_bps: 30  # 0.3% minimum profit
+    max_gas_cost_usd: 50
+    check_interval_seconds: 10
+    excluded_dexs: []
+    
+  momentum_breakout:
+    lookback_period: 20
+    breakout_threshold: 2.0  # 2 std devs
+    stop_loss_pct: 5
+    take_profit_pct: 15
+    
+  whale_following:
+    min_transaction_usd: 100000
+    follow_delay_seconds: 60
+    max_copy_pct: 10
+    
+  grid_trading:
+    grid_levels: 10
+    price_range_pct: 20
+    position_size_per_grid: 1
+
+# Risk management
+risk:
+  max_drawdown_pct: 15
+  max_single_position_pct: 10
+  max_leverage: 3
+  max_daily_trades: 50
+  correlation_threshold: 0.8
+  stop_loss_pct: 5
+  take_profit_pct: 15
+  
+  # Position sizing
+  position_sizing:
+    method: kelly_criterion  # fixed | kelly_criterion | volatility_adjusted
+    base_pct: 5
+    max_pct: 20
+  
+  # Liquidation protection
+  liquidation_buffer_pct: 20  # Keep 20% margin buffer
+
+# Data sources
+data_sources:
+  primary: binance
+  backup: coingecko
+  
+  refresh_intervals:
+    price_seconds: 5
+    orderbook_seconds: 10
+    funding_rate_minutes: 15
+    on_chain_minutes: 60
+  
+  historical_data:
+    default_period: 90  # days
+    max_period: 365
+
+# Alerts & notifications
+alerts:
+  telegram_enabled: true
+  discord_enabled: true
+  slack_enabled: false
+  
+  alert_on_trade: true
+  alert_on_large_move: true
+  alert_on_liquidation: true
+  alert_on_error: true
+  
+  large_move_threshold_pct: 5
+  
+  rate_limits:
+    max_per_hour: 20
+    max_per_day: 100
+
+# Machine learning
+ml:
+  models:
+    - random_forest
+    - lstm
+    - transformer
+  
+  features:
+    technical_indicators: true
+    on_chain_metrics: true
+    sentiment_analysis: true
+    funding_rates: true
+    orderbook_imbalance: true
+  
+  training:
+    retrain_interval_hours: 24
+    min_data_points: 1000
+    test_size: 0.2
+    validation_size: 0.1
+  
+  ensemble:
+    method: weighted_average
+    weights:
+      random_forest: 0.3
+      lstm: 0.4
+      transformer: 0.3
+
+# Infrastructure
+infrastructure:
+  redis:
+    enabled: true
+    ttl_seconds: 300
+    
+  timescaledb:
+    enabled: false
+    retention_days: 90
+    
+  rate_limiting:
+    enabled: true
+    default_per_minute: 60
+    
+  health_checks:
+    enabled: true
+    interval_seconds: 60
+
+# Logging
+logging:
+  level: INFO
+  format: "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+  file_rotation: "1 day"
+  retention: "30 days"
+  
+  modules:
+    blockchain: INFO
+    defi: INFO
+    strategies: INFO
+    ml: INFO
+    risk: WARNING
+
+# Backtesting
+backtesting:
+  initial_capital: 100000
+  commission_pct: 0.1
+  slippage_pct: 0.1
+  use_realistic_fills: true
