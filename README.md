@@ -44,6 +44,9 @@ python defi_trading_demo.py
 
 # Multi-chain operations
 python demo_multi_chain.py
+
+# 🆕 Crypto paper trading & backtesting
+python demo_crypto_paper_trading.py
 ```
 
 ### Option 1: Docker (Recommended for Production)
@@ -129,10 +132,13 @@ python src/execution/daily_retrain.py
 - ⚠️ GARCH volatility models (planned)
 - ⚠️ Regime detection (planned)
 
-**Infrastructure** ⚡ (40%)
+**Infrastructure** ⚡ (60%)
 - ✅ Multi-channel alerting (Telegram, Discord, Slack)
 - ✅ Trade and whale alerts
 - ✅ Error notifications
+- ✅ **Crypto paper trading engine** 🆕
+- ✅ **Historical data fetcher for crypto assets** 🆕
+- ✅ **Comprehensive backtesting framework** 🆕
 - ⚠️ WebSocket manager (planned)
 - ⚠️ Rate limiting (planned)
 - ⚠️ Redis caching (planned)
@@ -145,6 +151,16 @@ python src/execution/daily_retrain.py
 - ✅ Risk management settings
 - ✅ Alert configurations
 - ✅ Updated .env template with all crypto APIs
+
+**🆕 Paper Trading Infrastructure** ✅ (100%)
+- ✅ **Crypto Paper Trading Engine** - Realistic simulation with gas costs, slippage
+- ✅ **Historical Data Fetcher** - Multi-source data (Binance, CoinGecko, simulated)
+- ✅ **Backtesting Framework** - Complete strategy testing and comparison
+- ✅ **Performance Analytics** - Sharpe ratio, drawdown, win rate, returns
+- ✅ **Multi-Asset Support** - Portfolio management across chains
+- ✅ **Technical Indicators** - 15+ indicators auto-generated
+- ✅ **Strategy Library** - SMA crossover, RSI mean reversion, extensible
+- ✅ **Comprehensive Demo** - Full working example with documentation
 
 ### ✅ **FULLY IMPLEMENTED** (Production Ready)
 
@@ -609,6 +625,17 @@ python tests/test_trading_ai.py
 - Arbitrage opportunity alerts
 - Funding rate alerts
 - Error and system alerts
+
+**🆕 Paper Trading & Backtesting Infrastructure:**
+- **Paper Trading Engine:** Realistic simulation with gas costs, slippage, and multi-chain support
+- **Historical Data:** Fetch from Binance, CoinGecko, or use simulated data for testing
+- **Backtesting Framework:** Complete strategy testing with bar-by-bar execution
+- **Performance Metrics:** Sharpe ratio, drawdown, win rate, volatility, returns
+- **Multi-Asset Portfolios:** Track positions across multiple chains simultaneously
+- **Technical Indicators:** Auto-generate 15+ indicators (SMA, EMA, RSI, MACD, Bollinger Bands)
+- **Strategy Comparison:** Side-by-side strategy evaluation and benchmarking
+- **Visualization:** Portfolio value plots, drawdown charts, returns distribution
+- **Comprehensive Reporting:** Detailed performance reports with trade history
 
 ### ✅ Core Trading System
 
