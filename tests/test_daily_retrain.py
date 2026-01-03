@@ -34,5 +34,5 @@ def test_archive_model_creates_dated_copy(tmp_path: Path):
     assert archived_path is not None
     assert os.path.exists(archived_path)
     assert archived_path.endswith("model_TEST_20240203.joblib")
-    with open(archived_path) as f:
+    with open(archived_path, "r") as f:
         assert f.read() == "dummy-model"

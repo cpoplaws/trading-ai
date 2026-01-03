@@ -74,9 +74,12 @@ def schedule_daily_retrain(run_time: str = "09:00", tickers: Optional[List[str]]
     logger.info(f"Scheduling daily retrain at {run_time} for tickers: {tickers or ['AAPL', 'MSFT', 'SPY']}")
     schedule.every().day.at(run_time).do(daily_pipeline, tickers=tickers, window_days=window_days)
 
-    while True:
-        schedule.run_pending()
-        time.sleep(30)
+    try:
+        while True:
+            schedule.run_pending()
+            time.sleep(30)
+    except KeyboardInterrupt:
+        logger.info("Stopping scheduled daily retrain loop")
 
 
 def daily_pipeline(
