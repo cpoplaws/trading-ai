@@ -61,9 +61,6 @@ def _download_with_retries(
             logger.error(
                 f"Error fetching data for {ticker} on attempt {attempt}/{max_retries}: {exc}"
             )
-        except Exception:
-            # Re-raise unexpected exceptions to avoid masking programming errors.
-            raise
 
         if attempt < max_retries:
             time.sleep(retry_delay)
@@ -95,7 +92,7 @@ def _ensure_no_missing_dates(df: pd.DataFrame, start_date: str, end_date: str) -
 
         price_columns = [col for col in ["Open", "High", "Low", "Close", "Adj Close"] if col in cleaned.columns]
         if price_columns:
-            # Fill small gaps using nearest previous and next values; applying limits in both directions can cover up to 2 * MAX_FILL_DAYS consecutive missing rows when data exists on either side.
+            # Fill missing price data with limited forward and backward fills.
             cleaned[price_columns] = cleaned[price_columns].ffill(limit=MAX_FILL_DAYS).bfill(limit=MAX_FILL_DAYS)
         if "Volume" in cleaned.columns:
             cleaned["Volume"] = cleaned["Volume"].fillna(0)

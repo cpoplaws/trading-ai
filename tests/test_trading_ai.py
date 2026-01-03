@@ -11,7 +11,7 @@ from datetime import datetime, timedelta
 # Add src to path
 sys.path.append(os.path.join(os.path.dirname(__file__), '..', 'src'))
 
-import data_ingestion.fetch_data as fetch_data_module
+import data_ingestion.fetch_data as fetch_module
 from data_ingestion.fetch_data import fetch_data
 from feature_engineering.feature_generator import FeatureGenerator
 from modeling.train_model import train_model
@@ -51,7 +51,7 @@ class TestDataIngestion:
         def fake_download(*args, **kwargs):
             return sample_df
 
-        monkeypatch.setattr(fetch_data_module.yf, "download", fake_download)
+        monkeypatch.setattr(fetch_module.yf, "download", fake_download)
 
         start_date, end_date = self._date_bounds()
         target_dir = tmp_path / "raw"
@@ -81,7 +81,7 @@ class TestDataIngestion:
         def failing_download(*args, **kwargs):
             raise ValueError("Ticker not found")
 
-        monkeypatch.setattr(fetch_data_module.yf, "download", failing_download)
+        monkeypatch.setattr(fetch_module.yf, "download", failing_download)
 
         result = fetch_data(['INVALID_TICKER_XYZ'], '2023-01-01', '2023-01-31', str(tmp_path))
         assert result is False
