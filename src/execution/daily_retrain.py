@@ -165,7 +165,10 @@ def daily_pipeline(
                 
             logger.info(f"Model training metrics for {ticker}: {metrics}")
             model_path = f'./models/model_{ticker}.joblib'
-            archive_model(model_path, ticker)
+            if os.path.exists(model_path):
+                archive_model(model_path, ticker, run_date=datetime.utcnow())
+            else:
+                logger.warning(f"Expected model not found for {ticker} after training at {model_path}")
             
             # Step 5: Generate signals
             logger.info(f"Generating signals for {ticker}...")

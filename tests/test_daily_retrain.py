@@ -1,6 +1,6 @@
 import os
 import sys
-from datetime import datetime
+from datetime import datetime, timedelta
 from pathlib import Path
 
 # Add src to path
@@ -12,7 +12,8 @@ from execution.daily_retrain import _resolve_start_date, archive_model  # noqa: 
 def test_resolve_start_date_uses_rolling_window():
     fixed_now = datetime(2024, 1, 10)
     start_date = _resolve_start_date(None, 30, current_time=fixed_now)
-    assert start_date == "2023-12-11"
+    expected_date = (fixed_now - timedelta(days=30)).strftime("%Y-%m-%d")
+    assert start_date == expected_date
 
 
 def test_archive_model_creates_dated_copy(tmp_path: Path):
