@@ -112,11 +112,16 @@ class FeatureGenerator:
                 self.data['Volume_SMA'] = self.data['volume'].rolling(window=20).mean()
                 self.data['Volume_Ratio'] = self.data['volume'] / self.data['Volume_SMA']
             
-            features_df = self.data.dropna().copy()
-            feature_columns = [c for c in features_df.columns if c not in ['open', 'high', 'low', 'close', 'volume']]
+            latest_row = self.data.tail(1)
+            if latest_row.isna().any().any():
+                nan_cols = latest_row.columns[latest_row.isna().any()].tolist()
+                raise ValueError(f"NaN values remain after feature generation in columns: {nan_cols}")
 
-            if features_df.isna().any().any():
-                raise ValueError("NaN values remain after feature generation")
+            features_df = self.data.dropna().copy()
+            if features_df.empty:
+                raise ValueError("No rows remain after dropping NaN values from engineered features")
+
+            feature_columns = [c for c in features_df.columns if c not in ['open', 'high', 'low', 'close', 'volume']]
 
             logger.info(
                 f"Generated {len(feature_columns)} features with shape {features_df.shape} "

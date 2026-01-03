@@ -72,6 +72,10 @@ class TestFeatureEngineering:
         }, index=dates)
         
         return df
+
+    def assert_no_nans(self, df: pd.DataFrame):
+        """Helper to ensure frames have no NaN values."""
+        assert not df.isna().any().any()
     
     def test_feature_generator_init(self):
         """Test FeatureGenerator initialization."""
@@ -90,7 +94,7 @@ class TestFeatureEngineering:
         expected_features = ['SMA_10', 'SMA_30', 'RSI_14', 'Volatility_20']
         for feature in expected_features:
             assert feature in features_df.columns
-        assert not features_df.isna().any().any()
+        self.assert_no_nans(features_df)
 
     def test_feature_generation_shape_and_no_nans(self):
         """Feature frame should drop warmup rows and contain no NaNs."""
@@ -98,9 +102,10 @@ class TestFeatureEngineering:
         fg = FeatureGenerator(df)
         features_df = fg.generate_features()
 
-        expected_rows = len(df) - (30 - 1)
+        windows = [10, 30, 20, 14, 20]  # windows used for SMA/EMA/RSI/Volatility
+        expected_rows = len(df) - (max(windows) - 1)
         assert features_df.shape[0] == expected_rows
-        assert not features_df.isna().any().any()
+        self.assert_no_nans(features_df)
 
     def test_save_features_to_processed_dir(self):
         """Generated features should save under data/processed."""
@@ -117,7 +122,7 @@ class TestFeatureEngineering:
         assert os.path.exists(save_path)
 
         saved_df = pd.read_csv(save_path, index_col=0)
-        assert not saved_df.isna().any().any()
+        self.assert_no_nans(saved_df)
 
         if os.path.exists(save_path):
             os.remove(save_path)
