@@ -13,9 +13,6 @@ import schedule
 current_dir = Path(__file__).resolve().parent
 project_root = current_dir.parent.parent
 
-if str(project_root) not in sys.path:
-    sys.path.insert(0, str(project_root))
-
 src_path = project_root / "src"
 if str(src_path) not in sys.path:
     sys.path.insert(0, str(src_path))
