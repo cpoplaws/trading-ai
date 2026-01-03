@@ -1,9 +1,12 @@
-import os
+from pathlib import Path
 import sys
 
 import pandas as pd
 
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "src")))
+PROJECT_ROOT = Path(__file__).resolve().parents[1]
+SRC_PATH = PROJECT_ROOT / "src"
+if str(SRC_PATH) not in sys.path:
+    sys.path.insert(0, str(SRC_PATH))
 
 from feature_engineering.feature_enhancer import FeatureEnhancer
 
@@ -18,7 +21,7 @@ class DummyMacroFetcher:
 
 
 class DummyNewsScraper:
-    def fetch_ticker_news(self, ticker: str, days_back: int = 7):
+    def fetch_ticker_news(self, ticker: str, days_back: int = 7) -> pd.DataFrame:
         return pd.DataFrame(
             [
                 {"title": "Stock surges on earnings beat", "publishedAt": "2024-01-01"},

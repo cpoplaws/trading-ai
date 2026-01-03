@@ -59,13 +59,13 @@ class FeatureEnhancer:
             return
 
         macro_features = {}
-        regime_label = None
 
-        regime = summary.get("regime")
-        if isinstance(regime, dict):
-            macro_features["regime_score"] = regime.get("regime_score")
-            macro_features["regime_confidence"] = regime.get("confidence")
-            regime_label = regime.get("regime", "")
+        regime_data = summary.get("regime")
+        regime_dict = regime_data if isinstance(regime_data, dict) else {}
+        regime_label = regime_dict.get("regime", "")
+        if regime_dict:
+            macro_features["regime_score"] = regime_dict.get("regime_score")
+            macro_features["regime_confidence"] = regime_dict.get("confidence")
 
         yield_curve = summary.get("yield_curve", {})
         if isinstance(yield_curve, dict):
@@ -86,7 +86,11 @@ class FeatureEnhancer:
     def _add_news_context(self, ticker: str, days_back: int) -> None:
         try:
             articles = self.news_scraper.fetch_ticker_news(ticker, days_back)
-            sentiment = self.news_scraper.calculate_news_sentiment_score(articles) if not articles.empty else 0.0
+            if articles is None:
+                articles = pd.DataFrame()
+            sentiment = (
+                self.news_scraper.calculate_news_sentiment_score(articles) if not articles.empty else 0.0
+            )
             volume = len(articles)
             self.feature_generator.add_news_sentiment(sentiment, volume)
         except Exception as exc:  # pragma: no cover - defensive path
@@ -95,9 +99,10 @@ class FeatureEnhancer:
 
     def _add_reddit_context(self, ticker: str, days_back: int) -> None:
         try:
-            sentiment = self.reddit_analyzer.get_ticker_sentiment(ticker, days_back)
-            score = sentiment.get("sentiment_score", 0.0) if isinstance(sentiment, dict) else 0.0
-            mentions = sentiment.get("mention_count", 0) if isinstance(sentiment, dict) else 0
+            reddit_response = self.reddit_analyzer.get_ticker_sentiment(ticker, days_back)
+            sentiment_dict = reddit_response if isinstance(reddit_response, dict) else {}
+            score = sentiment_dict.get("sentiment_score", 0.0)
+            mentions = sentiment_dict.get("mention_count", 0)
             self.feature_generator.add_social_sentiment(score, mentions)
         except Exception as exc:  # pragma: no cover - defensive path
             logger.warning(f"Reddit sentiment ingestion failed, defaulting to neutral: {exc}")
