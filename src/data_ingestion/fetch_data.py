@@ -26,6 +26,7 @@ def _download_with_retries(
     end_date: str,
     max_retries: int = DEFAULT_RETRIES,
     retry_delay: float = DEFAULT_RETRY_DELAY,
+    auto_adjust: bool = True,
 ) -> pd.DataFrame:
     """Download ticker data with retry logic.
 
@@ -41,7 +42,7 @@ def _download_with_retries(
                 end=end_date,
                 interval="1d",
                 progress=False,
-                auto_adjust=True,
+                auto_adjust=auto_adjust,
                 threads=False,
             )
             if df is not None and not df.empty:
@@ -94,7 +95,7 @@ def _ensure_no_missing_dates(df: pd.DataFrame, start_date: str, end_date: str) -
 
         price_columns = [col for col in ["Open", "High", "Low", "Close", "Adj Close"] if col in cleaned.columns]
         if price_columns:
-            # Allow limited fills from both directions (up to 2 * MAX_FILL_DAYS) to patch small gaps.
+            # Allow limited fills from both directions; when values exist on both sides this can patch gaps up to 2 * MAX_FILL_DAYS.
             cleaned[price_columns] = cleaned[price_columns].ffill(limit=MAX_FILL_DAYS).bfill(limit=MAX_FILL_DAYS)
         if "Volume" in cleaned.columns:
             cleaned["Volume"] = cleaned["Volume"].fillna(0)
@@ -109,6 +110,7 @@ def fetch_data(
     save_path: str = DEFAULT_SAVE_PATH,
     max_retries: int = DEFAULT_RETRIES,
     retry_delay: float = DEFAULT_RETRY_DELAY,
+    auto_adjust: bool = True,
 ) -> bool:
     """
     Fetch OHLCV data for given tickers and save to CSV files.
@@ -120,6 +122,7 @@ def fetch_data(
         save_path: Directory to save the data files
         max_retries: Maximum retry attempts per ticker
         retry_delay: Base delay (seconds) between retries
+        auto_adjust: Whether to adjust prices for corporate actions
         
     Returns:
         bool: True if all tickers were successfully fetched, False otherwise
@@ -138,6 +141,7 @@ def fetch_data(
             end_date=end_date,
             max_retries=max_retries,
             retry_delay=retry_delay,
+            auto_adjust=auto_adjust,
         )
 
         if df is None or df.empty:

@@ -19,7 +19,7 @@ from strategy.simple_strategy import generate_signals
 from utils.logger import setup_logger
 
 class TestDataIngestion:
-    REFERENCE_DATE = pd.Timestamp.today().normalize()
+    REFERENCE_DATE = pd.Timestamp('2024-01-15')
     BASE_OFFSET_DAYS = 10
     END_OFFSET_DAYS = 9
     SAMPLE_PERIODS = 7
