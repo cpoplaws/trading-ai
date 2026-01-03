@@ -93,7 +93,7 @@ def _ensure_no_missing_dates(df: pd.DataFrame, start_date: str, end_date: str) -
 
         price_columns = [col for col in ["Open", "High", "Low", "Close", "Adj Close"] if col in cleaned.columns]
         if price_columns:
-            cleaned[price_columns] = cleaned[price_columns].ffill().bfill()
+            cleaned[price_columns] = cleaned[price_columns].ffill(limit=5).bfill(limit=5)
         if "Volume" in cleaned.columns:
             cleaned["Volume"] = cleaned["Volume"].fillna(0)
 
