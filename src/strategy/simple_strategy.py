@@ -54,11 +54,25 @@ def generate_signals(model_path: str, data_path: str, save_path: str = './signal
             return False
             
         predictions = model.predict(feature_data)
+
+        def _map_prediction_to_signal(prediction: Any) -> Optional[str]:
+            """Convert model prediction (numeric or UP/DOWN) to BUY/SELL."""
+            if isinstance(prediction, str):
+                normalized = prediction.strip().upper()
+                if normalized == 'UP':
+                    return 'BUY'
+                if normalized == 'DOWN':
+                    return 'SELL'
+            if isinstance(prediction, (bool, np.bool_)):
+                return 'BUY' if prediction else 'SELL'
+            if isinstance(prediction, (int, np.integer)):
+                return 'BUY' if prediction == 1 else 'SELL' if prediction == 0 else None
+            return None
         
         # Create signals DataFrame
         signals_df = pd.DataFrame(index=feature_data.index)
         signals_df['Prediction'] = predictions
-        signals_df['Signal'] = signals_df['Prediction'].map({1: 'BUY', 0: 'SELL'})
+        signals_df['Signal'] = signals_df['Prediction'].apply(_map_prediction_to_signal)
 
         # Add prediction probabilities if available
         if hasattr(model, 'predict_proba'):
