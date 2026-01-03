@@ -68,9 +68,16 @@ def _evaluate_existing_signals(signals_dir: str = SIGNALS_DIR) -> bool:
     for signal_file in signal_files:
         try:
             analysis = analyze_signals(str(signal_file))
-            logger.info("Strategy evaluation completed for %s", signal_file.name)
+            if isinstance(analysis, dict) and analysis.get("error"):
+                logger.warning(
+                    "Strategy evaluation for %s returned error: %s",
+                    signal_file.name,
+                    analysis.get("error"),
+                )
+            else:
+                processed_any = True
+                logger.info("Strategy evaluation completed for %s", signal_file.name)
             logger.debug("Analysis details for %s: %s", signal_file.name, analysis)
-            processed_any = True
         except Exception:
             logger.exception("Error evaluating signal file %s", signal_file.name)
 
@@ -110,17 +117,32 @@ def configure_schedule(
     """
     Configure scheduled jobs for retraining and strategy evaluation.
     """
+    validated_retrain = _validate_time(retrain_time, "retrain_time")
+    validated_strategy = _validate_time(strategy_time, "strategy_time")
+
     schedule.clear("scheduler_retrain")
     schedule.clear("scheduler_strategy")
 
-    schedule.every().day.at(retrain_time).do(run_retrain).tag("scheduler_retrain")
-    schedule.every().day.at(strategy_time).do(run_strategy_evaluation).tag(
+    schedule.every().day.at(validated_retrain).do(run_retrain).tag("scheduler_retrain")
+    schedule.every().day.at(validated_strategy).do(run_strategy_evaluation).tag(
         "scheduler_strategy"
     )
 
     logger.info(
-        f"Scheduler configured with retrain_time={retrain_time} and strategy_time={strategy_time}"
+        f"Scheduler configured with retrain_time={validated_retrain} and strategy_time={validated_strategy}"
     )
+
+
+def _validate_time(time_str: str, label: str) -> str:
+    """
+    Validate HH:MM formatted time strings before scheduling/logging.
+    """
+    try:
+        datetime.strptime(time_str, "%H:%M")
+        return time_str
+    except ValueError as exc:
+        logger.error("Invalid %s format '%s'; expected HH:MM", label, time_str)
+        raise exc
 
 
 def main():
