@@ -56,10 +56,8 @@ def train_model(
                 raise ValueError("No 'Close' or 'close' column found for target creation")
         else:
             target_col = 'Target' if 'Target' in df.columns else 'target'
-            source_targets = df[target_col]
-            df['Target'] = source_targets.apply(
-                lambda v: 'UP' if str(v).strip().upper() in ['1', 'UP', 'TRUE'] else 'DOWN'
-            )
+            target_values = df[target_col].astype(str).str.strip().str.upper()
+            df['Target'] = np.where(target_values.isin(['1', 'UP', 'TRUE']), 'UP', 'DOWN')
 
         # Define features (use all available technical indicators)
         feature_columns = ['SMA_10', 'SMA_30', 'RSI_14', 'Volatility_20']
@@ -146,14 +144,22 @@ def load_model_and_features(model_path: str) -> Tuple[Optional[object], Optional
         model = joblib.load(model_path)
         
         # Try to load corresponding features
-        feature_path = model_path.replace('model_', 'features_')
-        if feature_path == model_path:
-            feature_path = model_path.replace('random_forest_', 'random_forest_features_')
-        try:
-            features = joblib.load(feature_path)
-        except FileNotFoundError:
-            logger.warning(f"Feature file not found: {feature_path}")
-            features = None
+        feature_candidates = [
+            model_path.replace('model_', 'features_'),
+            model_path.replace('random_forest_', 'random_forest_features_'),
+            os.path.join(os.path.dirname(model_path), f"features_{os.path.basename(model_path)}"),
+        ]
+        features = None
+        for feature_path in feature_candidates:
+            if feature_path == model_path:
+                continue
+            try:
+                features = joblib.load(feature_path)
+                break
+            except FileNotFoundError:
+                continue
+        if features is None:
+            logger.warning(f"Feature file not found for model: {model_path}")
             
         return model, features
     except Exception as e:
