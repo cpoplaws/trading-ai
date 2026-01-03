@@ -72,7 +72,7 @@ def _evaluate_existing_signals(signals_dir: str = SIGNALS_DIR) -> bool:
             logger.debug("Analysis details for %s: %s", signal_file.name, analysis)
             processed_any = True
         except Exception:
-            logger.exception(f"Error evaluating signal file {signal_file.name}")
+            logger.exception("Error evaluating signal file %s", signal_file.name)
 
     return processed_any
 
