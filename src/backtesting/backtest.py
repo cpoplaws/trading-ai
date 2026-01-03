@@ -304,6 +304,7 @@ class PortfolioBacktester:
             'final_value': final_value,
             'total_return': total_return,
             'total_return_pct': total_return * 100,
+            'cumulative_return': total_return,
             'buy_hold_return': buy_hold_return,
             'buy_hold_return_pct': buy_hold_return * 100,
             'excess_return': total_return - buy_hold_return,
@@ -379,6 +380,51 @@ class PortfolioBacktester:
         except Exception as e:
             logger.error(f"Error saving backtest report: {str(e)}")
 
+def log_backtest_results(results: Dict, log_path: str = "./logs/backtest_results.log") -> None:
+    """
+    Persist key backtest metrics to a log file.
+    """
+    try:
+        os.makedirs(os.path.dirname(log_path), exist_ok=True)
+        with open(log_path, "a") as f:
+            f.write(
+                f"{datetime.now().isoformat()} | {results.get('ticker', 'unknown')} | "
+                f"Cumulative: {results.get('cumulative_return', 0):.4f} | "
+                f"Sharpe: {results.get('sharpe_ratio', 0):.4f} | "
+                f"MaxDD: {results.get('max_drawdown', 0):.4f}\n"
+            )
+    except Exception as e:
+        logger.error(f"Failed to log backtest results: {e}")
+
+def plot_equity_curve(portfolio_history: List[Dict], ticker: str, output_path: str = "./logs/equity_curve.png") -> Optional[str]:
+    """
+    Generate and save equity curve visualization.
+    """
+    if not portfolio_history:
+        return None
+    try:
+        os.makedirs(os.path.dirname(output_path), exist_ok=True)
+        df = pd.DataFrame(portfolio_history)
+        if 'date' in df.columns:
+            df['date'] = pd.to_datetime(df['date'])
+            df = df.sort_values('date')
+            x_axis = df['date']
+        else:
+            x_axis = range(len(df))
+        plt.figure(figsize=(10, 4))
+        plt.plot(x_axis, df['portfolio_value'], label='Equity Curve')
+        plt.title(f'Equity Curve - {ticker}')
+        plt.xlabel('Date')
+        plt.ylabel('Portfolio Value')
+        plt.legend()
+        plt.tight_layout()
+        plt.savefig(output_path)
+        plt.close()
+        return output_path
+    except Exception as e:
+        logger.error(f"Failed to plot equity curve: {e}")
+        return None
+
 def run_backtest(signal_file: str, ticker: Optional[str] = None, initial_capital: float = 10000) -> Dict:
     """
     Convenience function to run a single backtest.
@@ -393,6 +439,8 @@ def run_backtest(signal_file: str, ticker: Optional[str] = None, initial_capital
     """
     if ticker is None:
         ticker = os.path.basename(signal_file).split('_')[0]
+    if not ticker:
+        ticker = "unknown"
     
     # Construct price file path
     price_file = f'./data/processed/{ticker}.csv'
@@ -409,6 +457,12 @@ def run_backtest(signal_file: str, ticker: Optional[str] = None, initial_capital
     
     # Save detailed report
     backtester.save_backtest_report(results)
+    log_backtest_results(results)
+    results['equity_curve_path'] = plot_equity_curve(
+        backtester.portfolio_history,
+        ticker,
+        output_path=f"./logs/{ticker}_equity_curve.png"
+    )
     
     return results
 
