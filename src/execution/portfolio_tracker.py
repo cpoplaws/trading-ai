@@ -74,6 +74,7 @@ class PortfolioTracker:
             market_value = qty * current_price
             unrealized_pnl = (current_price - avg_price) * qty
             positions_value += market_value
+            denominator = avg_price * qty
 
             position_list.append(
                 {
@@ -83,8 +84,8 @@ class PortfolioTracker:
                     "current_price": current_price,
                     "market_value": market_value,
                     "unrealized_pnl": unrealized_pnl,
-                    "unrealized_pnl_pct": (unrealized_pnl / (avg_price * qty) * 100)
-                    if qty and avg_price
+                    "unrealized_pnl_pct": (unrealized_pnl / denominator * 100)
+                    if denominator != 0
                     else 0.0,
                     "exposure": 0.0,  # filled later
                 }
