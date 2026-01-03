@@ -217,7 +217,7 @@ class AlpacaBroker(BrokerInterface):
                     f"✅ Order placed: {side.value.upper()} {qty} {symbol} @ {order_type.value}"
                 )
                 parsed = self._parse_order(order_resp)
-                return vars(parsed)
+                return parsed
             else:
                 logger.error(f"❌ Order failed: {response.text}")
                 return None

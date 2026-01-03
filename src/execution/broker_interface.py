@@ -81,6 +81,9 @@ class Order:
     limit_price: Optional[float] = None
     stop_price: Optional[float] = None
 
+    def __getitem__(self, item):
+        return getattr(self, item)
+
 
 @dataclass
 class Position:

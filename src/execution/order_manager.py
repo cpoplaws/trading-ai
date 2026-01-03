@@ -108,8 +108,13 @@ class OrderManager:
 
         # Ensure status field exists as string for tests
         status = broker_order.get("status") if isinstance(broker_order, dict) else getattr(broker_order, "status", None)
-        order_record = broker_order if isinstance(broker_order, dict) else {}
-        order_record.setdefault("status", status.value if hasattr(status, "value") else status)
+        if isinstance(broker_order, dict):
+            order_record = dict(broker_order)
+        elif hasattr(broker_order, "__dict__"):
+            order_record = dict(broker_order.__dict__)
+        else:
+            order_record = {}
+        order_record["status"] = status.value if hasattr(status, "value") else status
         order_record.setdefault("symbol", symbol)
         order_record.setdefault("order_id", broker_order.get("order_id") if isinstance(broker_order, dict) else "")
         order_record.setdefault("timestamp", datetime.now().isoformat())
