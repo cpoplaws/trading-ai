@@ -66,11 +66,16 @@ def _evaluate_existing_signals(signals_dir: str = "./signals") -> bool:
         logger.warning("No signal files found for evaluation")
         return False
 
+    processed_any = False
     for signal_file in signal_files:
-        analysis = analyze_signals(str(signal_file))
-        logger.info(f"Strategy evaluation for {signal_file.name}: {analysis}")
+        try:
+            analysis = analyze_signals(str(signal_file))
+            logger.info(f"Strategy evaluation for {signal_file.name}: {analysis}")
+            processed_any = True
+        except Exception:
+            logger.exception(f"Error evaluating signal file {signal_file.name}")
 
-    return True
+    return processed_any
 
 
 def run_strategy_evaluation(
@@ -114,7 +119,7 @@ def configure_schedule(
     )
 
     logger.info(
-        "Scheduler configured",
+        f"Scheduler configured with retrain_time={retrain_time} and strategy_time={strategy_time}",
         extra={"retrain_time": retrain_time, "strategy_time": strategy_time},
     )
 
