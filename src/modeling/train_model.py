@@ -56,8 +56,9 @@ def train_model(
                 raise ValueError("No 'Close' or 'close' column found for target creation")
         else:
             target_col = 'Target' if 'Target' in df.columns else 'target'
-            df['Target'] = df[target_col].apply(
-                lambda v: 'UP' if str(v).lower() in ['1', 'up', 'true'] else 'DOWN'
+            source_targets = df[target_col]
+            df['Target'] = source_targets.apply(
+                lambda v: 'UP' if str(v).strip().upper() in ['1', 'UP', 'TRUE'] else 'DOWN'
             )
 
         # Define features (use all available technical indicators)
@@ -77,7 +78,7 @@ def train_model(
         
         # Prepare data
         X = df[available_features].dropna()
-        y = df.loc[X.index, 'Target'].astype(str).str.upper()
+        y = df.loc[X.index, 'Target']
         
         if len(X) == 0:
             raise ValueError("No valid samples after removing NaN values")
