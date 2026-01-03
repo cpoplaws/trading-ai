@@ -304,7 +304,7 @@ class PortfolioBacktester:
             'final_value': final_value,
             'total_return': total_return,
             'total_return_pct': total_return * 100,
-            'cumulative_return': portfolio_df['cum_return'].iloc[-1] if len(portfolio_df) > 0 else 0,
+            'cumulative_return': total_return,
             'buy_hold_return': buy_hold_return,
             'buy_hold_return_pct': buy_hold_return * 100,
             'excess_return': total_return - buy_hold_return,
@@ -406,9 +406,13 @@ def plot_equity_curve(portfolio_history: List[Dict], ticker: str, output_path: s
         os.makedirs(os.path.dirname(output_path), exist_ok=True)
         df = pd.DataFrame(portfolio_history)
         if 'date' in df.columns:
+            df['date'] = pd.to_datetime(df['date'])
             df = df.sort_values('date')
+            x_axis = df['date']
+        else:
+            x_axis = range(len(df))
         plt.figure(figsize=(10, 4))
-        plt.plot(df['date'], df['portfolio_value'], label='Equity Curve')
+        plt.plot(x_axis, df['portfolio_value'], label='Equity Curve')
         plt.title(f'Equity Curve - {ticker}')
         plt.xlabel('Date')
         plt.ylabel('Portfolio Value')
@@ -435,6 +439,8 @@ def run_backtest(signal_file: str, ticker: Optional[str] = None, initial_capital
     """
     if ticker is None:
         ticker = os.path.basename(signal_file).split('_')[0]
+    if not ticker:
+        ticker = "unknown"
     
     # Construct price file path
     price_file = f'./data/processed/{ticker}.csv'
@@ -455,7 +461,7 @@ def run_backtest(signal_file: str, ticker: Optional[str] = None, initial_capital
     results['equity_curve_path'] = plot_equity_curve(
         backtester.portfolio_history,
         ticker,
-        output_path="./logs/equity_curve.png" if ticker is None else f"./logs/{ticker}_equity_curve.png"
+        output_path=f"./logs/{ticker}_equity_curve.png"
     )
     
     return results
