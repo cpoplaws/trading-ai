@@ -102,8 +102,7 @@ class TestFeatureEngineering:
         fg = FeatureGenerator(df)
         features_df = fg.generate_features()
 
-        windows = [10, 30, 20, 14, 20]  # windows used for SMA/EMA/RSI/Volatility
-        expected_rows = len(df) - (max(windows) - 1)
+        expected_rows = len(df) - FeatureGenerator.warmup_rows()
         assert features_df.shape[0] == expected_rows
         self.assert_no_nans(features_df)
 
@@ -113,19 +112,19 @@ class TestFeatureEngineering:
         fg = FeatureGenerator(df)
         features_df = fg.generate_features()
 
-        processed_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'data', 'processed'))
-        os.makedirs(processed_dir, exist_ok=True)
-        save_path = os.path.join(processed_dir, 'test_features.csv')
+        save_path = FeatureGenerator.default_save_path('test_features.csv')
+        os.makedirs(os.path.dirname(save_path), exist_ok=True)
 
-        success = fg.save_features(save_path, features_df)
-        assert success is True
-        assert os.path.exists(save_path)
+        try:
+            success = fg.save_features(save_path, features_df)
+            assert success is True
+            assert os.path.exists(save_path)
 
-        saved_df = pd.read_csv(save_path, index_col=0)
-        self.assert_no_nans(saved_df)
-
-        if os.path.exists(save_path):
-            os.remove(save_path)
+            saved_df = pd.read_csv(save_path, index_col=0)
+            self.assert_no_nans(saved_df)
+        finally:
+            if os.path.exists(save_path):
+                os.remove(save_path)
             
     def test_sma_calculation(self):
         """Test SMA calculation."""
