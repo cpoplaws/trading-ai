@@ -5,6 +5,7 @@ from datetime import datetime
 from typing import List, Optional
 
 import pandas as pd
+from requests import exceptions as requests_exceptions
 import yfinance as yf
 
 from utils.logger import setup_logger
@@ -45,6 +46,11 @@ def _download_with_retries(
             logger.warning(
                 f"No data returned for {ticker} on attempt {attempt}/{max_retries}"
             )
+        except requests_exceptions.RequestException as exc:
+            last_exception = exc
+            logger.error(
+                f"Network error fetching data for {ticker} on attempt {attempt}/{max_retries}: {exc}"
+            )
         except Exception as exc:  # pragma: no cover - defensive logging
             last_exception = exc
             logger.error(
@@ -52,7 +58,7 @@ def _download_with_retries(
             )
 
         if attempt < max_retries:
-            time.sleep(retry_delay * attempt)
+            time.sleep(retry_delay)
 
     if last_exception:
         logger.error(f"Failed to fetch data for {ticker} after {max_retries} attempts")
