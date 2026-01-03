@@ -15,7 +15,8 @@ class DummyModel:
         return np.array(['UP', 'DOWN', 'UP'])
 
     def predict_proba(self, X):
-        # Probabilities align with predictions (P(SELL), P(BUY))
+        # Probabilities provided in [SELL, BUY] order to align with DOWN->SELL and UP->BUY mapping
+        # (sklearn convention: 0=negative, 1=positive); verify ordering for real models
         return np.array([
             [0.2, 0.8],
             [0.7, 0.3],
