@@ -232,7 +232,10 @@ class NewsScraper:
             
         df['ticker'] = ticker
         df['description'] = df.get('description', '').fillna('')
-        df['summary'] = df['description'].where(df['description'] != '', df['title'])
+        df['summary'] = df['description']
+        missing_summary = df['summary'] == ''
+        if missing_summary.any():
+            logger.debug(f"{missing_summary.sum()} articles missing descriptions; summaries left blank")
         
         # Remove duplicates
         df = df.drop_duplicates(subset=['title'], keep='first')
@@ -268,7 +271,7 @@ class NewsScraper:
         if limit:
             news_df = news_df.head(limit)
         
-        news_df['published_at'] = pd.to_datetime(news_df['published_at']).dt.strftime('%Y-%m-%dT%H:%M:%S')
+        news_df['published_at'] = pd.to_datetime(news_df['published_at'], utc=True).dt.strftime('%Y-%m-%dT%H:%M:%SZ')
         filename = f"financial_news_{datetime.now().strftime('%Y%m%d')}.csv"
         os.makedirs(output_dir, exist_ok=True)
         output_path = os.path.join(output_dir, filename)
