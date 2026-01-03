@@ -64,8 +64,10 @@ def train_model(
             # Try both uppercase and lowercase close column
             close_col = 'Close' if 'Close' in df.columns else 'close'
             if close_col in df.columns:
+                next_close = df[close_col].shift(-1)
+                df = df[next_close.notna()].copy()
                 df['Target'] = np.where(
-                    df[close_col].shift(-1) > df[close_col], 'UP', 'DOWN'
+                    next_close.loc[df.index] > df[close_col], 'UP', 'DOWN'
                 )
             else:
                 raise ValueError("No 'Close' or 'close' column found for target creation")
@@ -164,7 +166,6 @@ def load_model_and_features(model_path: str) -> Tuple[Optional[object], Optional
         # Try to load corresponding features
         base_dir = os.path.dirname(model_path)
         feature_candidates = [
-            model_path.replace('model_', 'features_'),
             model_path.replace('random_forest_', 'random_forest_features_'),
             os.path.join(base_dir, f"features_{os.path.basename(model_path)}"),
         ]
