@@ -112,10 +112,19 @@ class FeatureGenerator:
                 self.data['Volume_SMA'] = self.data['volume'].rolling(window=20).mean()
                 self.data['Volume_Ratio'] = self.data['volume'] / self.data['Volume_SMA']
             
-            logger.info(f"Generated {len([c for c in self.data.columns if c not in ['open', 'high', 'low', 'close', 'volume']])} features")
-            
-            # Drop rows with NaN values caused by rolling calculations
-            return self.data.dropna()
+            features_df = self.data.dropna().copy()
+            feature_columns = [c for c in features_df.columns if c not in ['open', 'high', 'low', 'close', 'volume']]
+
+            if features_df.isna().any().any():
+                raise ValueError("NaN values remain after feature generation")
+
+            logger.info(
+                f"Generated {len(feature_columns)} features with shape {features_df.shape} "
+                f"(dropped {len(self.data) - len(features_df)} warmup rows). "
+                f"Features: {feature_columns}"
+            )
+
+            return features_df
             
         except Exception as e:
             logger.error(f"Error generating features: {str(e)}")
@@ -195,15 +204,21 @@ class FeatureGenerator:
         except Exception as e:
             logger.error(f"Error adding market regime: {str(e)}")
 
-    def save_features(self, save_path: str) -> bool:
+    def save_features(self, save_path: Optional[str] = None, features_df: Optional[pd.DataFrame] = None) -> bool:
         """
         Save the generated features to a CSV file.
-        :param save_path: Path to save the processed DataFrame.
+        :param save_path: Path to save the processed DataFrame. Defaults to ./data/processed/features.csv
+        :param features_df: Optional DataFrame to save (falls back to self.data.dropna()).
         :return: True if successful, False otherwise
         """
         try:
+            if save_path is None:
+                save_path = os.path.join('.', 'data', 'processed', 'features.csv')
+
+            data_to_save = features_df if features_df is not None else self.data.dropna()
+
             os.makedirs(os.path.dirname(save_path), exist_ok=True)
-            self.data.dropna().to_csv(save_path)
+            data_to_save.to_csv(save_path)
             logger.info(f"Saved engineered features to {save_path}")
             return True
         except Exception as e:

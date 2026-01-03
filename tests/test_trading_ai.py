@@ -90,6 +90,37 @@ class TestFeatureEngineering:
         expected_features = ['SMA_10', 'SMA_30', 'RSI_14', 'Volatility_20']
         for feature in expected_features:
             assert feature in features_df.columns
+        assert not features_df.isna().any().any()
+
+    def test_feature_generation_shape_and_no_nans(self):
+        """Feature frame should drop warmup rows and contain no NaNs."""
+        df = self.create_sample_data()
+        fg = FeatureGenerator(df)
+        features_df = fg.generate_features()
+
+        expected_rows = len(df) - (30 - 1)
+        assert features_df.shape[0] == expected_rows
+        assert not features_df.isna().any().any()
+
+    def test_save_features_to_processed_dir(self):
+        """Generated features should save under data/processed."""
+        df = self.create_sample_data()
+        fg = FeatureGenerator(df)
+        features_df = fg.generate_features()
+
+        processed_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'data', 'processed'))
+        os.makedirs(processed_dir, exist_ok=True)
+        save_path = os.path.join(processed_dir, 'test_features.csv')
+
+        success = fg.save_features(save_path, features_df)
+        assert success is True
+        assert os.path.exists(save_path)
+
+        saved_df = pd.read_csv(save_path, index_col=0)
+        assert not saved_df.isna().any().any()
+
+        if os.path.exists(save_path):
+            os.remove(save_path)
             
     def test_sma_calculation(self):
         """Test SMA calculation."""
