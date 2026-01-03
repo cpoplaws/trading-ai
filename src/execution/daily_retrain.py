@@ -3,7 +3,9 @@ Daily automated trading pipeline - Fetch data, engineer features, train models, 
 """
 import sys
 import os
-from datetime import datetime
+import shutil
+import time
+from datetime import datetime, timedelta
 from typing import List, Optional
 
 # Add project root to Python path
@@ -15,6 +17,7 @@ if project_root not in sys.path:
 # Now import with relative paths
 sys.path.append(os.path.dirname(os.path.dirname(__file__)))
 
+import schedule
 from data_ingestion.fetch_data import fetch_data
 from feature_engineering.feature_generator import FeatureGenerator
 from modeling.train_model import train_model
@@ -24,14 +27,70 @@ import pandas as pd
 
 # Set up logging
 logger = setup_logger("daily_pipeline", "INFO")
+DEFAULT_LOOKBACK_DAYS = 365
 
-def daily_pipeline(tickers: Optional[List[str]] = None, start_date: str = '2020-01-01') -> bool:
+
+def _resolve_start_date(start_date: Optional[str], window_days: int, current_time: Optional[datetime] = None) -> str:
+    """Return an explicit start_date using a rolling lookback window when not provided."""
+    now = current_time or datetime.utcnow()
+    if start_date:
+        return start_date
+    return (now - timedelta(days=window_days)).strftime('%Y-%m-%d')
+
+
+def archive_model(model_path: str, ticker: str, run_date: Optional[datetime] = None, archive_dir: Optional[str] = None) -> Optional[str]:
+    """
+    Save a dated copy of the latest model so each day's retrain is preserved.
+
+    Args:
+        model_path: Path to the most recent model file.
+        ticker: Ticker symbol used for naming.
+        run_date: Optional date to embed in the archived filename.
+        archive_dir: Optional directory for archived models (defaults to ./models/daily/).
+
+    Returns:
+        The path to the archived model, or None if the source model is missing.
+    """
+    if not os.path.exists(model_path):
+        logger.warning(f"Model path not found for archiving: {model_path}")
+        return None
+
+    archive_dir = archive_dir or os.path.join(os.path.dirname(model_path), "daily")
+    os.makedirs(archive_dir, exist_ok=True)
+
+    run_date = run_date or datetime.utcnow()
+    dated_name = f"model_{ticker}_{run_date.strftime('%Y%m%d')}.joblib"
+    archived_path = os.path.join(archive_dir, dated_name)
+
+    shutil.copy2(model_path, archived_path)
+    logger.info(f"Archived daily model for {ticker} to {archived_path}")
+    return archived_path
+
+
+def schedule_daily_retrain(run_time: str = "09:00", tickers: Optional[List[str]] = None, window_days: int = DEFAULT_LOOKBACK_DAYS) -> None:
+    """
+    Schedule the daily retrain job at a specific time.
+    """
+    logger.info(f"Scheduling daily retrain at {run_time} for tickers: {tickers or ['AAPL', 'MSFT', 'SPY']}")
+    schedule.every().day.at(run_time).do(daily_pipeline, tickers=tickers, window_days=window_days)
+
+    while True:
+        schedule.run_pending()
+        time.sleep(30)
+
+
+def daily_pipeline(
+    tickers: Optional[List[str]] = None,
+    start_date: Optional[str] = None,
+    window_days: int = DEFAULT_LOOKBACK_DAYS,
+) -> bool:
     """
     Execute the complete daily trading pipeline.
     
     Args:
         tickers: List of ticker symbols to process
-        start_date: Start date for data fetching
+        start_date: Optional start date override (defaults to rolling window)
+        window_days: Rolling window lookback (in days) for retraining
         
     Returns:
         bool: True if pipeline completed successfully
@@ -39,7 +98,8 @@ def daily_pipeline(tickers: Optional[List[str]] = None, start_date: str = '2020-
     if tickers is None:
         tickers = ['AAPL', 'MSFT', 'SPY']
     
-    logger.info(f"Starting daily pipeline for tickers: {tickers}")
+    start_date = _resolve_start_date(start_date, window_days)
+    logger.info(f"Starting daily pipeline for tickers: {tickers} (rolling window start: {start_date})")
     
     # Step 1: Fetch latest data
     logger.info("Step 1: Fetching market data...")
@@ -101,10 +161,11 @@ def daily_pipeline(tickers: Optional[List[str]] = None, start_date: str = '2020-
                 continue
                 
             logger.info(f"Model training metrics for {ticker}: {metrics}")
+            model_path = f'./models/model_{ticker}.joblib'
+            archive_model(model_path, ticker)
             
             # Step 5: Generate signals
             logger.info(f"Generating signals for {ticker}...")
-            model_path = f'./models/model_{ticker}.joblib'
             os.makedirs('./signals', exist_ok=True)
             
             signal_success = generate_signals(model_path, processed_path)
@@ -151,11 +212,14 @@ def run_backtest(ticker: str) -> bool:
     return True
 
 if __name__ == "__main__":
-    # Run the daily pipeline
-    success = daily_pipeline()
-    
-    if success:
-        logger.info("Daily pipeline completed successfully!")
+    if "--schedule" in sys.argv:
+        schedule_time = os.getenv("DAILY_RETRAIN_TIME", "09:00")
+        schedule_daily_retrain(run_time=schedule_time)
     else:
-        logger.error("Daily pipeline failed!")
-        sys.exit(1)
+        success = daily_pipeline()
+        
+        if success:
+            logger.info("Daily pipeline completed successfully!")
+        else:
+            logger.error("Daily pipeline failed!")
+            sys.exit(1)
