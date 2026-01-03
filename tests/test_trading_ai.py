@@ -19,14 +19,18 @@ from strategy.simple_strategy import generate_signals
 from utils.logger import setup_logger
 
 class TestDataIngestion:
+    BASE_OFFSET_DAYS = 10
+    END_OFFSET_DAYS = 9
+    SAMPLE_PERIODS = 7
+
     def _date_bounds(self):
-        start_date = (pd.Timestamp.today().normalize() - pd.tseries.offsets.BDay(10)).date()
-        end_date = (pd.Timestamp(start_date) + pd.tseries.offsets.BDay(9)).date()
+        start_date = (pd.Timestamp.today().normalize() - pd.tseries.offsets.BDay(self.BASE_OFFSET_DAYS)).date()
+        end_date = (pd.Timestamp(start_date) + pd.tseries.offsets.BDay(self.END_OFFSET_DAYS)).date()
         return start_date, end_date
 
     def _sample_df(self):
         start_date, _ = self._date_bounds()
-        dates = pd.date_range(start=start_date, periods=7, freq='B')
+        dates = pd.date_range(start=start_date, periods=self.SAMPLE_PERIODS, freq='B')
         return pd.DataFrame(
             {
                 'Open': [100 + i for i in range(len(dates))],

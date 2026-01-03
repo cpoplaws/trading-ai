@@ -1,7 +1,7 @@
 """Data ingestion module for fetching OHLCV market data."""
 import os
 import time
-from datetime import datetime
+from datetime import datetime, timedelta
 from typing import List, Optional
 
 import pandas as pd
@@ -54,11 +54,14 @@ def _download_with_retries(
             logger.error(
                 f"Network error fetching data for {ticker} on attempt {attempt}/{max_retries}: {exc}"
             )
-        except Exception as exc:  # pragma: no cover - defensive logging
+        except (ValueError, KeyError) as exc:  # pragma: no cover - defensive logging
             last_exception = exc
             logger.error(
                 f"Error fetching data for {ticker} on attempt {attempt}/{max_retries}: {exc}"
             )
+        except Exception:
+            # Re-raise unexpected exceptions to avoid masking programming errors.
+            raise
 
         if attempt < max_retries:
             time.sleep(retry_delay)
@@ -149,6 +152,7 @@ def fetch_data(
     return success_count == len(tickers)
 
 if __name__ == "__main__":
-    success = fetch_data(['AAPL', 'MSFT'], '2020-01-01')
+    default_start = (datetime.today() - timedelta(days=365 * 3)).strftime('%Y-%m-%d')
+    success = fetch_data(['AAPL', 'MSFT'], default_start)
     if not success:
         logger.error("Failed to fetch all ticker data")
