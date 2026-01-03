@@ -28,6 +28,7 @@ logger = setup_logger("scheduler")
 
 RETRAIN_TIME = os.getenv("RETRAIN_TIME", "07:00")
 STRATEGY_EVAL_TIME = os.getenv("STRATEGY_EVAL_TIME", "07:30")
+SIGNALS_DIR = os.getenv("SIGNALS_DIR", "./signals")
 
 
 def run_retrain(pipeline_fn: Callable[[], bool] = daily_pipeline) -> bool:
@@ -52,7 +53,7 @@ def run_retrain(pipeline_fn: Callable[[], bool] = daily_pipeline) -> bool:
         logger.info(f"Retrain job ended (duration: {duration:.2f}s)")
 
 
-def _evaluate_existing_signals(signals_dir: str = "./signals") -> bool:
+def _evaluate_existing_signals(signals_dir: str = SIGNALS_DIR) -> bool:
     """
     Evaluate existing strategy signals.
     """

@@ -1,10 +1,11 @@
-import os
-import sys
-
 import logging
 import schedule
+import sys
+from pathlib import Path
 
-sys.path.append(os.path.join(os.path.dirname(__file__), "..", "src"))
+tests_dir = Path(__file__).resolve().parent
+src_path = tests_dir.parent / "src"
+sys.path.append(str(src_path))
 
 from execution import scheduler
 
