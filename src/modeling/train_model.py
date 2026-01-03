@@ -58,6 +58,7 @@ def train_model(
         else:
             target_col = 'Target' if 'Target' in df.columns else 'target'
             target_values = df[target_col].astype(str).str.strip().str.upper()
+            # Normalize common truthy values to UP; everything else treated as DOWN
             df['Target'] = np.where(target_values.isin(['1', 'UP', 'TRUE']), 'UP', 'DOWN')
 
         df = df.dropna(subset=['Target'])
@@ -165,7 +166,12 @@ def load_model_and_features(model_path: str) -> Tuple[Optional[object], Optional
                 os.path.join(os.path.dirname(model_path), "features_*.joblib"),
             ]
             for pattern in fallback_patterns:
-                for feature_path in glob.glob(pattern):
+                candidates = sorted(
+                    glob.glob(pattern),
+                    key=os.path.getmtime,
+                    reverse=True,
+                )
+                for feature_path in candidates:
                     try:
                         features = joblib.load(feature_path)
                         break
