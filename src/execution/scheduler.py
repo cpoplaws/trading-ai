@@ -21,7 +21,7 @@ from execution.daily_retrain import daily_pipeline
 from strategy.simple_strategy import analyze_signals
 from utils.logger import setup_logger
 
-logger = setup_logger("scheduler")
+logger = setup_logger("scheduler", "INFO")
 
 RETRAIN_TIME = os.getenv("RETRAIN_TIME", "07:00")
 STRATEGY_EVAL_TIME = os.getenv("STRATEGY_EVAL_TIME", "07:30")
@@ -117,8 +117,7 @@ def configure_schedule(
     )
 
     logger.info(
-        f"Scheduler configured with retrain_time={retrain_time} and strategy_time={strategy_time}",
-        extra={"retrain_time": retrain_time, "strategy_time": strategy_time},
+        f"Scheduler configured with retrain_time={retrain_time} and strategy_time={strategy_time}"
     )
 
 
