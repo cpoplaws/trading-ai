@@ -11,6 +11,7 @@ from datetime import datetime, timedelta
 # Add src to path
 sys.path.append(os.path.join(os.path.dirname(__file__), '..', 'src'))
 
+import data_ingestion.fetch_data as fetch_data_module
 from data_ingestion.fetch_data import fetch_data
 from feature_engineering.feature_generator import FeatureGenerator
 from modeling.train_model import train_model
@@ -18,35 +19,51 @@ from strategy.simple_strategy import generate_signals
 from utils.logger import setup_logger
 
 class TestDataIngestion:
-    def test_fetch_data_success(self):
-        """Test successful data fetching."""
-        # Create test directory
-        test_dir = './test_data/'
-        os.makedirs(test_dir, exist_ok=True)
-        
-        # Test with a simple ticker
-        success = fetch_data(['AAPL'], '2023-01-01', '2023-01-31', test_dir)
-        
-        # Check if file was created
-        assert os.path.exists(f'{test_dir}AAPL.csv')
-        
-        # Clean up
-        if os.path.exists(f'{test_dir}AAPL.csv'):
-            os.remove(f'{test_dir}AAPL.csv')
-        os.rmdir(test_dir)
-        
-    def test_fetch_data_invalid_ticker(self):
+    def _sample_df(self):
+        dates = pd.date_range(start='2023-01-02', periods=7, freq='B')
+        return pd.DataFrame(
+            {
+                'Open': [100 + i for i in range(len(dates))],
+                'High': [101 + i for i in range(len(dates))],
+                'Low': [99 + i for i in range(len(dates))],
+                'Close': [100 + i for i in range(len(dates))],
+                'Adj Close': [100 + i for i in range(len(dates))],
+                'Volume': [1000 for _ in dates],
+            },
+            index=dates,
+        )
+
+    def test_fetch_data_success(self, monkeypatch, tmp_path):
+        """Test successful data fetching with missing-date fill."""
+        sample_df = self._sample_df()
+
+        def fake_download(*args, **kwargs):
+            return sample_df
+
+        monkeypatch.setattr(fetch_data_module.yf, "download", fake_download)
+
+        target_dir = tmp_path / "raw"
+        success = fetch_data(['AAPL'], '2023-01-01', '2023-01-15', str(target_dir))
+
+        saved_file = target_dir / "AAPL.csv"
+        assert success is True
+        assert saved_file.exists()
+
+        saved_df = pd.read_csv(saved_file, index_col=0, parse_dates=True)
+        expected_index = pd.date_range(start='2023-01-01', end='2023-01-15', freq='B')
+        assert list(saved_df.index) == list(expected_index)
+        assert saved_df.isna().sum().sum() == 0
+
+    def test_fetch_data_invalid_ticker(self, monkeypatch, tmp_path):
         """Test behavior with invalid ticker."""
-        test_dir = './test_data/'
-        os.makedirs(test_dir, exist_ok=True)
-        
-        # This should not crash, but may return False
-        result = fetch_data(['INVALID_TICKER_XYZ'], '2023-01-01', '2023-01-31', test_dir)
-        
-        # Clean up
-        if os.path.exists(test_dir):
-            import shutil
-            shutil.rmtree(test_dir)
+
+        def failing_download(*args, **kwargs):
+            raise ValueError("Ticker not found")
+
+        monkeypatch.setattr(fetch_data_module.yf, "download", failing_download)
+
+        result = fetch_data(['INVALID_TICKER_XYZ'], '2023-01-01', '2023-01-31', str(tmp_path))
+        assert result is False
 
 class TestFeatureEngineering:
     def create_sample_data(self):
