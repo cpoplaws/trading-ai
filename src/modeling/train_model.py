@@ -1,6 +1,7 @@
 """Model training module for ML-based trading signal prediction."""
 import os
 from typing import Dict, Optional, Tuple
+from datetime import datetime
 
 import joblib
 import numpy as np
@@ -48,9 +49,16 @@ def train_model(
             # Try both uppercase and lowercase close column
             close_col = 'Close' if 'Close' in df.columns else 'close'
             if close_col in df.columns:
-                df['Target'] = (df[close_col].shift(-1) > df[close_col]).astype(int)
+                df['Target'] = np.where(
+                    df[close_col].shift(-1) > df[close_col], 'UP', 'DOWN'
+                )
             else:
                 raise ValueError("No 'Close' or 'close' column found for target creation")
+        else:
+            target_col = 'Target' if 'Target' in df.columns else 'target'
+            df['Target'] = df[target_col].apply(
+                lambda v: 'UP' if str(v).lower() in ['1', 'up', 'true'] else 'DOWN'
+            )
 
         # Define features (use all available technical indicators)
         feature_columns = ['SMA_10', 'SMA_30', 'RSI_14', 'Volatility_20']
@@ -69,7 +77,7 @@ def train_model(
         
         # Prepare data
         X = df[available_features].dropna()
-        y = df.loc[X.index, 'Target']
+        y = df.loc[X.index, 'Target'].astype(str).str.upper()
         
         if len(X) == 0:
             raise ValueError("No valid samples after removing NaN values")
@@ -105,20 +113,17 @@ def train_model(
         logger.info(f"Classification report:\n{classification_report(y_test, y_pred)}")
 
         # Save model
-        if file_path:
-            filename = os.path.basename(file_path).split('.')[0]
-        else:
-            filename = "in_memory_model"
-            
-        model_filename = os.path.join(save_path, f"model_{filename}.joblib")
+        date_str = datetime.now().strftime("%Y%m%d")
+        model_filename = os.path.join(save_path, f"random_forest_{date_str}.joblib")
         joblib.dump(model, model_filename)
         
         # Also save feature list for inference
-        feature_filename = os.path.join(save_path, f"features_{filename}.joblib")
+        feature_filename = os.path.join(save_path, f"random_forest_features_{date_str}.joblib")
         joblib.dump(available_features, feature_filename)
         
         logger.info(f"Model saved to {model_filename}")
         logger.info(f"Features saved to {feature_filename}")
+        logger.info("Model training completed successfully.")
         
         return True, metrics
         
@@ -141,6 +146,8 @@ def load_model_and_features(model_path: str) -> Tuple[Optional[object], Optional
         
         # Try to load corresponding features
         feature_path = model_path.replace('model_', 'features_')
+        if feature_path == model_path:
+            feature_path = model_path.replace('random_forest_', 'random_forest_features_')
         try:
             features = joblib.load(feature_path)
         except FileNotFoundError:
