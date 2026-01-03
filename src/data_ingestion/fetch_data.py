@@ -95,7 +95,7 @@ def _ensure_no_missing_dates(df: pd.DataFrame, start_date: str, end_date: str) -
 
         price_columns = [col for col in ["Open", "High", "Low", "Close", "Adj Close"] if col in cleaned.columns]
         if price_columns:
-            # Allow limited fills from both directions; when values exist on both sides this can patch gaps up to 2 * MAX_FILL_DAYS.
+            # Fill small gaps using nearest previous and next values; applying limits in both directions can cover up to 2 * MAX_FILL_DAYS consecutive missing rows when data exists on either side.
             cleaned[price_columns] = cleaned[price_columns].ffill(limit=MAX_FILL_DAYS).bfill(limit=MAX_FILL_DAYS)
         if "Volume" in cleaned.columns:
             cleaned["Volume"] = cleaned["Volume"].fillna(0)
