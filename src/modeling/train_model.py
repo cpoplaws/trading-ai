@@ -1,5 +1,6 @@
 """Model training module for ML-based trading signal prediction."""
 import os
+import glob
 from typing import Dict, Optional, Tuple
 from datetime import datetime
 
@@ -58,6 +59,8 @@ def train_model(
             target_col = 'Target' if 'Target' in df.columns else 'target'
             target_values = df[target_col].astype(str).str.strip().str.upper()
             df['Target'] = np.where(target_values.isin(['1', 'UP', 'TRUE']), 'UP', 'DOWN')
+
+        df = df.dropna(subset=['Target'])
 
         # Define features (use all available technical indicators)
         feature_columns = ['SMA_10', 'SMA_30', 'RSI_14', 'Volatility_20']
@@ -156,6 +159,20 @@ def load_model_and_features(model_path: str) -> Tuple[Optional[object], Optional
                 break
             except FileNotFoundError:
                 continue
+        if features is None:
+            fallback_patterns = [
+                os.path.join(os.path.dirname(model_path), "random_forest_features_*.joblib"),
+                os.path.join(os.path.dirname(model_path), "features_*.joblib"),
+            ]
+            for pattern in fallback_patterns:
+                for feature_path in glob.glob(pattern):
+                    try:
+                        features = joblib.load(feature_path)
+                        break
+                    except FileNotFoundError:
+                        continue
+                if features is not None:
+                    break
         if features is None:
             logger.warning(f"Feature file not found for model: {model_path}")
             
