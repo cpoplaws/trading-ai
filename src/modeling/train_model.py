@@ -17,6 +17,13 @@ logger = setup_logger(__name__)
 TARGET_UP_VALUES = {'1', 'UP', 'TRUE'}
 
 
+def _safe_mtime(path: str) -> float:
+    try:
+        return os.path.getmtime(path)
+    except OSError:
+        return 0
+
+
 def train_model(
     df: Optional[pd.DataFrame] = None,
     file_path: Optional[str] = None, 
@@ -167,15 +174,9 @@ def load_model_and_features(model_path: str) -> Tuple[Optional[object], Optional
                 os.path.join(os.path.dirname(model_path), "features_*.joblib"),
             ]
             for pattern in fallback_patterns:
-                def safe_mtime(path: str) -> float:
-                    try:
-                        return os.path.getmtime(path)
-                    except OSError:
-                        return 0
-
                 candidates = sorted(
                     glob.glob(pattern),
-                    key=safe_mtime,
+                    key=_safe_mtime,
                     reverse=True,
                 )
                 for feature_path in candidates:
