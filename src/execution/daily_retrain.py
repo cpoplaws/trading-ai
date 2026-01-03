@@ -11,7 +11,7 @@ try:
     import schedule  # type: ignore
 except ImportError:
     schedule = None
-HAS_SCHEDULE = schedule is not None
+SCHEDULE_AVAILABLE = schedule is not None
 
 # Add project root to Python path
 current_dir = os.path.dirname(os.path.abspath(__file__))
@@ -48,7 +48,15 @@ def resolve_start_date(start_date: Optional[str], window_days: int, current_time
 
 
 def _calculate_sleep_duration(next_run: Optional[float]) -> float:
-    """Clamp the schedule idle time to a reasonable sleep duration."""
+    """
+    Clamp the schedule idle time to a reasonable sleep duration.
+    
+    Args:
+        next_run: Seconds until the next scheduled task as reported by `schedule.idle_seconds()`.
+    
+    Returns:
+        Sleep duration bounded between SCHEDULE_MIN_SLEEP and SCHEDULE_MAX_SLEEP.
+    """
     if next_run is None:
         return float(SCHEDULE_DEFAULT_SLEEP)
     return float(max(SCHEDULE_MIN_SLEEP, min(next_run, SCHEDULE_MAX_SLEEP)))
@@ -87,7 +95,7 @@ def schedule_daily_retrain(run_time: str = "09:00", tickers: Optional[List[str]]
     """
     Schedule the daily retrain job at a specific time.
     """
-    if not HAS_SCHEDULE:
+    if not SCHEDULE_AVAILABLE:
         raise ImportError("The 'schedule' library is required for scheduled retraining. Install it via requirements.txt.")
 
     logger.info(f"Scheduling daily retrain at {run_time} for tickers: {tickers or ['AAPL', 'MSFT', 'SPY']}")
@@ -185,6 +193,7 @@ def daily_pipeline(
                 continue
                 
             logger.info(f"Model training metrics for {ticker}: {metrics}")
+            # Training succeeded; preserve the newly trained model for daily history
             if os.path.exists(model_path):
                 archive_model(model_path, ticker, run_date=datetime.utcnow())
             else:
