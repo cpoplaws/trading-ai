@@ -9,7 +9,6 @@ from datetime import datetime
 from typing import Dict, List, Optional
 
 import requests
-from dotenv import load_dotenv
 
 from execution.broker_interface import (
     Account,
@@ -21,9 +20,9 @@ from execution.broker_interface import (
     Position,
     TimeInForce,
 )
+from utils.api_keys import APIKeys
 from utils.logger import setup_logger
 
-load_dotenv()
 logger = setup_logger(__name__)
 
 
@@ -45,8 +44,9 @@ class AlpacaBroker(BrokerInterface):
         self.connected = False
 
         # Load API credentials from environment
-        self.api_key = os.getenv("ALPACA_API_KEY")
-        self.secret_key = os.getenv("ALPACA_SECRET_KEY")
+        api_keys = APIKeys.load()
+        self.api_key = api_keys.alpaca_api_key
+        self.secret_key = api_keys.alpaca_secret_key
 
         if not self.api_key or not self.secret_key:
             logger.warning("Alpaca API keys not found in environment variables")
@@ -54,10 +54,10 @@ class AlpacaBroker(BrokerInterface):
 
         # Set base URLs
         if paper_trading:
-            self.base_url = "https://paper-api.alpaca.markets"
+            self.base_url = api_keys.alpaca_base_url or "https://paper-api.alpaca.markets"
             self.data_url = "https://data.alpaca.markets"
         else:
-            self.base_url = "https://api.alpaca.markets"
+            self.base_url = api_keys.alpaca_base_url or "https://api.alpaca.markets"
             self.data_url = "https://data.alpaca.markets"
 
         # Create session with auth headers
