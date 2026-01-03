@@ -7,6 +7,10 @@ import shutil
 import time
 from datetime import datetime, timedelta
 from typing import List, Optional
+try:
+    import schedule  # type: ignore
+except ImportError:
+    schedule = None
 
 # Add project root to Python path
 current_dir = os.path.dirname(os.path.abspath(__file__))
@@ -27,6 +31,11 @@ import pandas as pd
 # Set up logging
 logger = setup_logger("daily_pipeline", "INFO")
 DEFAULT_LOOKBACK_DAYS = 365
+SCHEDULE_DEFAULT_SLEEP = 5
+SCHEDULE_MIN_SLEEP = 1
+SCHEDULE_MAX_SLEEP = 60
+MODEL_PATH_TEMPLATE = "./models/model_{ticker}.joblib"
+SIGNAL_FILE_TEMPLATE = "./signals/{ticker}_signals.csv"
 
 
 def _resolve_start_date(start_date: Optional[str], window_days: int, current_time: Optional[datetime] = None) -> str:
@@ -70,7 +79,8 @@ def schedule_daily_retrain(run_time: str = "09:00", tickers: Optional[List[str]]
     """
     Schedule the daily retrain job at a specific time.
     """
-    import schedule
+    if schedule is None:
+        raise ImportError("The 'schedule' library is required for scheduled retraining. Install it via requirements.txt.")
 
     logger.info(f"Scheduling daily retrain at {run_time} for tickers: {tickers or ['AAPL', 'MSFT', 'SPY']}")
     schedule.every().day.at(run_time).do(daily_pipeline, tickers=tickers, window_days=window_days)
@@ -79,7 +89,7 @@ def schedule_daily_retrain(run_time: str = "09:00", tickers: Optional[List[str]]
         while True:
             schedule.run_pending()
             next_run = schedule.idle_seconds()
-            sleep_for = 5 if next_run is None else max(1, min(next_run, 60))
+            sleep_for = SCHEDULE_DEFAULT_SLEEP if next_run is None else max(SCHEDULE_MIN_SLEEP, min(next_run, SCHEDULE_MAX_SLEEP))
             time.sleep(sleep_for)
     except KeyboardInterrupt:
         logger.info("Stopping scheduled daily retrain loop")
@@ -153,7 +163,7 @@ def daily_pipeline(
             
             # Save processed data
             processed_path = f'./data/processed/{ticker}.csv'
-            model_path = f'./models/model_{ticker}.joblib'
+            model_path = MODEL_PATH_TEMPLATE.format(ticker=ticker)
             os.makedirs('./data/processed', exist_ok=True)
             success = fg.save_features(processed_path)
             if not success:
@@ -183,7 +193,7 @@ def daily_pipeline(
                 continue
             
             # Step 6: Analyze signals
-            signal_file = f'./signals/{ticker}_signals.csv'
+            signal_file = SIGNAL_FILE_TEMPLATE.format(ticker=ticker)
             if os.path.exists(signal_file):
                 analysis = analyze_signals(signal_file)
                 logger.info(f"Signal analysis for {ticker}: {analysis}")
