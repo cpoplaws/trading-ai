@@ -15,6 +15,7 @@ LOG_FILE_PATH = os.path.join(BASE_DIR, "logs", "data_fetch.log")
 DEFAULT_SAVE_PATH = os.path.join(BASE_DIR, "data", "raw")
 DEFAULT_RETRIES = 3
 DEFAULT_RETRY_DELAY = 2.0
+MAX_FILL_DAYS = 5
 
 logger = setup_logger(__name__, log_file=LOG_FILE_PATH)
 
@@ -54,7 +55,7 @@ def _download_with_retries(
             logger.error(
                 f"Network error fetching data for {ticker} on attempt {attempt}/{max_retries}: {exc}"
             )
-        except (ValueError, KeyError) as exc:  # pragma: no cover - defensive logging
+        except (ValueError, KeyError) as exc:  # pragma: no cover - captures provider data issues
             last_exception = exc
             logger.error(
                 f"Error fetching data for {ticker} on attempt {attempt}/{max_retries}: {exc}"
@@ -93,7 +94,7 @@ def _ensure_no_missing_dates(df: pd.DataFrame, start_date: str, end_date: str) -
 
         price_columns = [col for col in ["Open", "High", "Low", "Close", "Adj Close"] if col in cleaned.columns]
         if price_columns:
-            cleaned[price_columns] = cleaned[price_columns].ffill(limit=5).bfill(limit=5)
+            cleaned[price_columns] = cleaned[price_columns].ffill(limit=MAX_FILL_DAYS).bfill(limit=MAX_FILL_DAYS)
         if "Volume" in cleaned.columns:
             cleaned["Volume"] = cleaned["Volume"].fillna(0)
 
