@@ -26,7 +26,10 @@ def _download_with_retries(
     max_retries: int = DEFAULT_RETRIES,
     retry_delay: float = DEFAULT_RETRY_DELAY,
 ) -> pd.DataFrame:
-    """Download ticker data with retry logic."""
+    """Download ticker data with retry logic.
+
+    Falls back to a generic exception handler to capture unexpected provider errors.
+    """
     last_exception: Optional[Exception] = None
 
     for attempt in range(1, max_retries + 1):
@@ -67,7 +70,10 @@ def _download_with_retries(
 
 
 def _ensure_no_missing_dates(df: pd.DataFrame, start_date: str, end_date: str) -> pd.DataFrame:
-    """Ensure there are no missing business days in the returned dataset."""
+    """Ensure there are no missing business days in the returned dataset.
+
+    Uses pandas business-day frequency ('B'), which excludes weekends.
+    """
     if df.empty:
         return df
 

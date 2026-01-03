@@ -19,8 +19,14 @@ from strategy.simple_strategy import generate_signals
 from utils.logger import setup_logger
 
 class TestDataIngestion:
+    def _date_bounds(self):
+        start_date = (pd.Timestamp.today().normalize() - pd.tseries.offsets.BDay(10)).date()
+        end_date = (pd.Timestamp(start_date) + pd.tseries.offsets.BDay(9)).date()
+        return start_date, end_date
+
     def _sample_df(self):
-        dates = pd.date_range(start='2023-01-02', periods=7, freq='B')
+        start_date, _ = self._date_bounds()
+        dates = pd.date_range(start=start_date, periods=7, freq='B')
         return pd.DataFrame(
             {
                 'Open': [100 + i for i in range(len(dates))],
@@ -42,15 +48,25 @@ class TestDataIngestion:
 
         monkeypatch.setattr(fetch_data_module.yf, "download", fake_download)
 
+        start_date, end_date = self._date_bounds()
         target_dir = tmp_path / "raw"
-        success = fetch_data(['AAPL'], '2023-01-01', '2023-01-15', str(target_dir))
+        success = fetch_data(
+            ['AAPL'],
+            start_date.strftime('%Y-%m-%d'),
+            end_date.strftime('%Y-%m-%d'),
+            str(target_dir),
+        )
 
         saved_file = target_dir / "AAPL.csv"
         assert success is True
         assert saved_file.exists()
 
         saved_df = pd.read_csv(saved_file, index_col=0, parse_dates=True)
-        expected_index = pd.date_range(start='2023-01-01', end='2023-01-15', freq='B')
+        expected_index = pd.date_range(
+            start=start_date.strftime('%Y-%m-%d'),
+            end=end_date.strftime('%Y-%m-%d'),
+            freq='B',
+        )
         assert list(saved_df.index) == list(expected_index)
         assert saved_df.isna().sum().sum() == 0
 
