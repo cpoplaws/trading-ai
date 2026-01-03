@@ -151,8 +151,6 @@ def load_model_and_features(model_path: str) -> Tuple[Optional[object], Optional
         ]
         features = None
         for feature_path in feature_candidates:
-            if feature_path == model_path:
-                continue
             try:
                 features = joblib.load(feature_path)
                 break
