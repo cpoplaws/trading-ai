@@ -15,6 +15,10 @@ from utils.logger import setup_logger
 
 logger = setup_logger(__name__)
 TARGET_UP_VALUES = {'1', 'UP', 'TRUE'}
+FEATURE_FALLBACK_PATTERNS = [
+    "random_forest_features_*.joblib",
+    "features_*.joblib",
+]
 
 
 def _safe_mtime(path: str) -> float:
@@ -26,8 +30,10 @@ def _safe_mtime(path: str) -> float:
 
 def train_model(
     df: Optional[pd.DataFrame] = None,
-    file_path: Optional[str] = None, 
-                save_path: str = './models/', test_size: float = 0.2) -> Tuple[bool, dict]:
+    file_path: Optional[str] = None,
+    save_path: str = './models/',
+    test_size: float = 0.2,
+) -> Tuple[bool, dict]:
     """
     Train a machine learning model for trading signals.
     
@@ -156,37 +162,27 @@ def load_model_and_features(model_path: str) -> Tuple[Optional[object], Optional
         model = joblib.load(model_path)
         
         # Try to load corresponding features
+        base_dir = os.path.dirname(model_path)
         feature_candidates = [
             model_path.replace('model_', 'features_'),
             model_path.replace('random_forest_', 'random_forest_features_'),
-            os.path.join(os.path.dirname(model_path), f"features_{os.path.basename(model_path)}"),
+            os.path.join(base_dir, f"features_{os.path.basename(model_path)}"),
         ]
         features = None
+        for pattern in FEATURE_FALLBACK_PATTERNS:
+            feature_candidates.extend(
+                sorted(
+                    glob.glob(os.path.join(base_dir, pattern)),
+                    key=_safe_mtime,
+                    reverse=True,
+                )
+            )
         for feature_path in feature_candidates:
             try:
                 features = joblib.load(feature_path)
                 break
             except FileNotFoundError:
                 continue
-        if features is None:
-            fallback_patterns = [
-                os.path.join(os.path.dirname(model_path), "random_forest_features_*.joblib"),
-                os.path.join(os.path.dirname(model_path), "features_*.joblib"),
-            ]
-            for pattern in fallback_patterns:
-                candidates = sorted(
-                    glob.glob(pattern),
-                    key=_safe_mtime,
-                    reverse=True,
-                )
-                for feature_path in candidates:
-                    try:
-                        features = joblib.load(feature_path)
-                        break
-                    except FileNotFoundError:
-                        continue
-                if features is not None:
-                    break
         if features is None:
             logger.warning(f"Feature file not found for model: {model_path}")
             
