@@ -47,7 +47,7 @@ def test_run_strategy_evaluation_logs_start_and_end(caplog):
 
     called = {"ran": False}
 
-    def fake_evaluator():
+    def fake_evaluator(signals_dir: str):
         called["ran"] = True
         return True
 

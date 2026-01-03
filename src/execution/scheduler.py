@@ -68,7 +68,8 @@ def _evaluate_existing_signals(signals_dir: str = SIGNALS_DIR) -> bool:
     for signal_file in signal_files:
         try:
             analysis = analyze_signals(str(signal_file))
-            logger.info(f"Strategy evaluation for {signal_file.name}: {analysis}")
+            logger.info("Strategy evaluation completed for %s", signal_file.name)
+            logger.debug("Analysis details for %s: %s", signal_file.name, analysis)
             processed_any = True
         except Exception:
             logger.exception(f"Error evaluating signal file {signal_file.name}")
@@ -77,7 +78,8 @@ def _evaluate_existing_signals(signals_dir: str = SIGNALS_DIR) -> bool:
 
 
 def run_strategy_evaluation(
-    evaluation_fn: Optional[Callable[[], bool]] = None,
+    evaluation_fn: Optional[Callable[[str], bool]] = None,
+    signals_dir: str = SIGNALS_DIR,
 ) -> bool:
     """
     Execute strategy evaluation and log lifecycle events.
@@ -88,7 +90,7 @@ def run_strategy_evaluation(
     evaluation_callable = evaluation_fn or _evaluate_existing_signals
 
     try:
-        success = evaluation_callable()
+        success = evaluation_callable(signals_dir)
         if success:
             logger.info("Strategy evaluation completed successfully")
         else:
