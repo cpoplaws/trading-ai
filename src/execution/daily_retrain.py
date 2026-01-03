@@ -11,6 +11,7 @@ try:
     import schedule  # type: ignore
 except ImportError:
     schedule = None
+HAS_SCHEDULE = schedule is not None
 
 # Add project root to Python path
 current_dir = os.path.dirname(os.path.abspath(__file__))
@@ -38,12 +39,19 @@ MODEL_PATH_TEMPLATE = "./models/model_{ticker}.joblib"
 SIGNAL_FILE_TEMPLATE = "./signals/{ticker}_signals.csv"
 
 
-def _resolve_start_date(start_date: Optional[str], window_days: int, current_time: Optional[datetime] = None) -> str:
+def resolve_start_date(start_date: Optional[str], window_days: int, current_time: Optional[datetime] = None) -> str:
     """Return an explicit start_date using a rolling lookback window when not provided."""
     now = current_time or datetime.utcnow()
     if start_date:
         return start_date
     return (now - timedelta(days=window_days)).strftime('%Y-%m-%d')
+
+
+def _calculate_sleep_duration(next_run: Optional[float]) -> float:
+    """Clamp the schedule idle time to a reasonable sleep duration."""
+    if next_run is None:
+        return float(SCHEDULE_DEFAULT_SLEEP)
+    return float(max(SCHEDULE_MIN_SLEEP, min(next_run, SCHEDULE_MAX_SLEEP)))
 
 
 def archive_model(model_path: str, ticker: str, run_date: Optional[datetime] = None, archive_dir: Optional[str] = None) -> Optional[str]:
@@ -79,7 +87,7 @@ def schedule_daily_retrain(run_time: str = "09:00", tickers: Optional[List[str]]
     """
     Schedule the daily retrain job at a specific time.
     """
-    if schedule is None:
+    if not HAS_SCHEDULE:
         raise ImportError("The 'schedule' library is required for scheduled retraining. Install it via requirements.txt.")
 
     logger.info(f"Scheduling daily retrain at {run_time} for tickers: {tickers or ['AAPL', 'MSFT', 'SPY']}")
@@ -89,8 +97,7 @@ def schedule_daily_retrain(run_time: str = "09:00", tickers: Optional[List[str]]
         while True:
             schedule.run_pending()
             next_run = schedule.idle_seconds()
-            sleep_for = SCHEDULE_DEFAULT_SLEEP if next_run is None else max(SCHEDULE_MIN_SLEEP, min(next_run, SCHEDULE_MAX_SLEEP))
-            time.sleep(sleep_for)
+            time.sleep(_calculate_sleep_duration(next_run))
     except KeyboardInterrupt:
         logger.info("Stopping scheduled daily retrain loop")
 
@@ -114,7 +121,7 @@ def daily_pipeline(
     if tickers is None:
         tickers = ['AAPL', 'MSFT', 'SPY']
     
-    start_date = _resolve_start_date(start_date, window_days)
+    start_date = resolve_start_date(start_date, window_days)
     logger.info(f"Starting daily pipeline for tickers: {tickers} (rolling window start: {start_date})")
     
     # Step 1: Fetch latest data

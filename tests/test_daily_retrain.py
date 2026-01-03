@@ -6,12 +6,12 @@ from pathlib import Path
 # Add src to path
 sys.path.append(os.path.join(os.path.dirname(__file__), "..", "src"))
 
-from execution.daily_retrain import _resolve_start_date, archive_model  # noqa: E402
+from execution.daily_retrain import archive_model, resolve_start_date  # noqa: E402
 
 
 def test_resolve_start_date_uses_rolling_window():
     fixed_now = datetime(2024, 1, 10)
-    start_date = _resolve_start_date(None, 30, current_time=fixed_now)
+    start_date = resolve_start_date(None, 30, current_time=fixed_now)
     expected_date = (fixed_now - timedelta(days=30)).strftime("%Y-%m-%d")
     assert start_date == expected_date
 
