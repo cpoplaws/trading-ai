@@ -17,7 +17,6 @@ if project_root not in sys.path:
 # Now import with relative paths
 sys.path.append(os.path.dirname(os.path.dirname(__file__)))
 
-import schedule
 from data_ingestion.fetch_data import fetch_data
 from feature_engineering.feature_generator import FeatureGenerator
 from modeling.train_model import train_model
@@ -71,13 +70,17 @@ def schedule_daily_retrain(run_time: str = "09:00", tickers: Optional[List[str]]
     """
     Schedule the daily retrain job at a specific time.
     """
+    import schedule
+
     logger.info(f"Scheduling daily retrain at {run_time} for tickers: {tickers or ['AAPL', 'MSFT', 'SPY']}")
     schedule.every().day.at(run_time).do(daily_pipeline, tickers=tickers, window_days=window_days)
 
     try:
         while True:
             schedule.run_pending()
-            time.sleep(30)
+            next_run = schedule.idle_seconds()
+            sleep_for = 5 if next_run is None else max(1, min(next_run, 60))
+            time.sleep(sleep_for)
     except KeyboardInterrupt:
         logger.info("Stopping scheduled daily retrain loop")
 
@@ -150,6 +153,7 @@ def daily_pipeline(
             
             # Save processed data
             processed_path = f'./data/processed/{ticker}.csv'
+            model_path = f'./models/model_{ticker}.joblib'
             os.makedirs('./data/processed', exist_ok=True)
             success = fg.save_features(processed_path)
             if not success:
@@ -164,7 +168,6 @@ def daily_pipeline(
                 continue
                 
             logger.info(f"Model training metrics for {ticker}: {metrics}")
-            model_path = f'./models/model_{ticker}.joblib'
             if os.path.exists(model_path):
                 archive_model(model_path, ticker, run_date=datetime.utcnow())
             else:
