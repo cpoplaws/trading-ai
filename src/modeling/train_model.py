@@ -14,6 +14,7 @@ from sklearn.model_selection import train_test_split
 from utils.logger import setup_logger
 
 logger = setup_logger(__name__)
+TARGET_UP_VALUES = {'1', 'UP', 'TRUE'}
 
 
 def train_model(
@@ -59,7 +60,7 @@ def train_model(
             target_col = 'Target' if 'Target' in df.columns else 'target'
             target_values = df[target_col].astype(str).str.strip().str.upper()
             # Normalize common truthy values to UP; everything else treated as DOWN
-            df['Target'] = np.where(target_values.isin(['1', 'UP', 'TRUE']), 'UP', 'DOWN')
+            df['Target'] = np.where(target_values.isin(TARGET_UP_VALUES), 'UP', 'DOWN')
 
         df = df.dropna(subset=['Target'])
 
@@ -166,9 +167,15 @@ def load_model_and_features(model_path: str) -> Tuple[Optional[object], Optional
                 os.path.join(os.path.dirname(model_path), "features_*.joblib"),
             ]
             for pattern in fallback_patterns:
+                def safe_mtime(path: str) -> float:
+                    try:
+                        return os.path.getmtime(path)
+                    except OSError:
+                        return 0
+
                 candidates = sorted(
                     glob.glob(pattern),
-                    key=os.path.getmtime,
+                    key=safe_mtime,
                     reverse=True,
                 )
                 for feature_path in candidates:
