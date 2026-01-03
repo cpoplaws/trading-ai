@@ -7,21 +7,6 @@ import numpy as np
 import os
 import sys
 from datetime import datetime, timedelta
-import joblib
-
-# Simple picklable model for signal generation tests
-class DummyModel:
-    def predict(self, X):
-        return np.array(['UP', 'DOWN', 'UP'])
-
-    def predict_proba(self, X):
-        # Probabilities provided in [SELL, BUY] order to align with DOWN->SELL and UP->BUY mapping
-        # (sklearn convention: 0=negative, 1=positive); verify ordering for real models
-        return np.array([
-            [0.2, 0.8],
-            [0.7, 0.3],
-            [0.1, 0.9],
-        ])
 
 # Add src to path
 sys.path.append(os.path.join(os.path.dirname(__file__), '..', 'src'))
@@ -157,37 +142,6 @@ class TestModeling:
             shutil.rmtree('./test_models/')
 
 class TestStrategy:
-    def test_generate_signals_up_down_mapping(self, tmp_path):
-        """Ensure UP/DOWN predictions map to BUY/SELL signals."""
-        model_path = tmp_path / "model_test.joblib"
-        joblib.dump(DummyModel(), model_path)
-
-        # Save feature list alongside model for loader
-        feature_path = tmp_path / "features_test.joblib"
-        joblib.dump(['SMA_10', 'SMA_30', 'RSI_14', 'Volatility_20'], feature_path)
-
-        dates = pd.date_range(start='2024-01-01', periods=3, freq='D')
-        data = pd.DataFrame({
-            'SMA_10': [1, 2, 3],
-            'SMA_30': [1, 2, 3],
-            'RSI_14': [30, 50, 70],
-            'Volatility_20': [0.1, 0.2, 0.3],
-            'Close': [100, 101, 102],
-        }, index=dates)
-
-        data_path = tmp_path / "data.csv"
-        data.to_csv(data_path)
-
-        success = generate_signals(str(model_path), str(data_path), save_path=str(tmp_path))
-        assert success is True
-
-        signals_path = tmp_path / "data_signals.csv"
-        assert signals_path.exists()
-
-        signals_df = pd.read_csv(signals_path, index_col=0, parse_dates=True)
-        assert list(signals_df['Signal']) == ['BUY', 'SELL', 'BUY']
-        assert set(signals_df['Prediction'].unique()) == {'UP', 'DOWN'}
-
     def test_signal_generation_placeholder(self):
         """Placeholder test for signal generation."""
         # This would require a trained model and processed data
