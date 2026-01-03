@@ -256,6 +256,54 @@ class MultiTimeframeAnalyzer:
         
         return signals
     
+    def aggregate_timeframe_signals(self, signals: Dict[str, Dict[str, float]]) -> Dict:
+        """
+        Aggregate signals across timeframes into a single decision.
+        
+        Args:
+            signals: Mapping of timeframe -> {'signal': str, 'confidence': float}
+            
+        Returns:
+            Dictionary with final_signal, confidence, and vote breakdown.
+        """
+        try:
+            if not signals:
+                return {'final_signal': 'HOLD', 'confidence': 0.0}
+            
+            weights = {
+                '1min': 0.1,
+                '5min': 0.2,
+                '1h': 0.3,
+                '1hour': 0.3,
+                '1d': 0.4,
+                '1day': 0.4
+            }
+            
+            vote_score = {'BUY': 0.0, 'SELL': 0.0, 'HOLD': 0.0}
+            for tf, data in signals.items():
+                weight = weights.get(tf, 0.25)
+                signal = data.get('signal', 'HOLD')
+                confidence = float(data.get('confidence', 0.5))
+                vote_score[signal] += weight * confidence
+            
+            if vote_score['BUY'] > vote_score['SELL'] and vote_score['BUY'] > vote_score['HOLD']:
+                final = 'BUY'
+                conf = vote_score['BUY']
+            elif vote_score['SELL'] > vote_score['BUY'] and vote_score['SELL'] > vote_score['HOLD']:
+                final = 'SELL'
+                conf = vote_score['SELL']
+            else:
+                final = 'HOLD'
+                conf = max(vote_score.values())
+            
+            return {
+                'final_signal': final,
+                'confidence': conf,
+                'votes': vote_score
+            }
+        except Exception:
+            return {'final_signal': 'HOLD', 'confidence': 0.0}
+    
     def combine_timeframe_signals(self, signals: Dict[str, pd.DataFrame]) -> pd.DataFrame:
         """
         Combine signals from all timeframes into a unified decision.

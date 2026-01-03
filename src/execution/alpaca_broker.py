@@ -34,7 +34,13 @@ class AlpacaBroker(BrokerInterface):
     Connects to Alpaca's trading API for paper or live trading.
     """
 
-    def __init__(self, paper_trading: bool = True):
+    def __init__(
+        self,
+        api_key: Optional[str] = None,
+        secret_key: Optional[str] = None,
+        base_url: Optional[str] = None,
+        paper_trading: bool = True,
+    ):
         """
         Initialize Alpaca broker.
         
@@ -44,16 +50,19 @@ class AlpacaBroker(BrokerInterface):
         self.paper_trading = paper_trading
         self.connected = False
 
-        # Load API credentials from environment
-        self.api_key = os.getenv("ALPACA_API_KEY")
-        self.secret_key = os.getenv("ALPACA_SECRET_KEY")
+        # Load API credentials from parameters or environment
+        self.api_key = api_key or os.getenv("ALPACA_API_KEY")
+        self.secret_key = secret_key or os.getenv("ALPACA_SECRET_KEY")
 
         if not self.api_key or not self.secret_key:
             logger.warning("Alpaca API keys not found in environment variables")
             logger.warning("Please set ALPACA_API_KEY and ALPACA_SECRET_KEY in .env file")
 
         # Set base URLs
-        if paper_trading:
+        if base_url:
+            self.base_url = base_url
+            self.data_url = "https://data.alpaca.markets"
+        elif paper_trading:
             self.base_url = "https://paper-api.alpaca.markets"
             self.data_url = "https://data.alpaca.markets"
         else:
@@ -172,15 +181,20 @@ class AlpacaBroker(BrokerInterface):
     def place_order(
         self,
         symbol: str,
-        qty: float,
-        side: OrderSide,
+        qty: float = None,
+        side: OrderSide = OrderSide.BUY,
         order_type: OrderType = OrderType.MARKET,
         time_in_force: TimeInForce = TimeInForce.DAY,
         limit_price: Optional[float] = None,
         stop_price: Optional[float] = None,
+        quantity: Optional[float] = None,
     ) -> Optional[Order]:
         """Place an order."""
         try:
+            qty = quantity if quantity is not None else qty
+            if qty is None:
+                logger.error("Quantity must be provided for order placement")
+                return None
             order_data = {
                 "symbol": symbol,
                 "qty": qty,
@@ -195,14 +209,15 @@ class AlpacaBroker(BrokerInterface):
             if stop_price is not None:
                 order_data["stop_price"] = stop_price
 
-            response = self.session.post(f"{self.base_url}/v2/orders", json=order_data)
+            response = requests.post(f"{self.base_url}/v2/orders", json=order_data, headers=self.session.headers)
 
             if response.status_code == 200 or response.status_code == 201:
                 order_resp = response.json()
                 logger.info(
                     f"✅ Order placed: {side.value.upper()} {qty} {symbol} @ {order_type.value}"
                 )
-                return self._parse_order(order_resp)
+                parsed = self._parse_order(order_resp)
+                return vars(parsed)
             else:
                 logger.error(f"❌ Order failed: {response.text}")
                 return None
@@ -277,18 +292,20 @@ class AlpacaBroker(BrokerInterface):
 
     def _parse_order(self, order_data: Dict) -> Order:
         """Parse order data from API response."""
+        time_in_force_value = order_data.get("time_in_force", TimeInForce.DAY.value)
+        status_value = order_data.get("status", OrderStatus.NEW.value)
         return Order(
             order_id=order_data["id"],
             symbol=order_data["symbol"],
-            qty=float(order_data["qty"]),
-            side=OrderSide(order_data["side"]),
-            order_type=OrderType(order_data["type"]),
-            time_in_force=TimeInForce(order_data["time_in_force"]),
-            status=OrderStatus(order_data["status"]),
-            created_at=datetime.fromisoformat(order_data["created_at"].replace("Z", "+00:00")),
+            qty=float(order_data.get("qty", 0)),
+            side=OrderSide(order_data.get("side", OrderSide.BUY.value)),
+            order_type=OrderType(order_data.get("type", OrderType.MARKET.value)),
+            time_in_force=TimeInForce(time_in_force_value),
+            status=OrderStatus(status_value),
+            created_at=datetime.fromisoformat(order_data.get("created_at", datetime.utcnow().isoformat()).replace("Z", "+00:00")),
             filled_qty=float(order_data.get("filled_qty", 0)),
             filled_avg_price=float(order_data.get("filled_avg_price", 0))
-            if order_data.get("filled_avg_price")
+            if order_data.get("filled_avg_price") is not None
             else 0.0,
             limit_price=float(order_data["limit_price"]) if order_data.get("limit_price") else None,
             stop_price=float(order_data["stop_price"]) if order_data.get("stop_price") else None,

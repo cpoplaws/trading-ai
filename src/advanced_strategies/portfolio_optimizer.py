@@ -43,7 +43,7 @@ class PortfolioOptimizer:
         """
         try:
             if len(returns) < 10:
-                return 0.1  # Default small position
+                return float(0.1)  # Default small position
             
             # Calculate win rate and average win/loss
             positive_returns = returns[returns > 0]
@@ -65,10 +65,10 @@ class PortfolioOptimizer:
             p = win_rate * confidence  # Adjust for model confidence
             q = 1 - p
             
-            kelly_fraction = (b * p - q) / b
+            kelly_fraction = float((b * p - q) / b)
             
             # Apply safety constraints
-            kelly_fraction = max(0, min(kelly_fraction, 0.25))  # Cap at 25%
+            kelly_fraction = float(max(0.0, min(kelly_fraction, 0.25)))  # Cap at 25%
             
             logger.info(f"Kelly Criterion: {kelly_fraction:.3f} (win_rate: {win_rate:.3f}, b: {b:.3f})")
             return kelly_fraction
@@ -92,22 +92,23 @@ class PortfolioOptimizer:
             Mean reversion analysis results
         """
         try:
-            if len(prices) < lookback + 10:
-                return {'signal': 'HOLD', 'z_score': 0, 'confidence': 0}
+            effective_lookback = min(len(prices), lookback)
+            if effective_lookback < 2:
+                return {'signal': 'HOLD', 'z_score': 0.0, 'confidence': 0.0}
             
             # Calculate rolling mean and std
-            rolling_mean = prices.rolling(lookback).mean()
-            rolling_std = prices.rolling(lookback).std()
+            rolling_mean = prices.rolling(effective_lookback).mean()
+            rolling_std = prices.rolling(effective_lookback).std()
             
             # Calculate Z-score
             current_price = prices.iloc[-1]
             recent_mean = rolling_mean.iloc[-1]
             recent_std = rolling_std.iloc[-1]
             
-            if recent_std == 0:
-                z_score = 0
+            if recent_std == 0 or np.isnan(recent_std):
+                z_score = 0.0
             else:
-                z_score = (current_price - recent_mean) / recent_std
+                z_score = float((current_price - recent_mean) / recent_std)
             
             # Generate signals
             if z_score > threshold:
