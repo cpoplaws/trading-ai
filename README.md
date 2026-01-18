@@ -6,6 +6,8 @@ Welcome to the Trading-AI Project — an autonomous, adaptive AI-driven trading 
 
 Build a scalable, modular AI trading system that combines machine learning, real-time market data, sentiment analysis, and macroeconomic indicators for intelligent automated trading decisions.
 
+> **📖 New Contributors?** Check out our [Branch Management Documentation Index](BRANCH_DOCS_INDEX.md) for a complete guide to contributing, branch workflow, and project standards.
+
 ## 🚀 Quick Start
 
 ### Launch the Dashboard
@@ -690,6 +692,8 @@ See [CONTRIBUTING.md](CONTRIBUTING.md) for detailed guidelines on coding standar
 
 ## 📚 Documentation
 
+> **📖 Documentation Index**: See [BRANCH_DOCS_INDEX.md](BRANCH_DOCS_INDEX.md) for a complete navigation guide to all documentation.
+
 ### Getting Started
 - **[QUICKSTART.md](QUICKSTART.md)** - Quick setup guide
 - **[GETTING_STARTED.md](GETTING_STARTED.md)** - Detailed setup walkthrough
@@ -698,6 +702,9 @@ See [CONTRIBUTING.md](CONTRIBUTING.md) for detailed guidelines on coding standar
 ### Development & Contributing
 - **[CONTRIBUTING.md](CONTRIBUTING.md)** - Contribution guidelines
 - **[BRANCH_MANAGEMENT.md](BRANCH_MANAGEMENT.md)** - Branching strategy & workflow
+- **[BRANCH_QUICK_REF.md](BRANCH_QUICK_REF.md)** - Quick reference for branch commands
+- **[BRANCH_VISUAL_GUIDE.md](BRANCH_VISUAL_GUIDE.md)** - Visual branch flow diagrams
+- **[BRANCH_STRATEGY_RECOMMENDATIONS.md](BRANCH_STRATEGY_RECOMMENDATIONS.md)** - Implementation recommendations
 
 ### Project Reports
 - **[AUDIT_REPORT.md](AUDIT_REPORT.md)** - Code quality audit results
