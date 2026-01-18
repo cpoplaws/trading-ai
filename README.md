@@ -672,21 +672,41 @@ strategies.strategy_weights = {
 
 ## 🤝 Contributing
 
+We welcome contributions! Please see our detailed contribution guidelines:
+
+- **[CONTRIBUTING.md](CONTRIBUTING.md)** - Complete contribution guide
+- **[BRANCH_MANAGEMENT.md](BRANCH_MANAGEMENT.md)** - Branching strategy & workflow
+
+### Quick Start for Contributors
+
 1. Fork the repository
-2. Create feature branch: `git checkout -b feature/amazing-feature`
-3. Follow code style in existing modules
+2. Create feature branch: `git checkout -b feature/phase<N>-description`
+3. Follow code style guidelines (Black, Ruff, mypy)
 4. Add tests for new functionality
 5. Update documentation
-6. Submit pull request
+6. Submit pull request to `develop` branch
+
+See [CONTRIBUTING.md](CONTRIBUTING.md) for detailed guidelines on coding standards, testing, and PR process.
 
 ## 📚 Documentation
 
+### Getting Started
 - **[QUICKSTART.md](QUICKSTART.md)** - Quick setup guide
+- **[GETTING_STARTED.md](GETTING_STARTED.md)** - Detailed setup walkthrough
 - **[CODESPACES.md](CODESPACES.md)** - GitHub Codespaces guide
+
+### Development & Contributing
+- **[CONTRIBUTING.md](CONTRIBUTING.md)** - Contribution guidelines
+- **[BRANCH_MANAGEMENT.md](BRANCH_MANAGEMENT.md)** - Branching strategy & workflow
+
+### Project Reports
 - **[AUDIT_REPORT.md](AUDIT_REPORT.md)** - Code quality audit results
 - **[SECURITY_REPORT.md](SECURITY_REPORT.md)** - Security analysis & scorecard
 - **[FIXES.md](FIXES.md)** - Recent improvements & fixes
+
+### Advanced Features
 - **[ADVANCED_STRATEGIES_SUMMARY.md](ADVANCED_STRATEGIES_SUMMARY.md)** - Strategies overview
+- **[VIRTUALS_INTEGRATION.md](VIRTUALS_INTEGRATION.md)** - Virtuals Protocol integration roadmap
 
 **Phase Guides:** See `/docs/phase_guides/` for detailed Phase Execution Guides.
 
