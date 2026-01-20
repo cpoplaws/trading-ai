@@ -12,7 +12,6 @@ Demonstrates the complete paper trading infrastructure for blockchain assets:
 Run this to test the complete paper trading system on historical crypto data.
 """
 import sys
-import os
 from pathlib import Path
 from datetime import datetime, timedelta
 

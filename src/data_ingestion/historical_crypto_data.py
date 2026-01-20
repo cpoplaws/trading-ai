@@ -5,7 +5,7 @@ Fetches and processes historical price data for crypto assets across multiple
 sources and chains for use in backtesting and analysis.
 """
 import logging
-from typing import Dict, List, Optional, Tuple
+from typing import Dict, List, Optional
 from datetime import datetime, timedelta
 import pandas as pd
 import numpy as np
@@ -76,9 +76,6 @@ class HistoricalCryptoDataFetcher:
     ) -> Optional[pd.DataFrame]:
         """Fetch data from Binance API."""
         try:
-            # Calculate number of candles needed
-            days = (end_date - start_date).days
-            
             # Fetch klines in chunks (Binance has 1000 limit per request)
             all_klines = []
             current_date = start_date

@@ -4,7 +4,7 @@ Alerting system for Telegram, Discord, and Slack notifications.
 import os
 import logging
 import requests
-from typing import Dict, List, Optional, Any
+from typing import Dict, List, Optional
 from datetime import datetime
 from dotenv import load_dotenv
 

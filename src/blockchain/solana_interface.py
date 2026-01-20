@@ -3,7 +3,7 @@ Solana blockchain interface.
 """
 import os
 import logging
-from typing import Dict, Optional, Any
+from typing import Optional, Any
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -54,7 +54,7 @@ class SolanaInterface:
         try:
             response = self.client.get_health()
             return response.get('result') == 'ok'
-        except:
+        except Exception:
             return False
     
     def get_balance(self, address: str, token_mint: Optional[str] = None) -> float:

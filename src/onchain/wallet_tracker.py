@@ -4,7 +4,6 @@ Wallet tracker for monitoring whale wallets and smart money.
 import logging
 from typing import Dict, List, Optional, Any
 from datetime import datetime
-from web3 import Web3
 
 logger = logging.getLogger(__name__)
 
