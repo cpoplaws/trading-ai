@@ -179,8 +179,21 @@ class OptionsStrategy:
             logger.error(f"Error calculating implied volatility: {e}")
             return 0.2  # Default volatility
     
-    def bull_call_spread(self, S: float, K_long: float, K_short: float, 
-                        T: float, sigma: float, quantity: int = 1) -> Dict:
+    def bull_call_spread(
+        self,
+        S: float = None,
+        K_long: float = None,
+        K_short: float = None,
+        T: float = None,
+        sigma: float = None,
+        quantity: int = 1,
+        *,
+        current_price: float = None,
+        lower_strike: float = None,
+        upper_strike: float = None,
+        time_to_expiry: float = None,
+        volatility: float = None,
+    ) -> Dict:
         """
         Analyze bull call spread strategy.
         
@@ -196,6 +209,18 @@ class OptionsStrategy:
             Bull call spread analysis
         """
         try:
+            # Support keyword arguments used in tests/demos
+            if current_price is not None:
+                S = current_price
+            if lower_strike is not None:
+                K_long = lower_strike
+            if upper_strike is not None:
+                K_short = upper_strike
+            if time_to_expiry is not None:
+                T = time_to_expiry
+            if volatility is not None:
+                sigma = volatility
+
             r = self.risk_free_rate
             
             # Calculate option prices
@@ -321,8 +346,19 @@ class OptionsStrategy:
             logger.error(f"Error analyzing bear put spread: {e}")
             return {'error': str(e)}
     
-    def long_straddle(self, S: float, K: float, T: float, sigma: float, 
-                     quantity: int = 1) -> Dict:
+    def long_straddle(
+        self,
+        S: float = None,
+        K: float = None,
+        T: float = None,
+        sigma: float = None,
+        quantity: int = 1,
+        *,
+        current_price: float = None,
+        strike: float = None,
+        time_to_expiry: float = None,
+        volatility: float = None,
+    ) -> Dict:
         """
         Analyze long straddle strategy.
         
@@ -337,6 +373,15 @@ class OptionsStrategy:
             Long straddle analysis
         """
         try:
+            if current_price is not None:
+                S = current_price
+            if strike is not None:
+                K = strike
+            if time_to_expiry is not None:
+                T = time_to_expiry
+            if volatility is not None:
+                sigma = volatility
+
             r = self.risk_free_rate
             
             # Calculate option prices
