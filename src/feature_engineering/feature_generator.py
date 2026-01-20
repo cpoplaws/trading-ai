@@ -16,10 +16,13 @@ class FeatureGenerator:
     EMA_WINDOW = 20
     RSI_WINDOW = 14
     VOL_WINDOW = 20
+    MACD_SLOW_WINDOW = 26
+    MACD_SIGNAL_WINDOW = 9
     
     @classmethod
     def max_feature_window(cls) -> int:
-        return max(cls.SMA_LONG_WINDOW, cls.EMA_WINDOW, cls.RSI_WINDOW, cls.VOL_WINDOW)
+        macd_warmup = cls.MACD_SLOW_WINDOW + cls.MACD_SIGNAL_WINDOW
+        return max(cls.SMA_LONG_WINDOW, cls.EMA_WINDOW, cls.RSI_WINDOW, cls.VOL_WINDOW, macd_warmup)
     
     @classmethod
     def warmup_rows(cls) -> int:
@@ -130,7 +133,8 @@ class FeatureGenerator:
             # Volume features (if available)
             if 'volume' in self.data.columns:
                 self.data['Volume_SMA'] = self.data['volume'].rolling(window=self.VOL_WINDOW).mean()
-                self.data['Volume_Ratio'] = self.data['volume'] / self.data['Volume_SMA']
+                volume_sma_safe = self.data['Volume_SMA'].replace(0, pd.NA)
+                self.data['Volume_Ratio'] = self.data['volume'] / volume_sma_safe
             
             warmup_cutoff = self.warmup_rows()
             post_warmup = self.data.iloc[warmup_cutoff:]
@@ -232,9 +236,16 @@ class FeatureGenerator:
     def save_features(self, save_path: Optional[str] = None, features_df: Optional[pd.DataFrame] = None) -> bool:
         """
         Save the generated features to a CSV file.
-        :param save_path: Path to save the processed DataFrame. Defaults to ./data/processed/features.csv
-        :param features_df: Optional DataFrame to save (falls back to self.data.dropna()).
-        :return: True if successful, False otherwise
+
+        When ``save_path`` is ``None``, the file is saved to the default path returned by
+        :meth:`default_save_path`, which points to the processed data directory.
+        When ``features_df`` is ``None``, the method saves ``self.data.dropna()`` instead.
+
+        :param save_path: Optional path to save the processed DataFrame. If ``None``,
+            uses :meth:`default_save_path` to determine the output path.
+        :param features_df: Optional DataFrame to save. If ``None``, ``self.data.dropna()``
+            is used as the data to be written.
+        :return: True if successful, False otherwise.
         """
         try:
             if save_path is None:

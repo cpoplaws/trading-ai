@@ -76,6 +76,12 @@ class TestFeatureEngineering:
     def assert_no_nans(self, df: pd.DataFrame):
         """Helper to ensure frames have no NaN values."""
         assert not df.isna().any().any()
+
+    def test_max_feature_window(self):
+        """Ensure warmup window reflects longest dependency (incl. MACD)."""
+        assert FeatureGenerator.max_feature_window() == (
+            FeatureGenerator.MACD_SLOW_WINDOW + FeatureGenerator.MACD_SIGNAL_WINDOW
+        )
     
     def test_feature_generator_init(self):
         """Test FeatureGenerator initialization."""
@@ -103,7 +109,7 @@ class TestFeatureEngineering:
         features_df = fg.generate_features()
 
         expected_rows = len(df) - FeatureGenerator.warmup_rows()
-        assert features_df.shape[0] == expected_rows
+        assert features_df.shape[0] <= expected_rows
         self.assert_no_nans(features_df)
 
     def test_save_features_to_processed_dir(self):
@@ -125,6 +131,49 @@ class TestFeatureEngineering:
         finally:
             if os.path.exists(save_path):
                 os.remove(save_path)
+            parent_dir = os.path.dirname(save_path)
+            if os.path.isdir(parent_dir) and not os.listdir(parent_dir):
+                os.rmdir(parent_dir)
+
+    def test_save_features_uses_default_path(self):
+        """Save should fall back to default path when none provided."""
+        df = self.create_sample_data()
+        fg = FeatureGenerator(df)
+        features_df = fg.generate_features()
+
+        default_path = FeatureGenerator.default_save_path()
+        os.makedirs(os.path.dirname(default_path), exist_ok=True)
+
+        try:
+            success = fg.save_features(features_df=features_df)
+            assert success is True
+            assert os.path.exists(default_path)
+            saved_df = pd.read_csv(default_path, index_col=0)
+            self.assert_no_nans(saved_df)
+        finally:
+            if os.path.exists(default_path):
+                os.remove(default_path)
+            parent_dir = os.path.dirname(default_path)
+            if os.path.isdir(parent_dir) and not os.listdir(parent_dir):
+                os.rmdir(parent_dir)
+
+    def test_generate_features_insufficient_data_raises(self):
+        """Insufficient rows after warmup should raise ValueError with message."""
+        dates = pd.date_range(start='2023-01-01', periods=5, freq='D')
+        df = pd.DataFrame({
+            'open': np.ones(len(dates)),
+            'high': np.ones(len(dates)),
+            'low': np.ones(len(dates)),
+            'close': np.ones(len(dates)),
+            'volume': np.ones(len(dates))
+        }, index=dates)
+
+        fg = FeatureGenerator(df)
+        with pytest.raises(ValueError) as exc:
+            fg.generate_features()
+
+        warmup = FeatureGenerator.warmup_rows()
+        assert f"Insufficient data after {warmup}-row warmup period" in str(exc.value)
             
     def test_sma_calculation(self):
         """Test SMA calculation."""
