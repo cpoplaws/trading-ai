@@ -3,6 +3,7 @@ Integration tests for broker interface and trading system.
 Tests use mocked API responses to validate broker operations.
 """
 
+import json
 import os
 import sys
 from datetime import datetime
@@ -98,6 +99,18 @@ class MockBroker(BrokerInterface):
         
     def get_account_info(self) -> Dict[str, Any]:
         return self.account
+
+    def get_position(self, symbol: str):
+        return self.positions.get(symbol)
+
+    def get_order(self, order_id: str):
+        return self.orders.get(order_id)
+
+    def get_orders(self, status=None):
+        return list(self.orders.values())
+
+    def get_current_price(self, symbol: str) -> float:
+        return 100.0
 
 
 class TestBrokerInterface:
@@ -293,6 +306,23 @@ class TestPortfolioTracker:
         aapl_position = [p for p in summary['positions'] if p['symbol'] == 'AAPL'][0]
         # Exposure should be 1500 / 100000 = 1.5%
         assert 0.01 < aapl_position['exposure'] < 0.02
+
+    def test_daily_snapshot_logging(self, tmp_path):
+        """Ensure a daily snapshot is written to disk."""
+        broker = MockBroker()
+        broker.connect()
+        log_file = tmp_path / "portfolio.log"
+        tracker = PortfolioTracker(broker, log_path=str(log_file))
+
+        broker.place_order('AAPL', 1, OrderType.MARKET, OrderSide.BUY)
+        summary = tracker.get_portfolio_summary({'AAPL': 100.0})
+
+        assert log_file.exists()
+        lines = log_file.read_text().strip().splitlines()
+        assert len(lines) >= 1
+        snapshot = json.loads(lines[-1])
+        assert snapshot.get('cash') == broker.account['cash']
+        assert snapshot.get('total_value') == summary['total_value']
 
 
 class TestAlpacaBroker:

@@ -2,27 +2,42 @@
 Real-time portfolio tracking and risk management.
 Monitors PnL, drawdown, exposure, and risk metrics.
 """
-import pandas as pd
-import numpy as np
-from datetime import datetime, timedelta
-from typing import Dict, List, Optional, Tuple
+import json
 import logging
+import os
+import threading
 from collections import defaultdict
+from datetime import datetime, timedelta
+from typing import Dict, List, Optional, Tuple, Union
+
+import numpy as np
+import pandas as pd
 
 logger = logging.getLogger(__name__)
+
 
 class PortfolioTracker:
     """
     Track portfolio performance, risk metrics, and exposure in real-time.
     """
     
-    def __init__(self, initial_capital: float = 100000.0):
+    def __init__(
+        self,
+        broker=None,
+        initial_capital: float = 100000.0,
+        refresh_interval_minutes: int = 5,
+        log_path: str = "logs/portfolio_snapshots.log",
+    ):
         """
         Initialize portfolio tracker.
         
         Args:
-            initial_capital: Starting portfolio value
+            broker: Broker interface for live data
+            initial_capital: Starting portfolio value (used if broker not provided)
+            refresh_interval_minutes: Frequency for live polling
+            log_path: File path for daily portfolio snapshots
         """
+        self.broker = broker
         self.initial_capital = initial_capital
         self.current_capital = initial_capital
         self.positions = {}  # symbol -> position details
@@ -30,6 +45,219 @@ class PortfolioTracker:
         self.equity_curve = []
         self.max_equity = initial_capital
         self.start_time = datetime.now()
+        self.refresh_interval = timedelta(minutes=refresh_interval_minutes)
+        self.log_path = log_path
+        self.last_snapshot_date = None
+        self._polling = False
+        self._poll_timer: Optional[threading.Timer] = None
+
+        if self.broker:
+            try:
+                account_info = self.broker.get_account_info()
+                self.current_capital = self._get_account_value(account_info, "cash", initial_capital)
+                portfolio_value = self._get_account_value(account_info, "portfolio_value", self.current_capital)
+                if portfolio_value:
+                    self.initial_capital = portfolio_value
+                    self.max_equity = portfolio_value
+            except Exception as exc:
+                logger.warning("Unable to initialize from broker account info: %s", exc)
+
+    @staticmethod
+    def _get_account_value(account_info: Union[dict, object], key: str, default: float = 0.0) -> float:
+        """Safely extract a numeric value from account info."""
+        try:
+            if isinstance(account_info, dict):
+                return float(account_info.get(key, default) or 0.0)
+            return float(getattr(account_info, key, default) or 0.0)
+        except Exception:
+            return float(default)
+
+    @staticmethod
+    def _parse_quantity(value) -> float:
+        """Convert quantity fields to float safely."""
+        try:
+            return float(value)
+        except Exception:
+            return 0.0
+
+    def _pull_live_positions(self, current_prices: Optional[Dict[str, float]] = None) -> Tuple[List[Dict], float]:
+        """
+        Pull holdings and cash from broker (if available) and normalize positions.
+        Returns a tuple of (positions list, total holdings value).
+        """
+        holdings_value = 0.0
+        positions_output: List[Dict] = []
+
+        if self.broker:
+            try:
+                account_info = self.broker.get_account_info()
+                self.current_capital = self._get_account_value(account_info, "cash", self.current_capital)
+                raw_positions = self.broker.get_positions() or {}
+            except Exception as exc:
+                logger.error("Error pulling live portfolio: %s", exc)
+                return positions_output, holdings_value
+
+            # Reset internal positions to reflect broker state
+            self.positions = {}
+            if isinstance(raw_positions, dict):
+                iterable = raw_positions.items()
+            else:
+                iterable = []
+                for pos in raw_positions:
+                    symbol = pos.get("symbol") if isinstance(pos, dict) else getattr(pos, "symbol", None)
+                    if symbol:
+                        iterable.append((symbol, pos))
+
+            for symbol, pos in iterable:
+                qty = self._parse_quantity(pos.get("quantity") if isinstance(pos, dict) else getattr(pos, "qty", 0))
+                if isinstance(pos, dict):
+                    avg_price = float(pos.get("avg_price") or pos.get("avg_entry_price") or pos.get("average_price") or 0.0)
+                    pos_current_price = pos.get("current_price")
+                else:
+                    avg_price = float(getattr(pos, "avg_entry_price", 0.0) or getattr(pos, "avg_price", 0.0))
+                    pos_current_price = getattr(pos, "current_price", None)
+
+                if qty == 0:
+                    continue
+
+                current_price = None
+                if current_prices and symbol in current_prices:
+                    current_price = current_prices[symbol]
+                elif pos_current_price is not None:
+                    current_price = float(pos_current_price)
+                elif hasattr(self.broker, "get_current_price"):
+                    current_price = self.broker.get_current_price(symbol)
+
+                if current_price is None:
+                    current_price = avg_price
+
+                market_value = qty * current_price
+                holdings_value += market_value
+
+                unrealized_pnl = (current_price - avg_price) * qty
+                unrealized_pct = (unrealized_pnl / (avg_price * qty)) * 100 if avg_price and qty else 0.0
+
+                self.positions[symbol] = {
+                    "symbol": symbol,
+                    "qty": qty,
+                    "avg_price": avg_price,
+                    "current_price": current_price,
+                    "entry_time": datetime.now(),
+                    "last_update": datetime.now(),
+                }
+
+                positions_output.append(
+                    {
+                        "symbol": symbol,
+                        "quantity": qty,
+                        "avg_price": avg_price,
+                        "current_price": current_price,
+                        "market_value": market_value,
+                        "unrealized_pnl": unrealized_pnl,
+                        "unrealized_pnl_pct": unrealized_pct,
+                        "side": "LONG" if qty > 0 else "SHORT",
+                    }
+                )
+        else:
+            # Fallback to locally tracked positions
+            for symbol, pos in self.positions.items():
+                current_price = pos.get("current_price", pos.get("avg_price", 0.0))
+                if current_prices and symbol in current_prices:
+                    current_price = current_prices[symbol]
+                qty = pos.get("qty", 0)
+                avg_price = pos.get("avg_price", 0.0)
+                market_value = qty * current_price
+                holdings_value += market_value
+                unrealized_pnl = (current_price - avg_price) * qty
+                unrealized_pct = (unrealized_pnl / (avg_price * qty)) * 100 if avg_price and qty else 0.0
+                positions_output.append(
+                    {
+                        "symbol": symbol,
+                        "quantity": qty,
+                        "avg_price": avg_price,
+                        "current_price": current_price,
+                        "market_value": market_value,
+                        "unrealized_pnl": unrealized_pnl,
+                        "unrealized_pnl_pct": unrealized_pct,
+                        "side": "LONG" if qty > 0 else "SHORT",
+                    }
+                )
+
+        return positions_output, holdings_value
+
+    def _maybe_log_daily_snapshot(self, summary: Dict) -> None:
+        """Log a single daily snapshot to the configured log file."""
+        current_date = datetime.now().date()
+        if self.last_snapshot_date == current_date:
+            return
+
+        try:
+            log_dir = os.path.dirname(self.log_path)
+            if log_dir:
+                os.makedirs(log_dir, exist_ok=True)
+            with open(self.log_path, "a", encoding="utf-8") as f:
+                f.write(json.dumps(summary, default=str) + "\n")
+            self.last_snapshot_date = current_date
+            logger.info("📈 Logged daily portfolio snapshot to %s", self.log_path)
+        except Exception as exc:
+            logger.error("Failed to log portfolio snapshot: %s", exc)
+
+    def start_polling(self, price_fetcher=None) -> None:
+        """Begin periodic polling of cash/holdings every configured interval."""
+        self.stop_polling()
+        self._polling = True
+        self._schedule_next_poll(price_fetcher)
+
+    def _schedule_next_poll(self, price_fetcher=None) -> None:
+        if not self._polling:
+            return
+        self._poll_timer = threading.Timer(
+            self.refresh_interval.total_seconds(), self._poll_once, [price_fetcher]
+        )
+        self._poll_timer.daemon = True
+        self._poll_timer.start()
+
+    def _poll_once(self, price_fetcher=None) -> None:
+        try:
+            current_prices = price_fetcher() if callable(price_fetcher) else None
+            self.get_portfolio_summary(current_prices)
+        finally:
+            self._schedule_next_poll(price_fetcher)
+
+    def stop_polling(self) -> None:
+        """Stop periodic polling."""
+        self._polling = False
+        if self._poll_timer:
+            self._poll_timer.cancel()
+            self._poll_timer = None
+
+    def get_portfolio_summary(self, current_prices: Optional[Dict[str, float]] = None) -> Dict:
+        """
+        Get normalized portfolio summary with live holdings and cash.
+        
+        Args:
+            current_prices: Optional map of symbol to current price
+            
+        Returns:
+            Dictionary with portfolio state
+        """
+        positions, holdings_value = self._pull_live_positions(current_prices)
+
+        total_value = self.current_capital + holdings_value
+        for pos in positions:
+            pos["exposure"] = (pos["market_value"] / total_value) if total_value else 0.0
+
+        summary = {
+            "timestamp": datetime.now(),
+            "cash": self.current_capital,
+            "holdings_value": holdings_value,
+            "total_value": total_value,
+            "portfolio_value": total_value,
+            "positions": positions,
+        }
+
+        self._maybe_log_daily_snapshot(summary)
+        return summary
         
     def update_position(self, symbol: str, qty: int, price: float, 
                        current_price: float = None) -> Dict:
