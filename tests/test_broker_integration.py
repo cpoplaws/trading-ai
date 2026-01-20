@@ -93,6 +93,20 @@ class MockBroker(BrokerInterface):
     def get_order_status(self, order_id: str) -> Dict[str, Any]:
         return self.orders.get(order_id, {})
         
+    def get_order(self, order_id: str) -> Dict[str, Any]:
+        return self.orders.get(order_id, {})
+
+    def get_orders(self, status=None):
+        if status is None:
+            return list(self.orders.values())
+        return [o for o in self.orders.values() if o.get('status') == status]
+
+    def get_current_price(self, symbol: str) -> float:
+        return 100.0
+
+    def get_position(self, symbol: str):
+        return self.positions.get(symbol)
+        
     def get_positions(self) -> Dict[str, Any]:
         return self.positions
         
