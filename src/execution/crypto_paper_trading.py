@@ -12,7 +12,7 @@ crypto/DeFi trading with support for:
 """
 import logging
 from typing import Dict, List, Optional, Tuple, Any
-from datetime import datetime, timedelta
+from datetime import datetime
 from dataclasses import dataclass, field
 import pandas as pd
 import numpy as np

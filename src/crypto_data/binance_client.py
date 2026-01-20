@@ -4,8 +4,7 @@ Binance API client for spot and futures market data.
 import os
 import logging
 import requests
-from typing import Dict, List, Optional, Any
-from datetime import datetime, timedelta
+from typing import Dict, List, Optional
 from dotenv import load_dotenv
 
 load_dotenv()

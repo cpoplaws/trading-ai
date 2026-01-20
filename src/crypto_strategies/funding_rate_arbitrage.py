@@ -3,9 +3,8 @@ Funding rate arbitrage strategy for perpetual futures.
 Long spot, short perp when funding is positive.
 """
 import logging
-from typing import Dict, List, Optional, Any
+from typing import Dict, List, Any
 from datetime import datetime
-import pandas as pd
 
 logger = logging.getLogger(__name__)
 

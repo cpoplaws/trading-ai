@@ -160,7 +160,8 @@ def count_lines_of_code():
                                 total_lines += lines
                                 total_files += 1
                                 print(f"  {file}: {lines} lines")
-                        except:
+                        except Exception:
+                            # Skip files that can't be read
                             pass
     
     print(f"\n{GREEN}{BOLD}Total:{RESET} {total_files} files, {total_lines} lines of code")

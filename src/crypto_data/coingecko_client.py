@@ -4,8 +4,7 @@ CoinGecko API client for crypto market data and token metadata.
 import os
 import logging
 import requests
-from typing import Dict, List, Optional, Any
-from datetime import datetime
+from typing import Dict, List, Optional
 from dotenv import load_dotenv
 
 load_dotenv()

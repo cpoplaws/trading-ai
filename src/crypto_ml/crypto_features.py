@@ -4,8 +4,7 @@ Crypto-specific machine learning features.
 import logging
 import pandas as pd
 import numpy as np
-from typing import Dict, List, Optional
-from datetime import datetime, timedelta
+from typing import Dict, List
 
 logger = logging.getLogger(__name__)
 

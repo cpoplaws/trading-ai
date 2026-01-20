@@ -3,7 +3,7 @@ Ethereum mainnet and L2 (Arbitrum, Optimism, Base) interface.
 """
 import os
 import logging
-from typing import Dict, List, Optional, Any
+from typing import Dict, Optional, Any
 from web3 import Web3
 from web3.middleware import geth_poa_middleware
 from eth_account import Account

@@ -3,7 +3,6 @@ DEX Aggregator for finding best prices across multiple decentralized exchanges.
 """
 import logging
 from typing import Dict, List, Optional, Any, Tuple
-from web3 import Web3
 from enum import Enum
 
 logger = logging.getLogger(__name__)

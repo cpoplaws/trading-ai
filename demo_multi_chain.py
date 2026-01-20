@@ -2,7 +2,6 @@
 Demo: Multi-Chain Portfolio Operations
 Demonstrates connecting to multiple blockchains and managing a multi-chain portfolio.
 """
-import os
 import sys
 from pathlib import Path
 
