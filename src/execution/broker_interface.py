@@ -82,6 +82,7 @@ class Order:
     stop_price: Optional[float] = None
 
     def __getitem__(self, item):
+        """Enable dict-style access for compatibility with existing call sites."""
         return getattr(self, item)
 
 

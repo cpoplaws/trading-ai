@@ -262,28 +262,41 @@ class MultiTimeframeAnalyzer:
         
         Args:
             signals: Mapping of timeframe -> {'signal': str, 'confidence': float}
-            
+                - signal: One of {'BUY', 'SELL', 'HOLD'}.
+                - confidence: Confidence score in [0.0, 1.0], multiplied by the
+                  timeframe weight.
+        
         Returns:
-            Dictionary with final_signal, confidence, and vote breakdown.
+            Dict with:
+                - final_signal (str): Aggregated signal.
+                - confidence (float): Weighted score of the winning signal.
+                - votes (Dict[str, float]): Per-signal weighted totals.
         """
         try:
             if not signals:
                 return {'final_signal': 'HOLD', 'confidence': 0.0}
             
+            # Canonical timeframe weights with aliases for convenience
             weights = {
                 '1min': 0.1,
                 '5min': 0.2,
                 '1h': 0.3,
-                '1hour': 0.3,
                 '1d': 0.4,
-                '1day': 0.4
+            }
+            timeframe_aliases = {
+                '1hour': '1h',
+                '1day': '1d',
             }
             
             vote_score = {'BUY': 0.0, 'SELL': 0.0, 'HOLD': 0.0}
             for tf, data in signals.items():
-                weight = weights.get(tf, 0.25)
+                normalized_tf = timeframe_aliases.get(tf, tf)
+                weight = weights.get(normalized_tf, 0.25)
                 signal = data.get('signal', 'HOLD')
                 confidence = float(data.get('confidence', 0.5))
+                if signal not in vote_score:
+                    logger.warning("Unknown signal '%s' in timeframe '%s'; skipping", signal, tf)
+                    continue
                 vote_score[signal] += weight * confidence
             
             if vote_score['BUY'] > vote_score['SELL'] and vote_score['BUY'] > vote_score['HOLD']:
@@ -301,8 +314,9 @@ class MultiTimeframeAnalyzer:
                 'confidence': conf,
                 'votes': vote_score
             }
-        except Exception:
-            return {'final_signal': 'HOLD', 'confidence': 0.0}
+        except Exception as e:
+            logger.exception("Error aggregating timeframe signals: %s", e)
+            raise
     
     def combine_timeframe_signals(self, signals: Dict[str, pd.DataFrame]) -> pd.DataFrame:
         """

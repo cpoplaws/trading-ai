@@ -50,14 +50,22 @@ def fetch_data(
                 logger.warning(f"No data returned for {ticker}, generating synthetic data")
                 dates = pd.date_range(start=start_date, end=end_date, freq='B')
                 if len(dates) == 0:
-                    raise ValueError("No dates available for synthetic data generation")
-                prices = np.linspace(100, 110, len(dates)) + np.random.normal(0, 1, len(dates))
+                    logger.warning("Synthetic generation skipped: no business days in range")
+                    continue
+                rng = np.random.default_rng()
+                price_trend = np.linspace(100, 110, len(dates))
+                shocks = rng.normal(0, 1, len(dates))
+                prices = price_trend + shocks
+                open_noise = rng.normal(0, 0.001, len(dates))
+                high_noise = np.abs(rng.normal(0, 0.002, len(dates)))
+                low_noise = np.abs(rng.normal(0, 0.002, len(dates)))
+                volume = rng.integers(1_000_000, 5_000_000, len(dates))
                 df = pd.DataFrame({
-                    "Open": prices * (1 + np.random.normal(0, 0.001, len(dates))),
-                    "High": prices * (1 + np.abs(np.random.normal(0, 0.002, len(dates)))),
-                    "Low": prices * (1 - np.abs(np.random.normal(0, 0.002, len(dates)))),
+                    "Open": prices * (1 + open_noise),
+                    "High": prices * (1 + high_noise),
+                    "Low": prices * (1 - low_noise),
                     "Close": prices,
-                    "Volume": np.random.randint(1_000_000, 5_000_000, len(dates)),
+                    "Volume": volume,
                 }, index=dates)
 
             file_path = os.path.join(save_path, f"{ticker}.csv")
