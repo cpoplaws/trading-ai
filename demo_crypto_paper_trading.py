@@ -344,7 +344,7 @@ def main():
         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
         report_file = output_dir / f"backtest_report_{timestamp}.txt"
         
-        report = backtester.generate_report(str(report_file))
+        backtester.generate_report(str(report_file))
         print(f"💾 Report saved to: {report_file}")
         
         # Try to save plot
