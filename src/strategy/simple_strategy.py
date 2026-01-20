@@ -10,6 +10,51 @@ from utils.logger import setup_logger
 
 logger = setup_logger(__name__)
 
+def _map_prediction_to_signal(prediction: Any) -> Optional[str]:
+    """
+    Convert model prediction to BUY/SELL.
+    
+    Supports:
+        - Strings: 'UP' -> BUY, 'DOWN' -> SELL
+        - Booleans: True -> BUY, False -> SELL
+        - Integers: 1 -> BUY, 0 -> SELL
+    
+    Returns:
+        'BUY' or 'SELL' for supported values, otherwise None. String checks are
+        case-insensitive after stripping whitespace. Returning None will be
+        caught by downstream validation, causing signal generation to halt.
+    """
+    if isinstance(prediction, str):
+        normalized = prediction.strip().upper()
+        if not normalized:
+            logger.warning("Empty string prediction encountered")
+            return None
+        if normalized == 'UP':
+            return 'BUY'
+        if normalized == 'DOWN':
+            return 'SELL'
+        logger.warning(f"Unmapped string prediction encountered: {prediction}")
+        return None
+    if isinstance(prediction, (bool, np.bool_)):
+        return 'BUY' if prediction else 'SELL'
+    if isinstance(prediction, (int, np.integer)):
+        if prediction == 1:
+            return 'BUY'
+        if prediction == 0:
+            return 'SELL'
+        logger.warning(f"Unmapped integer prediction encountered: {prediction}")
+        return None
+    logger.warning(f"Unsupported prediction type encountered: {type(prediction)}")
+    return None
+
+def _validate_signals(signals_df: pd.DataFrame) -> bool:
+    """Ensure all predictions mapped to signals."""
+    if signals_df['Signal'].isnull().any():
+        unmapped = signals_df.loc[signals_df['Signal'].isnull(), 'Prediction'].unique().tolist()
+        logger.error(f"Unmapped prediction values: {unmapped}")
+        return False
+    return True
+
 def generate_signals(model_path: str, data_path: str, save_path: str = './signals/') -> bool:
     """
     Generate trading signals using a trained model.
@@ -58,14 +103,34 @@ def generate_signals(model_path: str, data_path: str, save_path: str = './signal
         # Create signals DataFrame
         signals_df = pd.DataFrame(index=feature_data.index)
         signals_df['Prediction'] = predictions
-        signals_df['Signal'] = signals_df['Prediction'].map({1: 'BUY', 0: 'SELL'})
+        signals_df['Signal'] = signals_df['Prediction'].apply(_map_prediction_to_signal)
+        if not _validate_signals(signals_df):
+            return False
 
         # Add prediction probabilities if available
         if hasattr(model, 'predict_proba'):
             probabilities = model.predict_proba(feature_data)
-            signals_df['Confidence'] = probabilities[:, 1]  # Probability of positive class
-            signals_df['Buy_Confidence'] = probabilities[:, 1]
-            signals_df['Sell_Confidence'] = probabilities[:, 0]
+            buy_index, sell_index = 1, 0  # Defaults assume class ordering [SELL, BUY]
+            
+            if hasattr(model, 'classes_'):
+                classes = list(model.classes_)
+                buy_index = next(
+                    (i for i, cls in enumerate(classes) if _map_prediction_to_signal(cls) == 'BUY'),
+                    buy_index
+                )
+                sell_index = next(
+                    (i for i, cls in enumerate(classes) if _map_prediction_to_signal(cls) == 'SELL'),
+                    sell_index
+                )
+            else:
+                logger.warning("Model missing classes_; assuming predict_proba columns are ordered as [SELL, BUY]")
+            
+            try:
+                signals_df['Confidence'] = probabilities[:, buy_index]
+                signals_df['Buy_Confidence'] = probabilities[:, buy_index]
+                signals_df['Sell_Confidence'] = probabilities[:, sell_index]
+            except (IndexError, ValueError) as prob_error:
+                logger.warning(f"Could not align predict_proba outputs with class ordering: {prob_error}")
         
         # Add current price for reference
         if 'Close' in df.columns:
