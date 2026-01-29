@@ -132,15 +132,16 @@ def fetch_data(
     success_count = 0
     
     for ticker in tickers:
-        logger.info(f"Fetching data for {ticker}...")
-        df = _download_with_retries(
-            ticker=ticker,
-            start_date=start_date,
-            end_date=end_date,
-            max_retries=max_retries,
-            retry_delay=retry_delay,
-            auto_adjust=auto_adjust,
-        )
+        try:
+            logger.info(f"Fetching data for {ticker}...")
+            df = _download_with_retries(
+                ticker=ticker,
+                start_date=start_date,
+                end_date=end_date,
+                max_retries=max_retries,
+                retry_delay=retry_delay,
+                auto_adjust=auto_adjust,
+            )
 
             if df is None or df.empty:
                 logger.warning(f"No data returned for {ticker}, generating synthetic data")
@@ -168,7 +169,7 @@ def fetch_data(
             df.to_csv(file_path)
             logger.info(f"Saved {ticker} data to {file_path}")
             success_count += 1
-                
+
         except Exception as e:
             logger.error(f"Error fetching data for {ticker}: {str(e)}")
     
