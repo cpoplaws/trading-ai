@@ -2,6 +2,7 @@
 Basic test suite for the trading AI system.
 """
 import pytest
+import glob
 import pandas as pd
 import numpy as np
 import os
@@ -272,6 +273,7 @@ class TestModeling:
         assert success is True
         assert 'accuracy' in metrics
         assert 0 <= metrics['accuracy'] <= 1
+        assert glob.glob('./test_models/random_forest_*.joblib')
         
         # Clean up
         if os.path.exists('./test_models/'):
