@@ -4,12 +4,15 @@ Fetches financial news from multiple sources and extracts relevant signals.
 """
 
 import os
+import sys
 import logging
 from typing import Dict, List, Optional
 from datetime import datetime, timedelta
 import requests
 from bs4 import BeautifulSoup
 import pandas as pd
+
+sys.path.append(os.path.dirname(os.path.dirname(__file__)))
 from utils.logger import setup_logger
 
 logger = setup_logger(__name__)
@@ -182,12 +185,14 @@ class NewsScraper:
         df['description'] = df.get('description', '')
         df['url'] = df.get('url', '')
         df['source_name'] = df.get('source', {}).apply(lambda x: x.get('name', '') if isinstance(x, dict) else '')
+        df['summary'] = df['description'].fillna('')
+        df['published_at'] = pd.to_datetime(df['published_at'], errors='coerce').fillna(datetime.now())
         
         # Remove duplicates
         df = df.drop_duplicates(subset=['title'], keep='first')
         
         logger.info(f"Compiled {len(df)} unique market news articles")
-        return df[['published_at', 'title', 'description', 'url', 'source_name']]
+        return df[['published_at', 'title', 'summary', 'description', 'url', 'source_name']]
         
     def fetch_ticker_news(self, ticker: str, days_back: int = 7) -> pd.DataFrame:
         """
@@ -226,12 +231,54 @@ class NewsScraper:
             df['published_at'] = datetime.now()
             
         df['ticker'] = ticker
+        df['description'] = df.get('description', '').fillna('')
+        df['summary'] = df['description']
+        missing_summary = df['summary'] == ''
+        if missing_summary.any():
+            logger.debug(f"{missing_summary.sum()} articles missing descriptions; summaries left blank")
         
         # Remove duplicates
         df = df.drop_duplicates(subset=['title'], keep='first')
         
         logger.info(f"Compiled {len(df)} unique articles for {ticker}")
         return df
+        
+    def ingest_daily_headlines(
+        self,
+        days_back: int = 1,
+        limit: int = 50,
+        output_dir: str = os.path.join('data', 'raw', 'news')
+    ) -> Optional[str]:
+        """
+        Fetch and persist daily financial headlines.
+        
+        Args:
+            days_back: Lookback window for articles
+            limit: Maximum number of articles to save
+            output_dir: Directory to store CSV output
+        
+        Returns:
+            Path to saved CSV file or None if no articles
+        """
+        logger.info("Starting daily news ingestion")
+        news_df = self.fetch_market_news(days_back=days_back)
+        
+        if news_df.empty:
+            logger.warning("No market news fetched; skipping save")
+            return None
+        
+        news_df = news_df.sort_values('published_at', ascending=False)
+        if limit:
+            news_df = news_df.head(limit)
+        
+        news_df['published_at'] = pd.to_datetime(news_df['published_at'], utc=True).dt.strftime('%Y-%m-%dT%H:%M:%SZ')
+        filename = f"financial_news_{datetime.now().strftime('%Y%m%d')}.csv"
+        os.makedirs(output_dir, exist_ok=True)
+        output_path = os.path.join(output_dir, filename)
+        
+        news_df[['published_at', 'title', 'summary', 'source_name', 'url']].to_csv(output_path, index=False)
+        logger.info(f"Ingested {len(news_df)} articles to {output_path}")
+        return output_path
         
     def calculate_news_sentiment_score(self, articles: pd.DataFrame) -> float:
         """
@@ -308,6 +355,11 @@ class NewsScraper:
 def main():
     """Example usage of NewsScraper."""
     scraper = NewsScraper()
+    saved_path = scraper.ingest_daily_headlines(days_back=1, limit=50)
+    if saved_path:
+        print(f"Daily headlines saved to: {saved_path}")
+    else:
+        print("No headlines saved for today.")
     
     # Fetch market news
     market_news = scraper.fetch_market_news(days_back=7)
