@@ -16,13 +16,15 @@ class PortfolioTracker:
     Track portfolio performance, risk metrics, and exposure in real-time.
     """
     
-    def __init__(self, initial_capital: float = 100000.0):
+    def __init__(self, broker=None, initial_capital: float = 100000.0):
         """
         Initialize portfolio tracker.
         
         Args:
+            broker: Broker instance (optional)
             initial_capital: Starting portfolio value
         """
+        self.broker = broker
         self.initial_capital = initial_capital
         self.current_capital = initial_capital
         self.positions = {}  # symbol -> position details
@@ -30,6 +32,75 @@ class PortfolioTracker:
         self.equity_curve = []
         self.max_equity = initial_capital
         self.start_time = datetime.now()
+
+    def get_portfolio_summary(self, current_prices: Dict[str, float]) -> Dict:
+        """
+        Return a lightweight portfolio summary (Phase 2 compatibility).
+        """
+        # Fetch positions from broker if provided
+        positions_source = {}
+        cash = self.current_capital
+
+        if self.broker is not None:
+            try:
+                account_info = self.broker.get_account_info()
+                if isinstance(account_info, dict):
+                    cash = account_info.get("cash", cash)
+                else:
+                    cash = getattr(account_info, "cash", cash)
+            except Exception:
+                pass
+
+            if hasattr(self.broker, "get_positions"):
+                try:
+                    positions_source = self.broker.get_positions()
+                except Exception:
+                    positions_source = {}
+
+        if not positions_source:
+            positions_source = self.positions
+
+        position_list = []
+        positions_value = 0.0
+
+        for symbol, pos in positions_source.items():
+            qty = pos.get("quantity") if isinstance(pos, dict) else getattr(pos, "qty", 0)
+            avg_price = (
+                pos.get("avg_price") if isinstance(pos, dict) else getattr(pos, "avg_price", 0)
+            )
+            qty = float(qty or 0)
+            avg_price = float(avg_price or 0)
+            current_price = float(current_prices.get(symbol, avg_price))
+            market_value = qty * current_price
+            unrealized_pnl = (current_price - avg_price) * qty
+            positions_value += market_value
+            denominator = avg_price * qty
+
+            position_list.append(
+                {
+                    "symbol": symbol,
+                    "quantity": qty,
+                    "avg_price": avg_price,
+                    "current_price": current_price,
+                    "market_value": market_value,
+                    "unrealized_pnl": unrealized_pnl,
+                    "unrealized_pnl_pct": (unrealized_pnl / denominator * 100)
+                    if denominator != 0
+                    else 0.0,
+                    "exposure": 0.0,  # filled later
+                }
+            )
+
+        total_value = float(cash) + positions_value
+        for pos in position_list:
+            pos["exposure"] = pos["market_value"] / total_value if total_value else 0.0
+
+        summary = {
+            "positions": position_list,
+            "total_value": total_value,
+            "cash": float(cash),
+        }
+        return summary
         
     def update_position(self, symbol: str, qty: int, price: float, 
                        current_price: float = None) -> Dict:
@@ -365,6 +436,68 @@ class PortfolioTracker:
             'positions': self.positions,
             'recent_trades': self.trade_history[-10:] if self.trade_history else [],
             'timestamp': datetime.now()
+        }
+    
+    def get_portfolio_summary(self, current_prices: Dict[str, float]) -> Dict:
+        """
+        Provide a simplified portfolio summary using broker positions.
+
+        Args:
+            current_prices: Mapping from symbol to latest market price; falls back
+            to avg_price when missing.
+
+        Returns:
+            Dict with positions list (symbol, quantity, avg_price, market_value,
+            unrealized_pnl, unrealized_pnl_pct, exposure), total_value, and cash.
+        """
+        positions_data = []
+        account = {}
+        if self.broker and hasattr(self.broker, "get_account_info"):
+            try:
+                account = self.broker.get_account_info() or {}
+            except Exception as exc:
+                logger.exception("Error getting account info: %s", exc)
+                account = {}
+        cash = account.get("cash", self.current_capital) if isinstance(account, dict) else getattr(account, "cash", self.current_capital)
+        portfolio_value = account.get("portfolio_value", cash) if isinstance(account, dict) else getattr(account, "portfolio_value", cash)
+
+        raw_positions = {}
+        if self.broker and hasattr(self.broker, "get_positions"):
+            try:
+                raw_positions = self.broker.get_positions() or {}
+            except Exception as exc:
+                logger.exception("Error getting positions: %s", exc)
+                raw_positions = {}
+
+        iterable_positions = (
+            raw_positions.items()
+            if isinstance(raw_positions, dict)
+            else enumerate(raw_positions)
+            if isinstance(raw_positions, (list, tuple))
+            else []
+        )
+
+        for symbol, pos in iterable_positions:
+            qty = pos.get("quantity", pos.get("qty", 0)) if isinstance(pos, dict) else getattr(pos, "qty", 0)
+            avg_price = pos.get("avg_price", 0) if isinstance(pos, dict) else getattr(pos, "avg_entry_price", 0)
+            price = current_prices.get(symbol, avg_price)
+            market_value = qty * price
+            unrealized = (price - avg_price) * qty
+            positions_data.append({
+                "symbol": symbol if isinstance(symbol, str) else getattr(pos, "symbol", str(symbol)),
+                "quantity": qty,
+                "avg_price": avg_price,
+                "market_value": market_value,
+                "unrealized_pnl": unrealized,
+                "unrealized_pnl_pct": (unrealized / (avg_price * qty)) * 100 if qty and avg_price else 0,
+                "exposure": (market_value / portfolio_value) if portfolio_value else 0,
+            })
+
+        total_value = cash + sum(p["market_value"] for p in positions_data)
+        return {
+            "positions": positions_data,
+            "total_value": total_value,
+            "cash": cash,
         }
     
     def check_risk_limits(self, max_drawdown_pct: float = 20.0,

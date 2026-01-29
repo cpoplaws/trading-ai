@@ -81,6 +81,10 @@ class Order:
     limit_price: Optional[float] = None
     stop_price: Optional[float] = None
 
+    def __getitem__(self, item):
+        """Enable dict-style access for compatibility with existing call sites."""
+        return getattr(self, item)
+
 
 @dataclass
 class Position:
@@ -117,6 +121,28 @@ class BrokerInterface(ABC):
     All broker implementations must implement these methods.
     """
 
+    def check_connection(self) -> bool:
+        """Simple wrapper to verify connection status."""
+        try:
+            return self.connect()
+        except Exception as exc:
+            logger.error(f"Connection check failed: {exc}")
+            return False
+
+    def get_portfolio_value(self) -> float:
+        """Helper to fetch portfolio value if available."""
+        account = self.get_account_info()
+        if isinstance(account, dict):
+            return float(account.get("portfolio_value", 0.0))
+        return getattr(account, "portfolio_value", 0.0)
+
+    def get_buying_power(self) -> float:
+        """Helper to fetch buying power if available."""
+        account = self.get_account_info()
+        if isinstance(account, dict):
+            return float(account.get("buying_power", 0.0))
+        return getattr(account, "buying_power", 0.0)
+
     @abstractmethod
     def connect(self) -> bool:
         """
@@ -152,18 +178,15 @@ class BrokerInterface(ABC):
         """
         pass
 
-    @abstractmethod
     def get_position(self, symbol: str) -> Optional[Position]:
         """
         Get position for a specific symbol.
         
-        Args:
-            symbol: Stock ticker symbol
-            
         Returns:
             Position object or None if no position exists
         """
-        pass
+        logger.warning("get_position not implemented")
+        return None
 
     @abstractmethod
     def place_order(
@@ -175,6 +198,7 @@ class BrokerInterface(ABC):
         time_in_force: TimeInForce = TimeInForce.DAY,
         limit_price: Optional[float] = None,
         stop_price: Optional[float] = None,
+        quantity: Optional[float] = None,
     ) -> Optional[Order]:
         """
         Place an order.
@@ -206,7 +230,20 @@ class BrokerInterface(ABC):
         """
         pass
 
-    @abstractmethod
+    def modify_order(self, order_id: str, new_params: Dict) -> bool:
+        """
+        Modify an existing order with new parameters.
+
+        Args:
+            order_id: Order ID to modify
+            new_params: Dictionary of parameters to update
+
+        Returns:
+            True if modification successful, False otherwise
+        """
+        logger.warning("modify_order not implemented")
+        return False
+
     def get_order(self, order_id: str) -> Optional[Order]:
         """
         Get order details.
@@ -217,9 +254,9 @@ class BrokerInterface(ABC):
         Returns:
             Order object or None if not found
         """
-        pass
+        logger.warning("get_order not implemented")
+        return None
 
-    @abstractmethod
     def get_orders(self, status: Optional[OrderStatus] = None) -> List[Order]:
         """
         Get orders, optionally filtered by status.
@@ -230,9 +267,9 @@ class BrokerInterface(ABC):
         Returns:
             List of Order objects
         """
-        pass
+        logger.warning("get_orders not implemented")
+        return []
 
-    @abstractmethod
     def get_current_price(self, symbol: str) -> Optional[float]:
         """
         Get current market price for a symbol.
@@ -243,7 +280,8 @@ class BrokerInterface(ABC):
         Returns:
             Current price or None if unavailable
         """
-        pass
+        logger.warning("get_current_price not implemented")
+        return None
 
 
 class MockBroker(BrokerInterface):
@@ -317,10 +355,16 @@ class MockBroker(BrokerInterface):
         time_in_force: TimeInForce = TimeInForce.DAY,
         limit_price: Optional[float] = None,
         stop_price: Optional[float] = None,
+        quantity: Optional[float] = None,
     ) -> Optional[Order]:
         """Place mock order."""
         if not self.connected:
             logger.error("Cannot place order: not connected")
+            return None
+
+        qty = qty if qty is not None else quantity
+        if qty is None:
+            logger.error("Quantity is required to place order")
             return None
 
         self.order_counter += 1
@@ -422,6 +466,19 @@ class MockBroker(BrokerInterface):
         logger.warning(f"Cannot cancel order {order_id}")
         return False
 
+    def modify_order(self, order_id: str, new_params: Dict) -> bool:
+        """Modify an existing mock order."""
+        if order_id not in self.orders:
+            logger.warning(f"Order {order_id} not found for modification")
+            return False
+        order = self.orders[order_id]
+        for key, value in new_params.items():
+            if hasattr(order, key):
+                setattr(order, key, value)
+        order.status = OrderStatus.REPLACED
+        logger.info(f"✅ Order {order_id} modified")
+        return True
+
     def get_order(self, order_id: str) -> Optional[Order]:
         """Get mock order."""
         return self.orders.get(order_id)
@@ -444,3 +501,25 @@ class MockBroker(BrokerInterface):
         # Add small random variation
         variation = random.uniform(-2, 2)
         return max(1.0, base_price + variation)
+
+
+def create_broker(paper_trading: bool = True, mock: bool = False):
+    """
+    Factory helper to create broker instances.
+    """
+    if mock:
+        broker = MockBroker()
+        broker.connect()
+        return broker
+
+    try:
+        from execution.alpaca_broker import AlpacaBroker
+
+        broker = AlpacaBroker(paper_trading=paper_trading)
+        broker.connect()
+        return broker
+    except Exception as exc:
+        logger.error(f"Falling back to MockBroker: {exc}")
+        broker = MockBroker()
+        broker.connect()
+        return broker

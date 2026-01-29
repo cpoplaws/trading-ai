@@ -374,7 +374,7 @@ class EnhancedMLModels:
             logger.error(f"Error fitting ARIMA-GARCH model: {e}")
             return {'error': str(e)}
     
-    def create_ensemble_model(self, X: pd.DataFrame, y: pd.Series) -> Dict:
+    def create_ensemble_model(self, X: pd.DataFrame, y: pd.Series, return_dict: bool = False):
         """
         Create ensemble model with multiple base estimators.
         
@@ -444,7 +444,7 @@ class EnhancedMLModels:
             self.models['ensemble'] = ensemble
             self.scalers['ensemble'] = scaler
             
-            return {
+            result = {
                 'model_type': 'ensemble',
                 'model': ensemble,
                 'scaler': scaler,
@@ -453,6 +453,11 @@ class EnhancedMLModels:
                 'cv_scores': cv_scores,
                 'feature_importance': self._get_ensemble_feature_importance(ensemble, X.columns)
             }
+            
+            if return_dict:
+                return result
+            
+            return ensemble, ensemble_metrics.get('r2', 0.0)
             
         except Exception as e:
             logger.error(f"Error creating ensemble model: {e}")
@@ -521,7 +526,7 @@ class EnhancedMLModels:
             
             # Ensemble model
             if 'ensemble' in models_to_use:
-                ensemble_result = self.create_ensemble_model(X_selected, y)
+                ensemble_result = self.create_ensemble_model(X_selected, y, return_dict=True)
                 if 'error' not in ensemble_result:
                     # Get latest prediction
                     latest_features = X_selected.iloc[-1:].replace([np.inf, -np.inf], np.nan).fillna(0)
@@ -674,7 +679,7 @@ if __name__ == "__main__":
     
     # Ensemble model
     if not X.empty and not y.empty:
-        ensemble_result = ml_models.create_ensemble_model(X_selected, y)
+        ensemble_result = ml_models.create_ensemble_model(X_selected, y, return_dict=True)
         if 'error' not in ensemble_result:
             print(f"Ensemble R²: {ensemble_result['metrics']['r2']:.3f}")
             print(f"CV R² (mean ± std): {ensemble_result['metrics']['cv_r2_mean']:.3f} ± {ensemble_result['metrics']['cv_r2_std']:.3f}")

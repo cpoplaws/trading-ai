@@ -1,6 +1,8 @@
 """Model training module for ML-based trading signal prediction."""
 import os
+import glob
 from typing import Dict, Optional, Tuple
+from datetime import datetime
 
 import joblib
 import numpy as np
@@ -12,12 +14,26 @@ from sklearn.model_selection import train_test_split
 from utils.logger import setup_logger
 
 logger = setup_logger(__name__)
+TARGET_UP_VALUES = {'1', 'UP', 'TRUE'}
+FEATURE_FALLBACK_PATTERNS = [
+    "random_forest_features_*.joblib",
+    "features_*.joblib",
+]
+
+
+def _safe_mtime(path: str) -> float:
+    try:
+        return os.path.getmtime(path)
+    except OSError:
+        return 0
 
 
 def train_model(
     df: Optional[pd.DataFrame] = None,
-    file_path: Optional[str] = None, 
-                save_path: str = './models/', test_size: float = 0.2) -> Tuple[bool, dict]:
+    file_path: Optional[str] = None,
+    save_path: str = './models/',
+    test_size: float = 0.2,
+) -> Tuple[bool, dict]:
     """
     Train a machine learning model for trading signals.
     
@@ -48,9 +64,20 @@ def train_model(
             # Try both uppercase and lowercase close column
             close_col = 'Close' if 'Close' in df.columns else 'close'
             if close_col in df.columns:
-                df['Target'] = (df[close_col].shift(-1) > df[close_col]).astype(int)
+                next_close = df[close_col].shift(-1)
+                df = df[next_close.notna()].copy()
+                df['Target'] = np.where(
+                    next_close.loc[df.index] > df[close_col], 'UP', 'DOWN'
+                )
             else:
                 raise ValueError("No 'Close' or 'close' column found for target creation")
+        else:
+            target_col = 'Target' if 'Target' in df.columns else 'target'
+            target_values = df[target_col].astype(str).str.strip().str.upper()
+            # Normalize common truthy values to UP; everything else treated as DOWN
+            df['Target'] = np.where(target_values.isin(TARGET_UP_VALUES), 'UP', 'DOWN')
+
+        df = df.dropna(subset=['Target'])
 
         # Define features (use all available technical indicators)
         feature_columns = ['SMA_10', 'SMA_30', 'RSI_14', 'Volatility_20']
@@ -105,20 +132,17 @@ def train_model(
         logger.info(f"Classification report:\n{classification_report(y_test, y_pred)}")
 
         # Save model
-        if file_path:
-            filename = os.path.basename(file_path).split('.')[0]
-        else:
-            filename = "in_memory_model"
-            
-        model_filename = os.path.join(save_path, f"model_{filename}.joblib")
+        date_str = datetime.now().strftime("%Y%m%d")
+        model_filename = os.path.join(save_path, f"random_forest_{date_str}.joblib")
         joblib.dump(model, model_filename)
         
         # Also save feature list for inference
-        feature_filename = os.path.join(save_path, f"features_{filename}.joblib")
+        feature_filename = os.path.join(save_path, f"random_forest_features_{date_str}.joblib")
         joblib.dump(available_features, feature_filename)
         
         logger.info(f"Model saved to {model_filename}")
         logger.info(f"Features saved to {feature_filename}")
+        logger.info("Model training completed successfully.")
         
         return True, metrics
         
@@ -140,12 +164,28 @@ def load_model_and_features(model_path: str) -> Tuple[Optional[object], Optional
         model = joblib.load(model_path)
         
         # Try to load corresponding features
-        feature_path = model_path.replace('model_', 'features_')
-        try:
-            features = joblib.load(feature_path)
-        except FileNotFoundError:
-            logger.warning(f"Feature file not found: {feature_path}")
-            features = None
+        base_dir = os.path.dirname(model_path)
+        feature_candidates = [
+            model_path.replace('random_forest_', 'random_forest_features_'),
+            os.path.join(base_dir, f"features_{os.path.basename(model_path)}"),
+        ]
+        features = None
+        for pattern in FEATURE_FALLBACK_PATTERNS:
+            feature_candidates.extend(
+                sorted(
+                    glob.glob(os.path.join(base_dir, pattern)),
+                    key=_safe_mtime,
+                    reverse=True,
+                )
+            )
+        for feature_path in feature_candidates:
+            try:
+                features = joblib.load(feature_path)
+                break
+            except FileNotFoundError:
+                continue
+        if features is None:
+            logger.warning(f"Feature file not found for model: {model_path}")
             
         return model, features
     except Exception as e:

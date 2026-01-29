@@ -11,6 +11,28 @@ logger = setup_logger(__name__)
 
 
 class FeatureGenerator:
+    SMA_SHORT_WINDOW = 10
+    SMA_LONG_WINDOW = 30
+    EMA_WINDOW = 20
+    RSI_WINDOW = 14
+    VOL_WINDOW = 20
+    MACD_SLOW_WINDOW = 26
+    MACD_SIGNAL_WINDOW = 9
+    
+    @classmethod
+    def max_feature_window(cls) -> int:
+        macd_warmup = cls.MACD_SLOW_WINDOW + cls.MACD_SIGNAL_WINDOW
+        return max(cls.SMA_LONG_WINDOW, cls.EMA_WINDOW, cls.RSI_WINDOW, cls.VOL_WINDOW, macd_warmup)
+    
+    @classmethod
+    def warmup_rows(cls) -> int:
+        return cls.max_feature_window() - 1
+    
+    @staticmethod
+    def default_save_path(filename: str = "features.csv") -> str:
+        base_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..'))
+        return os.path.join(base_dir, 'data', 'processed', filename)
+
     def __init__(self, data: pd.DataFrame):
         """
         Initialize the FeatureGenerator with price data.
@@ -56,15 +78,16 @@ class FeatureGenerator:
         close_prices = pd.to_numeric(self.data['close'], errors='coerce')
         return close_prices.rolling(window=window).std()
     
-    def calculate_bollinger_bands(self, window: int = 20, num_std: float = 2) -> tuple[pd.Series, pd.Series, pd.Series]:
+    def calculate_bollinger_bands(self, window: Optional[int] = None, num_std: float = 2) -> Tuple[pd.Series, pd.Series, pd.Series]:
         """Calculate Bollinger Bands."""
+        window = window or self.VOL_WINDOW
         sma = self.calculate_sma(window)
         std = self.calculate_volatility(window)
         upper_band = sma + (std * num_std)
         lower_band = sma - (std * num_std)
         return upper_band, sma, lower_band
     
-    def calculate_macd(self, fast: int = 12, slow: int = 26, signal: int = 9) -> tuple[pd.Series, pd.Series, pd.Series]:
+    def calculate_macd(self, fast: int = 12, slow: int = 26, signal: int = 9) -> Tuple[pd.Series, pd.Series, pd.Series]:
         """Calculate MACD (Moving Average Convergence Divergence)."""
         ema_fast = self.calculate_ema(fast)
         ema_slow = self.calculate_ema(slow)
@@ -80,15 +103,15 @@ class FeatureGenerator:
         """
         try:
             # Moving averages
-            self.data['SMA_10'] = self.calculate_sma(10)
-            self.data['SMA_30'] = self.calculate_sma(30)
-            self.data['EMA_20'] = self.calculate_ema(20)
+            self.data['SMA_10'] = self.calculate_sma(self.SMA_SHORT_WINDOW)
+            self.data['SMA_30'] = self.calculate_sma(self.SMA_LONG_WINDOW)
+            self.data['EMA_20'] = self.calculate_ema(self.EMA_WINDOW)
             
             # Momentum indicators
-            self.data['RSI_14'] = self.calculate_rsi(14)
+            self.data['RSI_14'] = self.calculate_rsi(self.RSI_WINDOW)
             
             # Volatility
-            self.data['Volatility_20'] = self.calculate_volatility(20)
+            self.data['Volatility_20'] = self.calculate_volatility(self.VOL_WINDOW)
             
             # Bollinger Bands
             bb_upper, bb_middle, bb_lower = self.calculate_bollinger_bands()
@@ -109,13 +132,28 @@ class FeatureGenerator:
             
             # Volume features (if available)
             if 'volume' in self.data.columns:
-                self.data['Volume_SMA'] = self.data['volume'].rolling(window=20).mean()
-                self.data['Volume_Ratio'] = self.data['volume'] / self.data['Volume_SMA']
+                self.data['Volume_SMA'] = self.data['volume'].rolling(window=self.VOL_WINDOW).mean()
+                volume_sma_safe = self.data['Volume_SMA'].replace(0, pd.NA)
+                self.data['Volume_Ratio'] = self.data['volume'] / volume_sma_safe
             
-            logger.info(f"Generated {len([c for c in self.data.columns if c not in ['open', 'high', 'low', 'close', 'volume']])} features")
-            
-            # Drop rows with NaN values caused by rolling calculations
-            return self.data.dropna()
+            warmup_cutoff = self.warmup_rows()
+            post_warmup = self.data.iloc[warmup_cutoff:]
+            features_df = post_warmup.dropna().copy()
+            if features_df.empty:
+                raise ValueError(
+                    f"Insufficient data after {warmup_cutoff}-row warmup period and NaN removal. "
+                    f"Need at least {warmup_cutoff + 1} rows."
+                )
+
+            feature_columns = [c for c in features_df.columns if c not in ['open', 'high', 'low', 'close', 'volume']]
+
+            logger.info(
+                f"Generated {len(feature_columns)} features with shape {features_df.shape} "
+                f"(dropped {len(self.data) - len(features_df)} warmup rows). "
+                f"Features: {feature_columns}"
+            )
+
+            return features_df
             
         except Exception as e:
             logger.error(f"Error generating features: {str(e)}")
@@ -195,15 +233,28 @@ class FeatureGenerator:
         except Exception as e:
             logger.error(f"Error adding market regime: {str(e)}")
 
-    def save_features(self, save_path: str) -> bool:
+    def save_features(self, save_path: Optional[str] = None, features_df: Optional[pd.DataFrame] = None) -> bool:
         """
         Save the generated features to a CSV file.
-        :param save_path: Path to save the processed DataFrame.
-        :return: True if successful, False otherwise
+
+        When ``save_path`` is ``None``, the file is saved to the default path returned by
+        :meth:`default_save_path`, which points to the processed data directory.
+        When ``features_df`` is ``None``, the method saves ``self.data.dropna()`` instead.
+
+        :param save_path: Optional path to save the processed DataFrame. If ``None``,
+            uses :meth:`default_save_path` to determine the output path.
+        :param features_df: Optional DataFrame to save. If ``None``, ``self.data.dropna()``
+            is used as the data to be written.
+        :return: True if successful, False otherwise.
         """
         try:
+            if save_path is None:
+                save_path = self.default_save_path()
+
+            data_to_save = features_df if features_df is not None else self.data.dropna()
+
             os.makedirs(os.path.dirname(save_path), exist_ok=True)
-            self.data.dropna().to_csv(save_path)
+            data_to_save.to_csv(save_path)
             logger.info(f"Saved engineered features to {save_path}")
             return True
         except Exception as e:
