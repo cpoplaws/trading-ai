@@ -8,6 +8,7 @@ from datetime import datetime, timedelta
 from typing import Dict, List, Optional
 import logging
 import os
+from utils.logger import setup_logger
 
 try:
     from fredapi import Fred
@@ -16,7 +17,7 @@ except ImportError:
     FRED_AVAILABLE = False
     logging.warning("fredapi not installed. Install with: pip install fredapi")
 
-logger = logging.getLogger(__name__)
+logger = setup_logger(__name__)
 
 class MacroDataFetcher:
     """
@@ -160,7 +161,7 @@ class MacroDataFetcher:
         return df
     
     def get_all_indicators(self, start_date: Optional[datetime] = None,
-                          end_date: Optional[datetime] = None) -> Dict[str, pd.DataFrame]:
+                           end_date: Optional[datetime] = None) -> Dict[str, pd.DataFrame]:
         """
         Fetch all available economic indicators.
         
@@ -179,6 +180,92 @@ class MacroDataFetcher:
                 indicators[indicator_name] = df
         
         return indicators
+    
+    def build_daily_macro_dataset(
+        self,
+        start_date: Optional[datetime] = None,
+        end_date: Optional[datetime] = None,
+        save_path: str = "./data/processed/macro_daily.csv"
+    ) -> pd.DataFrame:
+        """
+        Build a clean daily macroeconomic dataset with key indicators and save to disk.
+        
+        Args:
+            start_date: Optional start date (defaults to two years lookback)
+            end_date: Optional end date (defaults to today)
+            save_path: File path to save the CSV dataset
+        
+        Returns:
+            DataFrame indexed by date with fed funds rate, CPI inflation, and unemployment rate.
+        """
+        try:
+            if end_date is None:
+                end_date = datetime.now()
+            if start_date is None:
+                start_date = end_date - timedelta(days=730)
+
+            logger.info(
+                "Building daily macro dataset from %s",
+                "FRED API" if self.fred_client else "simulated data"
+            )
+
+            fed_funds = self.get_indicator('fed_funds_rate', start_date, end_date)
+            cpi = self.get_indicator('cpi', start_date, end_date)
+            unemployment = self.get_indicator('unemployment', start_date, end_date)
+
+            def _prep_series(df: pd.DataFrame, column_name: str) -> pd.Series:
+                if df.empty:
+                    return pd.Series(dtype=float, name=column_name)
+                clean_df = df.copy()
+                clean_df['date'] = pd.to_datetime(clean_df['date'])
+                clean_df = clean_df.sort_values('date').set_index('date')
+                series = clean_df['value'].resample('D').ffill()
+                series = series.loc[start_date:end_date]
+                series.name = column_name
+                return series
+
+            fed_series = _prep_series(fed_funds, 'fed_funds_rate')
+
+            inflation_series: pd.Series
+            if cpi.empty:
+                inflation_series = pd.Series(dtype=float, name='cpi_inflation_rate')
+            else:
+                cpi_clean = cpi.copy()
+                cpi_clean['date'] = pd.to_datetime(cpi_clean['date'])
+                cpi_clean = cpi_clean.sort_values('date').set_index('date')
+                cpi_clean['cpi_inflation_rate'] = cpi_clean['value'].pct_change(periods=12) * 100
+                if cpi_clean['cpi_inflation_rate'].isna().all():
+                    cpi_clean['cpi_inflation_rate'] = cpi_clean['value'].pct_change() * 12 * 100
+                cpi_clean['cpi_inflation_rate'] = cpi_clean['cpi_inflation_rate'].ffill().bfill()
+                inflation_series = cpi_clean['cpi_inflation_rate'].resample('D').ffill()
+                inflation_series = inflation_series.loc[start_date:end_date]
+                inflation_series.name = 'cpi_inflation_rate'
+
+            unemployment_series = _prep_series(unemployment, 'unemployment_rate')
+
+            daily_df = pd.concat([fed_series, inflation_series, unemployment_series], axis=1)
+            daily_df.index.name = 'date'
+            daily_df = daily_df.ffill().bfill()
+
+            save_dir = os.path.dirname(save_path) or "."
+            os.makedirs(save_dir, exist_ok=True)
+            daily_df.reset_index().to_csv(save_path, index=False)
+
+            missing_count = int(daily_df.isna().sum().sum())
+            if missing_count == 0:
+                logger.info(
+                    "Daily macro dataset built successfully with %d rows and no missing values. Saved to %s",
+                    len(daily_df),
+                    save_path,
+                )
+            else:
+                logger.warning("Daily macro dataset contains %d missing values", missing_count)
+
+            return daily_df
+
+        except Exception as e:
+            logger.error(f"Failed to build daily macro dataset: {e}")
+            raise
     
     def get_economic_regime(self) -> Dict:
         """
@@ -356,6 +443,10 @@ if __name__ == "__main__":
     
     fetcher = MacroDataFetcher()
     
+    print("\n=== Daily Macro Dataset (Preview) ===")
+    macro_df = fetcher.build_daily_macro_dataset()
+    print(macro_df.head())
+
     print("\n=== Economic Regime Analysis ===")
     regime = fetcher.get_economic_regime()
     print(f"Regime: {regime['regime']} (Confidence: {regime['confidence']:.1%})")
