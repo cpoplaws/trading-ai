@@ -46,8 +46,8 @@ class TestDataIngestion:
         return start_date, end_date
 
     def _sample_df(self):
-        start_date, _ = self._date_bounds()
-        dates = pd.date_range(start=start_date, periods=self.SAMPLE_PERIODS, freq='B')
+        start_date, end_date = self._date_bounds()
+        dates = pd.date_range(start=start_date, end=end_date, freq='B')
         return pd.DataFrame(
             {
                 'Open': [100 + i for i in range(len(dates))],
