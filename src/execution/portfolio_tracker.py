@@ -438,6 +438,68 @@ class PortfolioTracker:
             'timestamp': datetime.now()
         }
     
+    def get_portfolio_summary(self, current_prices: Dict[str, float]) -> Dict:
+        """
+        Provide a simplified portfolio summary using broker positions.
+
+        Args:
+            current_prices: Mapping from symbol to latest market price; falls back
+            to avg_price when missing.
+
+        Returns:
+            Dict with positions list (symbol, quantity, avg_price, market_value,
+            unrealized_pnl, unrealized_pnl_pct, exposure), total_value, and cash.
+        """
+        positions_data = []
+        account = {}
+        if self.broker and hasattr(self.broker, "get_account_info"):
+            try:
+                account = self.broker.get_account_info() or {}
+            except Exception as exc:
+                logger.exception("Error getting account info: %s", exc)
+                account = {}
+        cash = account.get("cash", self.current_capital) if isinstance(account, dict) else getattr(account, "cash", self.current_capital)
+        portfolio_value = account.get("portfolio_value", cash) if isinstance(account, dict) else getattr(account, "portfolio_value", cash)
+
+        raw_positions = {}
+        if self.broker and hasattr(self.broker, "get_positions"):
+            try:
+                raw_positions = self.broker.get_positions() or {}
+            except Exception as exc:
+                logger.exception("Error getting positions: %s", exc)
+                raw_positions = {}
+
+        iterable_positions = (
+            raw_positions.items()
+            if isinstance(raw_positions, dict)
+            else enumerate(raw_positions)
+            if isinstance(raw_positions, (list, tuple))
+            else []
+        )
+
+        for symbol, pos in iterable_positions:
+            qty = pos.get("quantity", pos.get("qty", 0)) if isinstance(pos, dict) else getattr(pos, "qty", 0)
+            avg_price = pos.get("avg_price", 0) if isinstance(pos, dict) else getattr(pos, "avg_entry_price", 0)
+            price = current_prices.get(symbol, avg_price)
+            market_value = qty * price
+            unrealized = (price - avg_price) * qty
+            positions_data.append({
+                "symbol": symbol if isinstance(symbol, str) else getattr(pos, "symbol", str(symbol)),
+                "quantity": qty,
+                "avg_price": avg_price,
+                "market_value": market_value,
+                "unrealized_pnl": unrealized,
+                "unrealized_pnl_pct": (unrealized / (avg_price * qty)) * 100 if qty and avg_price else 0,
+                "exposure": (market_value / portfolio_value) if portfolio_value else 0,
+            })
+
+        total_value = cash + sum(p["market_value"] for p in positions_data)
+        return {
+            "positions": positions_data,
+            "total_value": total_value,
+            "cash": cash,
+        }
+    
     def check_risk_limits(self, max_drawdown_pct: float = 20.0,
                          max_position_pct: float = 30.0,
                          max_total_exposure_pct: float = 100.0) -> Dict:

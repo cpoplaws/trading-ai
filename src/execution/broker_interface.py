@@ -81,37 +81,9 @@ class Order:
     limit_price: Optional[float] = None
     stop_price: Optional[float] = None
 
-    def __getitem__(self, key: str):
-        """Allow dict-style access for backward compatibility in tests."""
-        attr = None
-        if key == "quantity":
-            attr = getattr(self, "qty", None)
-        elif hasattr(self, key):
-            attr = getattr(self, key)
-        if isinstance(attr, Enum):
-            return attr.value
-        return attr
-
-    def to_dict(self) -> Dict:
-        """Convert order to dictionary with primitive values."""
-        return {
-            "order_id": self.order_id,
-            "symbol": self.symbol,
-            "quantity": self.qty,
-            "side": self.side.value if isinstance(self.side, Enum) else self.side,
-            "order_type": self.order_type.value
-            if isinstance(self.order_type, Enum)
-            else self.order_type,
-            "time_in_force": self.time_in_force.value
-            if isinstance(self.time_in_force, Enum)
-            else self.time_in_force,
-            "status": self.status.value if isinstance(self.status, Enum) else self.status,
-            "created_at": self.created_at.isoformat(),
-            "filled_qty": self.filled_qty,
-            "filled_avg_price": self.filled_avg_price,
-            "limit_price": self.limit_price,
-            "stop_price": self.stop_price,
-        }
+    def __getitem__(self, item):
+        """Enable dict-style access for compatibility with existing call sites."""
+        return getattr(self, item)
 
 
 @dataclass

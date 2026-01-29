@@ -4,6 +4,10 @@ Comprehensive tests for advanced strategies modules.
 import numpy as np
 import pandas as pd
 import pytest
+import os
+import sys
+
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "src"))
 
 from advanced_strategies.portfolio_optimizer import PortfolioOptimizer
 from advanced_strategies.sentiment_analyzer import SentimentAnalyzer

@@ -69,38 +69,81 @@ class OrderManager:
         stop_price: float = None,
     ) -> Dict:
         """
-        Simplified order placement to align with phase 2 tests.
+        Place a single order with minimal validation and normalized output.
+
+        This is a lightweight helper for testing/integration. It performs a basic
+        order value check (against ``max_order_value``) then forwards to
+        ``broker.place_order``. It does not run the broader validation/deduping
+        done by :meth:`execute_trade`.
+
+        Returns a dict with normalized fields: ``status`` (str), ``symbol``,
+        ``order_id`` (if provided), and ``timestamp``. On validation/broker
+        failure it returns a rejected status with a message.
         """
-        estimated_price = limit_price if limit_price is not None else 100.0
+        estimated_price = limit_price or self.broker.get_current_price(symbol) or 0
         order_value = quantity * estimated_price
 
         if order_value > self.max_order_value:
-            result = {
+            return {
                 "status": OrderStatus.REJECTED.value,
-                "message": "Order value exceeds maximum limit",
+                "message": "Order value exceeds maximum allowed"
             }
-            return result
 
-        order = self.broker.place_order(
-            symbol=symbol,
-            quantity=quantity,
-            order_type=order_type,
-            side=side,
-            limit_price=limit_price,
-            stop_price=stop_price,
-        )
+        try:
+            broker_order = self.broker.place_order(
+                symbol=symbol,
+                quantity=quantity,
+                order_type=order_type,
+                side=side,
+                limit_price=limit_price,
+                stop_price=stop_price,
+            )
+        except TypeError:
+            broker_order = self.broker.place_order(
+                symbol=symbol,
+                qty=quantity,
+                side=side,
+                order_type=order_type,
+                time_in_force=TimeInForce.DAY,
+                limit_price=limit_price,
+                stop_price=stop_price,
+            )
 
-        # Normalize order to dict for compatibility
-        if isinstance(order, Order):
-            order_dict = order.to_dict()
+        if not broker_order:
+            return {
+                "status": OrderStatus.REJECTED.value,
+                "message": "Broker order failed"
+            }
+
+        # Ensure status field exists as string for tests
+        status = broker_order.get("status") if isinstance(broker_order, dict) else getattr(broker_order, "status", None)
+        if isinstance(broker_order, dict):
+            order_record = dict(broker_order)
+        elif hasattr(broker_order, "__dict__"):
+            order_record = dict(broker_order.__dict__)
         else:
-            order_dict = order or {
-                "status": OrderStatus.REJECTED.value,
-                "message": "Order failed",
-            }
+            order_record = {}
+        if status is None:
+            order_record["status"] = OrderStatus.NEW.value
+        elif hasattr(status, "value"):
+            order_record["status"] = status.value
+        else:
+            order_record["status"] = status
+        order_record.setdefault("symbol", symbol)
+        order_record.setdefault("order_id", broker_order.get("order_id") if isinstance(broker_order, dict) else "")
+        order_record.setdefault("timestamp", datetime.now().isoformat())
 
-        self.order_history.append(order_dict)
-        return order_dict
+        self.order_history.append(order_record)
+        try:
+            with open(self.trades_log_path, "a") as f:
+                f.write(json.dumps(order_record) + "\n")
+        except Exception as exc:  # pragma: no cover - logging only
+            logger.exception(
+                "Failed to write order record to trades log file '%s'. Order record: %s",
+                self.trades_log_path,
+                order_record,
+            )
+        return order_record
 
     def execute_trade(
         self,
@@ -340,7 +383,7 @@ class OrderManager:
             List of trade records
         """
         if self.order_history:
-            return self.order_history
+            return list(self.order_history)
 
         if not os.path.exists(self.trades_log_path):
             return []
