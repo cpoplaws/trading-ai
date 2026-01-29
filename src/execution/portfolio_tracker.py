@@ -21,6 +21,7 @@ class PortfolioTracker:
         Initialize portfolio tracker.
         
         Args:
+            broker: Broker instance (optional)
             initial_capital: Starting portfolio value
         """
         self.broker = broker
@@ -31,6 +32,75 @@ class PortfolioTracker:
         self.equity_curve = []
         self.max_equity = initial_capital
         self.start_time = datetime.now()
+
+    def get_portfolio_summary(self, current_prices: Dict[str, float]) -> Dict:
+        """
+        Return a lightweight portfolio summary (Phase 2 compatibility).
+        """
+        # Fetch positions from broker if provided
+        positions_source = {}
+        cash = self.current_capital
+
+        if self.broker is not None:
+            try:
+                account_info = self.broker.get_account_info()
+                if isinstance(account_info, dict):
+                    cash = account_info.get("cash", cash)
+                else:
+                    cash = getattr(account_info, "cash", cash)
+            except Exception:
+                pass
+
+            if hasattr(self.broker, "get_positions"):
+                try:
+                    positions_source = self.broker.get_positions()
+                except Exception:
+                    positions_source = {}
+
+        if not positions_source:
+            positions_source = self.positions
+
+        position_list = []
+        positions_value = 0.0
+
+        for symbol, pos in positions_source.items():
+            qty = pos.get("quantity") if isinstance(pos, dict) else getattr(pos, "qty", 0)
+            avg_price = (
+                pos.get("avg_price") if isinstance(pos, dict) else getattr(pos, "avg_price", 0)
+            )
+            qty = float(qty or 0)
+            avg_price = float(avg_price or 0)
+            current_price = float(current_prices.get(symbol, avg_price))
+            market_value = qty * current_price
+            unrealized_pnl = (current_price - avg_price) * qty
+            positions_value += market_value
+            denominator = avg_price * qty
+
+            position_list.append(
+                {
+                    "symbol": symbol,
+                    "quantity": qty,
+                    "avg_price": avg_price,
+                    "current_price": current_price,
+                    "market_value": market_value,
+                    "unrealized_pnl": unrealized_pnl,
+                    "unrealized_pnl_pct": (unrealized_pnl / denominator * 100)
+                    if denominator != 0
+                    else 0.0,
+                    "exposure": 0.0,  # filled later
+                }
+            )
+
+        total_value = float(cash) + positions_value
+        for pos in position_list:
+            pos["exposure"] = pos["market_value"] / total_value if total_value else 0.0
+
+        summary = {
+            "positions": position_list,
+            "total_value": total_value,
+            "cash": float(cash),
+        }
+        return summary
         
     def update_position(self, symbol: str, qty: int, price: float, 
                        current_price: float = None) -> Dict:

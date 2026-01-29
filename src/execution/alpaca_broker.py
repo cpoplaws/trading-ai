@@ -6,6 +6,7 @@ paper trading and live trading.
 """
 import os
 from datetime import datetime
+from enum import Enum
 from typing import Dict, List, Optional
 
 import requests
@@ -30,7 +31,7 @@ logger = setup_logger(__name__)
 class AlpacaBroker(BrokerInterface):
     """
     Alpaca broker implementation.
-    
+
     Connects to Alpaca's trading API for paper or live trading.
     """
 
@@ -43,8 +44,11 @@ class AlpacaBroker(BrokerInterface):
     ):
         """
         Initialize Alpaca broker.
-        
+
         Args:
+            api_key: Alpaca API key (optional, defaults to env)
+            secret_key: Alpaca secret key (optional, defaults to env)
+            base_url: Override base URL (optional)
             paper_trading: Use paper trading (True) or live trading (False)
         """
         self.paper_trading = paper_trading
@@ -64,10 +68,9 @@ class AlpacaBroker(BrokerInterface):
             self.data_url = "https://data.alpaca.markets"
         elif paper_trading:
             self.base_url = "https://paper-api.alpaca.markets"
-            self.data_url = "https://data.alpaca.markets"
         else:
             self.base_url = "https://api.alpaca.markets"
-            self.data_url = "https://data.alpaca.markets"
+        self.data_url = "https://data.alpaca.markets"
 
         # Create session with auth headers
         self.session = requests.Session()
@@ -79,25 +82,33 @@ class AlpacaBroker(BrokerInterface):
             }
         )
 
-        logger.info(f"AlpacaBroker initialized (Paper: {paper_trading})")
+        logger.info(f"AlpacaBroker initialized (Paper: {self.paper_trading})")
 
     def connect(self) -> bool:
-        """Establish connection to Alpaca API."""
-        try:
-            response = self.session.get(f"{self.base_url}/v2/account")
-            if response.status_code == 200:
-                account_data = response.json()
-                self.connected = True
-                logger.info(
-                    f"✅ Connected to Alpaca - Account: {account_data.get('account_number', 'N/A')}"
+        """Establish connection to Alpaca API with basic retry logic."""
+        attempts = 3
+        for attempt in range(1, attempts + 1):
+            try:
+                response = requests.get(
+                    f"{self.base_url}/v2/account", headers=self.session.headers
                 )
-                return True
-            else:
-                logger.error(f"❌ Connection failed: {response.status_code} - {response.text}")
-                return False
-        except Exception as e:
-            logger.error(f"❌ Connection error: {str(e)}")
-            return False
+                if response.status_code == 200:
+                    account_data = response.json()
+                    self.connected = True
+                    logger.info(
+                        f"✅ Connected to Alpaca - Account: {account_data.get('account_number', 'N/A')}"
+                    )
+                    return True
+                logger.error(
+                    f"❌ Connection failed (attempt {attempt}/{attempts}): {response.status_code} - {response.text}"
+                )
+            except Exception as e:
+                logger.error(f"❌ Connection error (attempt {attempt}/{attempts}): {str(e)}")
+            if attempt < attempts:
+                import time
+
+                time.sleep(1 * attempt)
+        return False
 
     def disconnect(self) -> None:
         """Disconnect from Alpaca API."""
@@ -108,7 +119,9 @@ class AlpacaBroker(BrokerInterface):
     def get_account_info(self) -> Account:
         """Get account information."""
         try:
-            response = self.session.get(f"{self.base_url}/v2/account")
+            response = requests.get(
+                f"{self.base_url}/v2/account", headers=self.session.headers
+            )
             if response.status_code == 200:
                 data = response.json()
                 return Account(
@@ -131,7 +144,9 @@ class AlpacaBroker(BrokerInterface):
     def get_positions(self) -> List[Position]:
         """Get all open positions."""
         try:
-            response = self.session.get(f"{self.base_url}/v2/positions")
+            response = requests.get(
+                f"{self.base_url}/v2/positions", headers=self.session.headers
+            )
             if response.status_code == 200:
                 positions_data = response.json()
                 positions = []
@@ -159,7 +174,9 @@ class AlpacaBroker(BrokerInterface):
     def get_position(self, symbol: str) -> Optional[Position]:
         """Get position for a specific symbol."""
         try:
-            response = self.session.get(f"{self.base_url}/v2/positions/{symbol}")
+            response = requests.get(
+                f"{self.base_url}/v2/positions/{symbol}", headers=self.session.headers
+            )
             if response.status_code == 200:
                 pos = response.json()
                 return Position(
@@ -201,9 +218,11 @@ class AlpacaBroker(BrokerInterface):
             order_data = {
                 "symbol": symbol,
                 "qty": qty,
-                "side": side.value,
-                "type": order_type.value,
-                "time_in_force": time_in_force.value,
+                "side": side.value if isinstance(side, Enum) else side,
+                "type": order_type.value if isinstance(order_type, Enum) else order_type,
+                "time_in_force": time_in_force.value
+                if isinstance(time_in_force, Enum)
+                else time_in_force,
             }
 
             if limit_price is not None:
@@ -212,12 +231,16 @@ class AlpacaBroker(BrokerInterface):
             if stop_price is not None:
                 order_data["stop_price"] = stop_price
 
-            response = self.session.post(f"{self.base_url}/v2/orders", json=order_data)
+            response = requests.post(
+                f"{self.base_url}/v2/orders",
+                json=order_data,
+                headers=self.session.headers,
+            )
 
-            if response.status_code == 200 or response.status_code == 201:
+            if response.status_code in (200, 201):
                 order_resp = response.json()
                 logger.info(
-                    f"✅ Order placed: {side.value.upper()} {qty} {symbol} @ {order_type.value}"
+                    f"✅ Order placed: {order_data['side'].upper()} {qty} {symbol} @ {order_data['type']}"
                 )
                 parsed = self._parse_order(order_resp)
                 return parsed
@@ -237,7 +260,9 @@ class AlpacaBroker(BrokerInterface):
     def cancel_order(self, order_id: str) -> bool:
         """Cancel an open order."""
         try:
-            response = self.session.delete(f"{self.base_url}/v2/orders/{order_id}")
+            response = requests.delete(
+                f"{self.base_url}/v2/orders/{order_id}", headers=self.session.headers
+            )
             if response.status_code == 204:
                 logger.info(f"✅ Order {order_id} canceled")
                 return True
@@ -248,10 +273,29 @@ class AlpacaBroker(BrokerInterface):
             logger.error(f"Error canceling order: {str(e)}")
             return False
 
+    def modify_order(self, order_id: str, new_params: Dict) -> bool:
+        """Modify an open order."""
+        try:
+            response = requests.patch(
+                f"{self.base_url}/v2/orders/{order_id}",
+                json=new_params,
+                headers=self.session.headers,
+            )
+            if response.status_code in (200, 201):
+                logger.info(f"✅ Order {order_id} modified")
+                return True
+            logger.error(f"Failed to modify order {order_id}: {response.text}")
+            return False
+        except Exception as e:
+            logger.error(f"Error modifying order: {str(e)}")
+            return False
+
     def get_order(self, order_id: str) -> Optional[Order]:
         """Get order details."""
         try:
-            response = self.session.get(f"{self.base_url}/v2/orders/{order_id}")
+            response = requests.get(
+                f"{self.base_url}/v2/orders/{order_id}", headers=self.session.headers
+            )
             if response.status_code == 200:
                 return self._parse_order(response.json())
             else:
@@ -267,7 +311,9 @@ class AlpacaBroker(BrokerInterface):
             if status:
                 params["status"] = status.value
 
-            response = self.session.get(f"{self.base_url}/v2/orders", params=params)
+            response = requests.get(
+                f"{self.base_url}/v2/orders", params=params, headers=self.session.headers
+            )
             if response.status_code == 200:
                 orders_data = response.json()
                 return [self._parse_order(order) for order in orders_data]
@@ -281,9 +327,12 @@ class AlpacaBroker(BrokerInterface):
     def get_current_price(self, symbol: str) -> Optional[float]:
         """Get current market price for a symbol."""
         try:
-            response = self.session.get(
+            response = requests.get(
                 f"{self.data_url}/v2/stocks/{symbol}/quotes/latest",
-                headers={"APCA-API-KEY-ID": self.api_key, "APCA-API-SECRET-KEY": self.secret_key},
+                headers={
+                    "APCA-API-KEY-ID": self.api_key,
+                    "APCA-API-SECRET-KEY": self.secret_key,
+                },
             )
             if response.status_code == 200:
                 data = response.json()
