@@ -164,6 +164,10 @@ def fetch_data(
                     "Close": prices,
                     "Volume": volume,
                 }, index=dates)
+                file_path = os.path.join(save_path, f"{ticker}.csv")
+                df.to_csv(file_path)
+                logger.info(f"Saved {ticker} data to {file_path}")
+                continue  # Synthetic data does not count as success
 
             file_path = os.path.join(save_path, f"{ticker}.csv")
             df.to_csv(file_path)
