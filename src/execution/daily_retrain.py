@@ -3,8 +3,15 @@ Daily automated trading pipeline - Fetch data, engineer features, train models, 
 """
 import sys
 import os
-from datetime import datetime
+import shutil
+import time
+from datetime import datetime, timedelta
 from typing import List, Optional
+try:
+    import schedule  # type: ignore
+except ImportError:
+    schedule = None
+SCHEDULE_AVAILABLE = schedule is not None
 
 # Add project root to Python path
 current_dir = os.path.dirname(os.path.abspath(__file__))
@@ -24,14 +31,145 @@ import pandas as pd
 
 # Set up logging
 logger = setup_logger("daily_pipeline", "INFO")
+DEFAULT_LOOKBACK_DAYS = 365
+SCHEDULE_DEFAULT_SLEEP = 5
+SCHEDULE_MIN_SLEEP = 1
+SCHEDULE_MAX_SLEEP = 60
+MODEL_PATH_TEMPLATE = "./models/model_{ticker}.joblib"
+SIGNAL_FILE_TEMPLATE = "./signals/{ticker}_signals.csv"
 
-def daily_pipeline(tickers: Optional[List[str]] = None, start_date: str = '2020-01-01') -> bool:
+
+def resolve_start_date(start_date: Optional[str], window_days: int, current_time: Optional[datetime] = None) -> str:
+    """Return an explicit start_date using a rolling lookback window when not provided."""
+    now = current_time or datetime.utcnow()
+    if start_date:
+        return start_date
+    return (now - timedelta(days=window_days)).strftime('%Y-%m-%d')
+
+
+def _calculate_sleep_duration(next_run: Optional[float]) -> float:
+    """
+    Clamp the schedule idle time to a reasonable sleep duration.
+    
+    Args:
+        next_run: Seconds until the next scheduled task as reported by `schedule.idle_seconds()`.
+    
+    Returns:
+        Sleep duration bounded between SCHEDULE_MIN_SLEEP and SCHEDULE_MAX_SLEEP.
+    """
+    if next_run is None:
+        return float(SCHEDULE_DEFAULT_SLEEP)
+    return float(max(SCHEDULE_MIN_SLEEP, min(next_run, SCHEDULE_MAX_SLEEP)))
+
+
+def archive_model(model_path: str, ticker: str, run_date: Optional[datetime] = None, archive_dir: Optional[str] = None) -> Optional[str]:
+    """
+    Save a dated copy of the latest model so each day's retrain is preserved.
+
+    Args:
+        model_path: Path to the most recent model file.
+        ticker: Ticker symbol used for naming.
+        run_date: Optional date to embed in the archived filename.
+        archive_dir: Optional directory for archived models (defaults to ./models/daily/).
+
+    Returns:
+        The path to the archived model, or None if the source model is missing.
+    """
+    if not os.path.exists(model_path):
+        logger.warning(f"Model path not found for archiving: {model_path}")
+        return None
+
+    archive_dir = archive_dir or os.path.join(os.path.dirname(model_path), "daily")
+    os.makedirs(archive_dir, exist_ok=True)
+
+    run_date = run_date or datetime.utcnow()
+    dated_name = f"model_{ticker}_{run_date.strftime('%Y%m%d_%H%M%S')}.joblib"
+    archived_path = os.path.join(archive_dir, dated_name)
+
+    shutil.copy2(model_path, archived_path)
+    logger.info(f"Archived daily model for {ticker} to {archived_path}")
+    return archived_path
+
+
+def schedule_daily_retrain(run_time: str = "09:00", tickers: Optional[List[str]] = None, window_days: int = DEFAULT_LOOKBACK_DAYS) -> None:
+    """
+    Schedule the daily retrain job to run once per day at a specific time.
+
+    This function uses the `schedule` library to register `daily_pipeline` as a
+    recurring job and then enters a loop that keeps the scheduler running until
+    the process is interrupted.
+
+    Args:
+        run_time:
+            Time of day (in 24-hour ``"HH:MM"`` format) when the daily retrain
+            should run, e.g. ``"09:00"`` for 9:00 AM or ``"17:30"`` for 5:30 PM.
+            The string is passed directly to ``schedule.every().day.at(run_time)``.
+        tickers:
+            Optional list of ticker symbols to process in the daily pipeline.
+            If ``None``, the pipeline will fall back to its internal defaults
+            (currently ``["AAPL", "MSFT", "SPY"]`` as reflected in the log
+            message).
+        window_days:
+            Size of the rolling lookback window, in days, that controls how much
+            recent historical data is used when fetching data and retraining
+            models in ``daily_pipeline``.
+
+    Behavior:
+        After scheduling the job, this function enters an infinite loop that:
+
+        * runs any pending scheduled jobs via ``schedule.run_pending()``, and
+        * sleeps until the next scheduled run (with a bounded sleep duration).
+
+        It will continue running until the process receives a ``KeyboardInterrupt``
+        (for example, by pressing ``Ctrl+C`` in the terminal), at which point the
+        loop exits and a shutdown message is logged. This provides a graceful way
+        to stop the scheduler.
+
+    Example:
+        Run the daily retrain at 09:30 UTC for a custom set of tickers, using a
+        180-day lookback window:
+
+        .. code-block:: python
+
+            from execution.daily_retrain import schedule_daily_retrain
+
+            if __name__ == "__main__":
+                schedule_daily_retrain(
+                    run_time="09:30",
+                    tickers=["AAPL", "MSFT", "SPY"],
+                    window_days=180,
+                )
+    """
+    if not SCHEDULE_AVAILABLE:
+        raise ImportError(
+            "The 'schedule' library is required for scheduled retraining. "
+            "Install it with: 'pip install schedule' or 'pip install -r requirements.txt'."
+        )
+
+    logger.info(f"Scheduling daily retrain at {run_time} for tickers: {tickers or ['AAPL', 'MSFT', 'SPY']}")
+    schedule.every().day.at(run_time).do(daily_pipeline, tickers=tickers, window_days=window_days)
+
+    try:
+        while True:
+            schedule.run_pending()
+            next_run = schedule.idle_seconds()
+            time.sleep(_calculate_sleep_duration(next_run))
+    except KeyboardInterrupt:
+        logger.info("Stopping scheduled daily retrain loop")
+
+
+def daily_pipeline(
+    tickers: Optional[List[str]] = None,
+    start_date: Optional[str] = None,
+    window_days: int = DEFAULT_LOOKBACK_DAYS,
+) -> bool:
     """
     Execute the complete daily trading pipeline.
     
     Args:
         tickers: List of ticker symbols to process
-        start_date: Start date for data fetching
+        start_date: Optional start date override (defaults to rolling window)
+        window_days: Rolling window lookback (in days) for retraining
         
     Returns:
         bool: True if pipeline completed successfully
@@ -39,7 +177,8 @@ def daily_pipeline(tickers: Optional[List[str]] = None, start_date: str = '2020-
     if tickers is None:
         tickers = ['AAPL', 'MSFT', 'SPY']
     
-    logger.info(f"Starting daily pipeline for tickers: {tickers}")
+    start_date = resolve_start_date(start_date, window_days)
+    logger.info(f"Starting daily pipeline for tickers: {tickers} (rolling window start: {start_date})")
     
     # Step 1: Fetch latest data
     logger.info("Step 1: Fetching market data...")
@@ -87,6 +226,7 @@ def daily_pipeline(tickers: Optional[List[str]] = None, start_date: str = '2020-
             
             # Save processed data
             processed_path = f'./data/processed/{ticker}.csv'
+            model_path = MODEL_PATH_TEMPLATE.format(ticker=ticker)
             os.makedirs('./data/processed', exist_ok=True)
             success = fg.save_features(processed_path)
             if not success:
@@ -101,11 +241,14 @@ def daily_pipeline(tickers: Optional[List[str]] = None, start_date: str = '2020-
                 continue
                 
             logger.info(f"Model training metrics for {ticker}: {metrics}")
+            # Training succeeded; preserve the newly trained model for daily history
+            if os.path.exists(model_path):
+                archive_model(model_path, ticker, run_date=datetime.utcnow())
+            else:
+                logger.warning(f"Expected model not found for {ticker} after training at {model_path}")
             
             # Step 5: Generate signals
             logger.info(f"Generating signals for {ticker}...")
-            model_path = f'./models/model_{ticker}.joblib'
-            os.makedirs('./signals', exist_ok=True)
             
             signal_success = generate_signals(model_path, processed_path)
             if not signal_success:
@@ -113,7 +256,7 @@ def daily_pipeline(tickers: Optional[List[str]] = None, start_date: str = '2020-
                 continue
             
             # Step 6: Analyze signals
-            signal_file = f'./signals/{ticker}_signals.csv'
+            signal_file = SIGNAL_FILE_TEMPLATE.format(ticker=ticker)
             if os.path.exists(signal_file):
                 analysis = analyze_signals(signal_file)
                 logger.info(f"Signal analysis for {ticker}: {analysis}")
@@ -151,11 +294,14 @@ def run_backtest(ticker: str) -> bool:
     return True
 
 if __name__ == "__main__":
-    # Run the daily pipeline
-    success = daily_pipeline()
-    
-    if success:
-        logger.info("Daily pipeline completed successfully!")
+    if "--schedule" in sys.argv:
+        schedule_time = os.getenv("DAILY_RETRAIN_TIME", "09:00")
+        schedule_daily_retrain(run_time=schedule_time)
     else:
-        logger.error("Daily pipeline failed!")
-        sys.exit(1)
+        success = daily_pipeline()
+        
+        if success:
+            logger.info("Daily pipeline completed successfully!")
+        else:
+            logger.error("Daily pipeline failed!")
+            sys.exit(1)
