@@ -96,7 +96,10 @@ def schedule_daily_retrain(run_time: str = "09:00", tickers: Optional[List[str]]
     Schedule the daily retrain job at a specific time.
     """
     if not SCHEDULE_AVAILABLE:
-        raise ImportError("The 'schedule' library is required for scheduled retraining. Install it via requirements.txt.")
+        raise ImportError(
+            "The 'schedule' library is required for scheduled retraining. "
+            "Install it with: 'pip install schedule' or 'pip install -r requirements.txt'."
+        )
 
     logger.info(f"Scheduling daily retrain at {run_time} for tickers: {tickers or ['AAPL', 'MSFT', 'SPY']}")
     schedule.every().day.at(run_time).do(daily_pipeline, tickers=tickers, window_days=window_days)
