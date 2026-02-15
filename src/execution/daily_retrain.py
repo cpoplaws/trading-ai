@@ -93,7 +93,52 @@ def archive_model(model_path: str, ticker: str, run_date: Optional[datetime] = N
 
 def schedule_daily_retrain(run_time: str = "09:00", tickers: Optional[List[str]] = None, window_days: int = DEFAULT_LOOKBACK_DAYS) -> None:
     """
-    Schedule the daily retrain job at a specific time.
+    Schedule the daily retrain job to run once per day at a specific time.
+
+    This function uses the `schedule` library to register `daily_pipeline` as a
+    recurring job and then enters a loop that keeps the scheduler running until
+    the process is interrupted.
+
+    Args:
+        run_time:
+            Time of day (in 24-hour ``"HH:MM"`` format) when the daily retrain
+            should run, e.g. ``"09:00"`` for 9:00 AM or ``"17:30"`` for 5:30 PM.
+            The string is passed directly to ``schedule.every().day.at(run_time)``.
+        tickers:
+            Optional list of ticker symbols to process in the daily pipeline.
+            If ``None``, the pipeline will fall back to its internal defaults
+            (currently ``["AAPL", "MSFT", "SPY"]`` as reflected in the log
+            message).
+        window_days:
+            Size of the rolling lookback window, in days, that controls how much
+            recent historical data is used when fetching data and retraining
+            models in ``daily_pipeline``.
+
+    Behavior:
+        After scheduling the job, this function enters an infinite loop that:
+
+        * runs any pending scheduled jobs via ``schedule.run_pending()``, and
+        * sleeps until the next scheduled run (with a bounded sleep duration).
+
+        It will continue running until the process receives a ``KeyboardInterrupt``
+        (for example, by pressing ``Ctrl+C`` in the terminal), at which point the
+        loop exits and a shutdown message is logged. This provides a graceful way
+        to stop the scheduler.
+
+    Example:
+        Run the daily retrain at 09:30 UTC for a custom set of tickers, using a
+        180-day lookback window:
+
+        .. code-block:: python
+
+            from execution.daily_retrain import schedule_daily_retrain
+
+            if __name__ == "__main__":
+                schedule_daily_retrain(
+                    run_time="09:30",
+                    tickers=["AAPL", "MSFT", "SPY"],
+                    window_days=180,
+                )
     """
     if not SCHEDULE_AVAILABLE:
         raise ImportError(
