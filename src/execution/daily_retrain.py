@@ -83,7 +83,7 @@ def archive_model(model_path: str, ticker: str, run_date: Optional[datetime] = N
     os.makedirs(archive_dir, exist_ok=True)
 
     run_date = run_date or datetime.utcnow()
-    dated_name = f"model_{ticker}_{run_date.strftime('%Y%m%d')}.joblib"
+    dated_name = f"model_{ticker}_{run_date.strftime('%Y%m%d_%H%M%S')}.joblib"
     archived_path = os.path.join(archive_dir, dated_name)
 
     shutil.copy2(model_path, archived_path)
