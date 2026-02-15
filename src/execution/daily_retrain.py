@@ -249,7 +249,6 @@ def daily_pipeline(
             
             # Step 5: Generate signals
             logger.info(f"Generating signals for {ticker}...")
-            os.makedirs('./signals', exist_ok=True)
             
             signal_success = generate_signals(model_path, processed_path)
             if not signal_success:
