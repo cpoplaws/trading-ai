@@ -1,0 +1,256 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: postgres
+  namespace: trading-ai
+  labels:
+    app: postgres
+    tier: database
+spec:
+  serviceName: postgres-service
+  replicas: 1
+  selector:
+    matchLabels:
+      app: postgres
+  template:
+    metadata:
+      labels:
+        app: postgres
+        tier: database
+    spec:
+      containers:
+      - name: postgres
+        image: timescale/timescaledb:latest-pg14
+        ports:
+        - containerPort: 5432
+          name: postgres
+        env:
+        - name: POSTGRES_DB
+          valueFrom:
+            secretKeyRef:
+              name: postgres-secret
+              key: database
+        - name: POSTGRES_USER
+          valueFrom:
+            secretKeyRef:
+              name: postgres-secret
+              key: username
+        - name: POSTGRES_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: postgres-secret
+              key: password
+        - name: PGDATA
+          value: /var/lib/postgresql/data/pgdata
+        - name: POSTGRES_INITDB_ARGS
+          value: "-E UTF8 --locale=en_US.UTF-8"
+        resources:
+          requests:
+            memory: "1Gi"
+            cpu: "500m"
+          limits:
+            memory: "4Gi"
+            cpu: "2000m"
+        livenessProbe:
+          exec:
+            command:
+            - pg_isready
+            - -U
+            - $(POSTGRES_USER)
+          initialDelaySeconds: 30
+          periodSeconds: 10
+          timeoutSeconds: 5
+        readinessProbe:
+          exec:
+            command:
+            - pg_isready
+            - -U
+            - $(POSTGRES_USER)
+          initialDelaySeconds: 10
+          periodSeconds: 5
+          timeoutSeconds: 3
+        volumeMounts:
+        - name: postgres-data
+          mountPath: /var/lib/postgresql/data
+        - name: postgres-config
+          mountPath: /etc/postgresql
+        - name: init-scripts
+          mountPath: /docker-entrypoint-initdb.d
+      volumes:
+      - name: postgres-config
+        configMap:
+          name: postgres-config
+      - name: init-scripts
+        configMap:
+          name: postgres-init-scripts
+  volumeClaimTemplates:
+  - metadata:
+      name: postgres-data
+    spec:
+      accessModes:
+      - ReadWriteOnce
+      resources:
+        requests:
+          storage: 100Gi
+      storageClassName: fast-ssd
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: postgres-service
+  namespace: trading-ai
+  labels:
+    app: postgres
+spec:
+  type: ClusterIP
+  ports:
+  - port: 5432
+    targetPort: 5432
+    protocol: TCP
+    name: postgres
+  selector:
+    app: postgres
+  clusterIP: None
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: postgres-config
+  namespace: trading-ai
+data:
+  postgresql.conf: |
+    # Connection settings
+    max_connections = 200
+    shared_buffers = 1GB
+    effective_cache_size = 3GB
+    maintenance_work_mem = 256MB
+
+    # Write-ahead log
+    wal_level = replica
+    max_wal_size = 2GB
+    min_wal_size = 1GB
+
+    # Query tuning
+    random_page_cost = 1.1
+    effective_io_concurrency = 200
+    work_mem = 5MB
+
+    # Monitoring
+    log_destination = 'stderr'
+    logging_collector = on
+    log_directory = 'log'
+    log_filename = 'postgresql-%Y-%m-%d.log'
+    log_statement = 'mod'
+    log_duration = on
+    log_min_duration_statement = 1000
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: postgres-init-scripts
+  namespace: trading-ai
+data:
+  01-create-extensions.sql: |
+    -- Enable TimescaleDB extension
+    CREATE EXTENSION IF NOT EXISTS timescaledb CASCADE;
+
+    -- Enable other useful extensions
+    CREATE EXTENSION IF NOT EXISTS pg_stat_statements;
+    CREATE EXTENSION IF NOT EXISTS btree_gin;
+    CREATE EXTENSION IF NOT EXISTS btree_gist;
+
+  02-create-tables.sql: |
+    -- Trades table (time-series)
+    CREATE TABLE IF NOT EXISTS trades (
+      id BIGSERIAL,
+      timestamp TIMESTAMPTZ NOT NULL,
+      symbol VARCHAR(20) NOT NULL,
+      side VARCHAR(10) NOT NULL,
+      quantity DECIMAL(20, 8) NOT NULL,
+      price DECIMAL(20, 8) NOT NULL,
+      order_type VARCHAR(20),
+      status VARCHAR(20),
+      exchange VARCHAR(50),
+      strategy VARCHAR(50),
+      profit_loss DECIMAL(20, 8),
+      PRIMARY KEY (id, timestamp)
+    );
+
+    -- Convert to hypertable
+    SELECT create_hypertable('trades', 'timestamp', if_not_exists => TRUE);
+
+    -- Create indexes
+    CREATE INDEX IF NOT EXISTS idx_trades_symbol ON trades (symbol, timestamp DESC);
+    CREATE INDEX IF NOT EXISTS idx_trades_strategy ON trades (strategy, timestamp DESC);
+
+    -- Agent decisions table
+    CREATE TABLE IF NOT EXISTS agent_decisions (
+      id BIGSERIAL,
+      timestamp TIMESTAMPTZ NOT NULL,
+      agent_id VARCHAR(50) NOT NULL,
+      symbol VARCHAR(20) NOT NULL,
+      action INTEGER NOT NULL,
+      confidence DECIMAL(5, 4),
+      reward DECIMAL(20, 8),
+      state JSONB,
+      PRIMARY KEY (id, timestamp)
+    );
+
+    SELECT create_hypertable('agent_decisions', 'timestamp', if_not_exists => TRUE);
+
+    -- Signals table
+    CREATE TABLE IF NOT EXISTS signals (
+      id BIGSERIAL,
+      timestamp TIMESTAMPTZ NOT NULL,
+      symbol VARCHAR(20) NOT NULL,
+      signal_type VARCHAR(20) NOT NULL,
+      confidence DECIMAL(5, 4),
+      source VARCHAR(50),
+      metadata JSONB,
+      PRIMARY KEY (id, timestamp)
+    );
+
+    SELECT create_hypertable('signals', 'timestamp', if_not_exists => TRUE);
+
+    -- Performance metrics table
+    CREATE TABLE IF NOT EXISTS performance_metrics (
+      id BIGSERIAL,
+      timestamp TIMESTAMPTZ NOT NULL,
+      metric_name VARCHAR(50) NOT NULL,
+      metric_value DECIMAL(20, 8),
+      strategy VARCHAR(50),
+      symbol VARCHAR(20),
+      PRIMARY KEY (id, timestamp)
+    );
+
+    SELECT create_hypertable('performance_metrics', 'timestamp', if_not_exists => TRUE);
+
+    -- Liquidations table
+    CREATE TABLE IF NOT EXISTS liquidations (
+      id BIGSERIAL,
+      timestamp TIMESTAMPTZ NOT NULL,
+      symbol VARCHAR(20) NOT NULL,
+      side VARCHAR(10) NOT NULL,
+      amount_usd DECIMAL(20, 2),
+      price DECIMAL(20, 8),
+      exchange VARCHAR(50),
+      PRIMARY KEY (id, timestamp)
+    );
+
+    SELECT create_hypertable('liquidations', 'timestamp', if_not_exists => TRUE);
+
+    -- Whale transactions table
+    CREATE TABLE IF NOT EXISTS whale_transactions (
+      id BIGSERIAL,
+      timestamp TIMESTAMPTZ NOT NULL,
+      whale_address VARCHAR(100) NOT NULL,
+      token VARCHAR(20) NOT NULL,
+      action VARCHAR(20) NOT NULL,
+      amount DECIMAL(30, 8),
+      usd_value DECIMAL(20, 2),
+      tx_hash VARCHAR(100),
+      PRIMARY KEY (id, timestamp)
+    );
+
+    SELECT create_hypertable('whale_transactions', 'timestamp', if_not_exists => TRUE);
+    CREATE INDEX IF NOT EXISTS idx_whale_address ON whale_transactions (whale_address, timestamp DESC);
