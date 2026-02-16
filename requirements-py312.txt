@@ -36,7 +36,7 @@ keras>=3.13.1,<4.0
 # ==============================================================================
 
 # yfinance - Yahoo Finance data downloader
-yfinance>=0.2.50,<1.0
+yfinance>=0.2.50,<2.0
 # TA-Lib - Technical analysis library (requires binary install)
 TA-Lib>=0.4.28
 
