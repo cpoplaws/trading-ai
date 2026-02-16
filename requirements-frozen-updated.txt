@@ -118,7 +118,7 @@ parsimonious==0.10.0
 passlib==1.7.4
 pathspec==1.0.4
 peewee==3.19.0
-pillow==11.3.0
+pillow==12.1.1
 pip-api==0.0.34
 pip-requirements-parser==32.0.1
 pip_audit==2.9.0
