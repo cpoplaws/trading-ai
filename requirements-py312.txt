@@ -75,7 +75,7 @@ solders>=0.22.0,<1.0
 # aiohttp - Async HTTP client/server
 aiohttp>=3.13.0,<4.0
 # WebSockets - Async WebSocket client/server
-websockets>=13.0,<14.0
+websockets>=13.0,<17.0
 # requests - HTTP library
 requests>=2.32.0,<3.0
 # urllib3 - HTTP client (with security fixes)
