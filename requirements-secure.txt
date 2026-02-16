@@ -37,7 +37,7 @@ eth-utils>=3.0.0,<6.0
 
 # Dashboard & Visualization
 streamlit>=1.28.0,<2.0
-plotly>=5.15.0,<6.0
+plotly>=5.15.0,<7.0
 pillow>=12.1.1,<13.0  # Patched: CVE-2026-25990
 
 # Sentiment Analysis
