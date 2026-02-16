@@ -5,7 +5,7 @@ import os
 import logging
 from typing import Dict, List, Optional, Any
 from web3 import Web3
-from web3.middleware import geth_poa_middleware
+from web3.middleware import ExtraDataToPOAMiddleware
 from eth_account import Account
 from dotenv import load_dotenv
 
@@ -48,7 +48,7 @@ class EthereumInterface:
         
         # Add middleware for L2s that use PoA
         if chain_id in [10, 8453]:  # Optimism, Base
-            self.w3.middleware_onion.inject(geth_poa_middleware, layer=0)
+            self.w3.middleware_onion.inject(ExtraDataToPOAMiddleware, layer=0)
         
         # Wallet setup
         self.private_key = private_key or os.getenv('ETH_PRIVATE_KEY')

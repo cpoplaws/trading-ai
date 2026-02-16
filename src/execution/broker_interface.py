@@ -13,7 +13,7 @@ from typing import Dict, List, Optional, Union
 
 from dotenv import load_dotenv
 
-from utils.logger import setup_logger
+from ..utils.logger import setup_logger
 
 load_dotenv()
 logger = setup_logger(__name__)

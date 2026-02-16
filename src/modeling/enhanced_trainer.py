@@ -29,7 +29,7 @@ from sklearn.preprocessing import StandardScaler
 import joblib
 
 # Neural Networks
-from src.modeling.neural_models import LSTMTradingModel, HybridTradingModel, train_neural_model
+from .neural_models import LSTMTradingModel, HybridTradingModel, train_neural_model
 
 logger = logging.getLogger(__name__)
 

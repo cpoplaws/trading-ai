@@ -11,9 +11,9 @@ import time
 # Add src to path
 sys.path.append(os.path.dirname(os.path.dirname(__file__)))
 
-from execution.broker_interface import create_broker, AlpacaBroker, MockBroker
-from utils.logger import setup_logger
-from strategy.simple_strategy import analyze_signals
+from .broker_interface import create_broker, AlpacaBroker, MockBroker
+from ..utils.logger import setup_logger
+from ..strategy.simple_strategy import analyze_signals
 
 # Set up logging
 logger = setup_logger("signal_executor", "INFO")

@@ -1,0 +1,180 @@
+version: "3.8"
+
+services:
+  # ==========================================
+  # Database (TimescaleDB - PostgreSQL extension)
+  # ==========================================
+  timescaledb:
+    image: timescale/timescaledb:latest-pg15
+    container_name: trading_timescaledb
+    environment:
+      - POSTGRES_DB=trading_db
+      - POSTGRES_USER=trading_user
+      - POSTGRES_PASSWORD=trading_password
+      - PGDATA=/var/lib/postgresql/data/pgdata
+    ports:
+      - "5432:5432"
+    volumes:
+      - timescale_data:/var/lib/postgresql/data
+    networks:
+      - trading_network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U trading_user -d trading_db"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+  # ==========================================
+  # Redis (Cache & Pub/Sub)
+  # ==========================================
+  redis:
+    image: redis:7-alpine
+    container_name: trading_redis
+    command: redis-server --appendonly yes
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - trading_network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+    restart: unless-stopped
+
+  # ==========================================
+  # Trading AI API (FastAPI)
+  # ==========================================
+  trading-api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: trading_api
+    command: uvicorn src.api.main:app --host 0.0.0.0 --port 8000 --reload
+    ports:
+      - "8000:8000"
+    environment:
+      - POSTGRES_HOST=timescaledb
+      - POSTGRES_PORT=5432
+      - POSTGRES_DB=trading_db
+      - POSTGRES_USER=trading_user
+      - POSTGRES_PASSWORD=trading_password
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - PYTHONUNBUFFERED=1
+      - PYTHONPATH=/app
+    volumes:
+      - ./src:/app/src
+      - ./logs:/app/logs
+      - ./.env:/app/.env
+    depends_on:
+      timescaledb:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - trading_network
+    restart: unless-stopped
+
+  # ==========================================
+  # Prometheus (Metrics Collection)
+  # ==========================================
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: trading_prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.console.libraries=/etc/prometheus/console_libraries'
+      - '--web.console.templates=/etc/prometheus/consoles'
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./infrastructure/monitoring/prometheus.yml:/etc/prometheus/prometheus.yml
+      - prometheus_data:/prometheus
+    networks:
+      - trading_network
+    restart: unless-stopped
+
+  # ==========================================
+  # Grafana (Monitoring Dashboards)
+  # ==========================================
+  grafana:
+    image: grafana/grafana:latest
+    container_name: trading_grafana
+    ports:
+      - "3001:3000"  # Port 3001 to avoid conflict with Next.js
+    environment:
+      - GF_SECURITY_ADMIN_USER=admin
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+      - GF_USERS_ALLOW_SIGN_UP=false
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./infrastructure/monitoring/grafana/dashboards:/etc/grafana/provisioning/dashboards
+      - ./infrastructure/monitoring/grafana/datasources:/etc/grafana/provisioning/datasources
+    depends_on:
+      - prometheus
+    networks:
+      - trading_network
+    restart: unless-stopped
+
+  # ==========================================
+  # Web Dashboard (Next.js)
+  # ==========================================
+  web-dashboard:
+    build:
+      context: ./src/web-dashboard
+      dockerfile: Dockerfile
+    container_name: trading_web_dashboard
+    ports:
+      - "3000:3000"
+    environment:
+      - NEXT_PUBLIC_API_URL=http://localhost:8000
+      - NEXT_PUBLIC_WS_URL=ws://localhost:8000/ws
+    volumes:
+      - ./src/web-dashboard:/app
+      - /app/node_modules
+      - /app/.next
+    depends_on:
+      - trading-api
+    networks:
+      - trading_network
+    restart: unless-stopped
+    profiles:
+      - dashboard  # Optional service
+
+  # ==========================================
+  # pgAdmin (Database Management)
+  # ==========================================
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    container_name: trading_pgadmin
+    environment:
+      - PGADMIN_DEFAULT_EMAIL=admin@trading.ai
+      - PGADMIN_DEFAULT_PASSWORD=admin
+      - PGADMIN_CONFIG_SERVER_MODE=False
+    ports:
+      - "5050:80"
+    volumes:
+      - pgadmin_data:/var/lib/pgadmin
+    depends_on:
+      - timescaledb
+    networks:
+      - trading_network
+    restart: unless-stopped
+    profiles:
+      - tools  # Optional service
+
+networks:
+  trading_network:
+    driver: bridge
+
+volumes:
+  timescale_data:
+  redis_data:
+  prometheus_data:
+  grafana_data:
+  pgadmin_data:

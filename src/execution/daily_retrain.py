@@ -15,11 +15,11 @@ if project_root not in sys.path:
 # Now import with relative paths
 sys.path.append(os.path.dirname(os.path.dirname(__file__)))
 
-from data_ingestion.fetch_data import fetch_data
-from feature_engineering.feature_generator import FeatureGenerator
-from modeling.train_model import train_model
-from strategy.simple_strategy import generate_signals, analyze_signals
-from utils.logger import setup_logger
+from .data_ingestion.fetch_data import fetch_data
+from .feature_engineering.feature_generator import FeatureGenerator
+from .modeling.train_model import train_model
+from .strategy.simple_strategy import generate_signals, analyze_signals
+from ..utils.logger import setup_logger
 import pandas as pd
 
 # Set up logging
@@ -146,9 +146,54 @@ def run_backtest(ticker: str) -> bool:
         logger.error(f"No signals file found for {ticker}")
         return False
     
-    # TODO: Implement actual backtesting logic
-    logger.info(f"Backtest placeholder executed for {ticker}")
-    return True
+    # Implement backtesting logic
+    try:
+        # Read signals
+        signals_df = pd.read_csv(signal_file)
+        if 'date' in signals_df.columns:
+            signals_df['date'] = pd.to_datetime(signals_df['date'])
+            signals_df.set_index('date', inplace=True)
+
+        # Get historical price data
+        from ..data_ingestion.fetch_data import download_data
+        start_date = signals_df.index.min()
+        end_date = signals_df.index.max()
+
+        price_data = download_data(
+            ticker,
+            start_date.strftime('%Y-%m-%d'),
+            end_date.strftime('%Y-%m-%d')
+        )
+
+        if price_data.empty:
+            logger.warning(f"No price data for {ticker} backtest")
+            return False
+
+        # Run backtest
+        from ..backtesting.backtest import backtest_strategy
+
+        results = backtest_strategy(
+            price_data,
+            signals_df,
+            initial_capital=100000,
+            commission=0.001,
+            slippage=0.0005
+        )
+
+        if results:
+            logger.info(f"Backtest for {ticker}: Return={results.get('total_return', 0):.2%}, Sharpe={results.get('sharpe_ratio', 0):.2f}")
+
+            # Save results
+            os.makedirs('./backtests', exist_ok=True)
+            results_file = f'./backtests/{ticker}_backtest.json'
+            with open(results_file, 'w') as f:
+                json.dump(results, f, indent=2, default=str)
+
+            return True
+        return False
+    except Exception as e:
+        logger.error(f"Backtest error for {ticker}: {e}")
+        return False
 
 if __name__ == "__main__":
     # Run the daily pipeline

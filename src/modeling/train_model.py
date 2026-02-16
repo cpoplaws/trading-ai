@@ -11,7 +11,7 @@ from sklearn.ensemble import RandomForestClassifier
 from sklearn.metrics import accuracy_score, classification_report
 from sklearn.model_selection import train_test_split
 
-from utils.logger import setup_logger
+from ..utils.logger import setup_logger
 
 logger = setup_logger(__name__)
 TARGET_UP_VALUES = {'1', 'UP', 'TRUE'}

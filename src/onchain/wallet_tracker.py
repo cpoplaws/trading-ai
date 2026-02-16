@@ -1,279 +1,418 @@
 """
-Wallet tracker for monitoring whale wallets and smart money.
+Wallet Tracker and Analyzer
+Track wallet activities, token holdings, and trading patterns
 """
+from typing import Dict, List, Optional, Set
+from dataclasses import dataclass, field
+from datetime import datetime, timedelta
+from collections import defaultdict
+from blockchain_client import BlockchainClient
 import logging
-from typing import Dict, List, Optional, Any
-from datetime import datetime
-from web3 import Web3
 
 logger = logging.getLogger(__name__)
 
 
+@dataclass
+class TokenHolding:
+    """Token holding information."""
+    token_address: str
+    token_symbol: str
+    token_name: str
+    balance: float
+    price_usd: float
+    value_usd: float
+    decimals: int
+
+
+@dataclass
+class WalletProfile:
+    """Comprehensive wallet profile."""
+    address: str
+    native_balance: float
+    token_holdings: List[TokenHolding] = field(default_factory=list)
+    total_value_usd: float = 0.0
+    transaction_count: int = 0
+    first_transaction_date: Optional[datetime] = None
+    last_transaction_date: Optional[datetime] = None
+    interacted_contracts: Set[str] = field(default_factory=set)
+    labels: List[str] = field(default_factory=list)  # "whale", "degen", "trader", etc.
+
+
+@dataclass
+class TransactionPattern:
+    """Transaction pattern analysis."""
+    address: str
+    total_transactions: int
+    avg_tx_per_day: float
+    most_active_hour: int
+    most_traded_tokens: List[str]
+    avg_gas_price_gwei: float
+    total_gas_spent_eth: float
+    profit_loss_usd: float
+    win_rate: float
+
+
 class WalletTracker:
     """
-    Track specific wallets for whale activity and smart money movements.
+    Track and analyze wallet activities.
+
+    Features:
+    - Token balance tracking
+    - Transaction history analysis
+    - Trading pattern detection
+    - Whale watching
+    - Smart money tracking
+    - Copy trading signals
     """
-    
-    def __init__(self, web3_provider: Optional[Any] = None):
-        """
-        Initialize wallet tracker.
-        
-        Args:
-            web3_provider: Web3 provider instance
-        """
-        self.w3 = web3_provider
-        self.tracked_wallets: Dict[str, Dict] = {}
-        
-        logger.info("Wallet tracker initialized")
-    
-    def add_wallet(self, address: str, label: str, category: str = 'whale') -> None:
+
+    def __init__(self, blockchain_client: BlockchainClient):
+        """Initialize wallet tracker."""
+        self.client = blockchain_client
+        self.tracked_wallets: Dict[str, WalletProfile] = {}
+
+    def add_wallet(self, address: str, label: str = None):
         """
         Add wallet to tracking list.
-        
+
         Args:
             address: Wallet address
-            label: Descriptive label
-            category: Category (whale, fund, smart_money, exchange)
+            label: Optional label for wallet
         """
-        self.tracked_wallets[address.lower()] = {
-            'address': address,
-            'label': label,
-            'category': category,
-            'added_at': datetime.now().isoformat()
-        }
-        logger.info(f"Added wallet to tracking: {label} ({address[:10]}...)")
-    
-    def get_wallet_balance(self, address: str, token_address: Optional[str] = None) -> float:
+        address = self.client.to_checksum_address(address)
+
+        if address not in self.tracked_wallets:
+            profile = self.get_wallet_profile(address)
+            if label:
+                profile.labels.append(label)
+            self.tracked_wallets[address] = profile
+            logger.info(f"Added wallet to tracking: {address}")
+
+    def remove_wallet(self, address: str):
+        """Remove wallet from tracking."""
+        address = self.client.to_checksum_address(address)
+        if address in self.tracked_wallets:
+            del self.tracked_wallets[address]
+            logger.info(f"Removed wallet from tracking: {address}")
+
+    def get_wallet_profile(self, address: str) -> WalletProfile:
         """
-        Get wallet balance.
-        
+        Get comprehensive wallet profile.
+
         Args:
             address: Wallet address
-            token_address: Token contract address (ETH if None)
-            
+
         Returns:
-            Balance amount
+            WalletProfile with all holdings and stats
         """
-        if not self.w3:
-            logger.error("No Web3 provider configured")
-            return 0.0
-        
-        try:
-            if token_address is None:
-                # Get ETH balance
-                balance_wei = self.w3.eth.get_balance(address)
-                return balance_wei / 1e18
-            else:
-                # Get ERC-20 balance (requires contract ABI)
-                logger.warning("ERC-20 balance tracking not fully implemented")
-                return 0.0
-        except Exception as e:
-            logger.error(f"Error getting balance for {address}: {e}")
-            return 0.0
-    
-    def monitor_transactions(self, address: str, from_block: int, to_block: int = None) -> List[Dict]:
-        """
-        Monitor transactions for a specific wallet.
-        
-        Args:
-            address: Wallet address
-            from_block: Starting block number
-            to_block: Ending block number (latest if None)
-            
-        Returns:
-            List of transactions
-        """
-        if not self.w3:
-            logger.error("No Web3 provider configured")
-            return []
-        
-        try:
-            if to_block is None:
-                to_block = 'latest'
-            
-            # Get transactions (simplified - full implementation would use filters)
-            transactions = []
-            
-            # Note: This is a placeholder. Real implementation would use:
-            # - Event logs
-            # - External APIs like Etherscan
-            # - The Graph subgraphs
-            
-            logger.info(f"Monitoring transactions for {address[:10]}... (blocks {from_block}-{to_block})")
-            
-            return transactions
-        except Exception as e:
-            logger.error(f"Error monitoring transactions: {e}")
-            return []
-    
-    def detect_large_transfers(self, transactions: List[Dict], threshold_usd: float = 100000) -> List[Dict]:
-        """
-        Detect large transfers from transaction list.
-        
-        Args:
-            transactions: List of transactions
-            threshold_usd: Minimum value in USD to flag
-            
-        Returns:
-            List of large transfers
-        """
-        large_transfers = []
-        
-        try:
+        address = self.client.to_checksum_address(address)
+
+        # Get native balance
+        native_balance = self.client.get_balance(address)
+
+        # Get transaction count
+        tx_count = self.client.get_transaction_count(address)
+
+        # Get token holdings
+        token_holdings = self._get_token_holdings(address)
+
+        # Calculate total value
+        total_value = native_balance  # Native token value (would need price)
+        total_value += sum(holding.value_usd for holding in token_holdings)
+
+        # Get transaction history for dates
+        transactions = self.client.get_transactions_by_address(address, sort='asc')
+
+        first_tx_date = None
+        last_tx_date = None
+        interacted_contracts = set()
+
+        if transactions:
+            first_tx_date = datetime.fromtimestamp(int(transactions[0]['timeStamp']))
+            last_tx_date = datetime.fromtimestamp(int(transactions[-1]['timeStamp']))
+
+            # Collect interacted contracts
             for tx in transactions:
-                value_usd = tx.get('value_usd', 0)
-                
-                if value_usd >= threshold_usd:
-                    large_transfers.append({
-                        'hash': tx.get('hash'),
-                        'from': tx.get('from'),
-                        'to': tx.get('to'),
-                        'value_usd': value_usd,
-                        'timestamp': tx.get('timestamp'),
-                        'type': 'large_transfer'
-                    })
-            
-            if large_transfers:
-                logger.info(f"Detected {len(large_transfers)} large transfers")
-            
-            return large_transfers
-        except Exception as e:
-            logger.error(f"Error detecting large transfers: {e}")
-            return []
-    
-    def analyze_wallet_behavior(self, address: str, transactions: List[Dict]) -> Dict:
+                if tx.get('to') and self.client.is_contract(tx['to']):
+                    interacted_contracts.add(tx['to'])
+
+        return WalletProfile(
+            address=address,
+            native_balance=native_balance,
+            token_holdings=token_holdings,
+            total_value_usd=total_value,
+            transaction_count=tx_count,
+            first_transaction_date=first_tx_date,
+            last_transaction_date=last_tx_date,
+            interacted_contracts=interacted_contracts
+        )
+
+    def _get_token_holdings(self, address: str) -> List[TokenHolding]:
         """
-        Analyze wallet trading behavior.
-        
+        Get all token holdings for wallet.
+
         Args:
             address: Wallet address
-            transactions: List of transactions
-            
+
         Returns:
-            Behavior analysis
+            List of TokenHolding objects
         """
-        try:
-            if len(transactions) == 0:
-                return {}
-            
-            # Calculate basic metrics
-            total_value = sum(tx.get('value_usd', 0) for tx in transactions)
-            avg_tx_size = total_value / len(transactions) if len(transactions) > 0 else 0
-            
-            # Categorize transactions
-            buys = [tx for tx in transactions if tx.get('type') == 'buy']
-            sells = [tx for tx in transactions if tx.get('type') == 'sell']
-            
-            return {
-                'address': address,
-                'total_transactions': len(transactions),
-                'total_value_usd': total_value,
-                'avg_transaction_size_usd': avg_tx_size,
-                'buy_count': len(buys),
-                'sell_count': len(sells),
-                'buy_sell_ratio': len(buys) / len(sells) if len(sells) > 0 else float('inf'),
-                'analysis_timestamp': datetime.now().isoformat()
-            }
-        except Exception as e:
-            logger.error(f"Error analyzing wallet behavior: {e}")
-            return {}
-    
-    def get_tracked_wallets_summary(self) -> List[Dict]:
+        holdings = []
+
+        # Get token transfers to identify owned tokens
+        transfers = self.client.get_token_transfers(address)
+
+        # Group by token contract
+        token_balances = defaultdict(float)
+        token_info = {}
+
+        for transfer in transfers:
+            token_address = transfer.get('contractAddress')
+            value = float(transfer.get('value', 0))
+            decimals = int(transfer.get('tokenDecimal', 18))
+
+            # Adjust for decimals
+            value_adjusted = value / (10 ** decimals)
+
+            # Add or subtract based on from/to
+            if transfer['to'].lower() == address.lower():
+                token_balances[token_address] += value_adjusted
+            elif transfer['from'].lower() == address.lower():
+                token_balances[token_address] -= value_adjusted
+
+            # Store token info
+            if token_address not in token_info:
+                token_info[token_address] = {
+                    'symbol': transfer.get('tokenSymbol', 'UNKNOWN'),
+                    'name': transfer.get('tokenName', 'Unknown Token'),
+                    'decimals': decimals
+                }
+
+        # Create holdings for non-zero balances
+        for token_address, balance in token_balances.items():
+            if balance > 0:
+                info = token_info[token_address]
+                holdings.append(TokenHolding(
+                    token_address=token_address,
+                    token_symbol=info['symbol'],
+                    token_name=info['name'],
+                    balance=balance,
+                    price_usd=0.0,  # Would need price oracle
+                    value_usd=0.0,
+                    decimals=info['decimals']
+                ))
+
+        return holdings
+
+    def analyze_trading_pattern(
+        self,
+        address: str,
+        days: int = 30
+    ) -> TransactionPattern:
         """
-        Get summary of all tracked wallets.
-        
-        Returns:
-            List of wallet summaries
-        """
-        summaries = []
-        
-        for address, info in self.tracked_wallets.items():
-            balance = self.get_wallet_balance(address)
-            
-            summaries.append({
-                'address': address,
-                'label': info['label'],
-                'category': info['category'],
-                'balance_eth': balance,
-                'added_at': info['added_at']
-            })
-        
-        return summaries
-    
-    def generate_whale_alerts(self, large_transfers: List[Dict]) -> List[Dict]:
-        """
-        Generate alerts for whale activity.
-        
+        Analyze trading patterns for wallet.
+
         Args:
-            large_transfers: List of large transfers
-            
+            address: Wallet address
+            days: Number of days to analyze
+
         Returns:
-            List of alerts
+            TransactionPattern with analysis
         """
-        alerts = []
-        
-        for transfer in large_transfers:
-            # Check if transfer involves tracked wallet
-            from_addr = transfer['from'].lower()
-            to_addr = transfer['to'].lower()
-            
-            is_tracked = from_addr in self.tracked_wallets or to_addr in self.tracked_wallets
-            
-            if is_tracked:
-                wallet_label = None
-                direction = None
-                
-                if from_addr in self.tracked_wallets:
-                    wallet_label = self.tracked_wallets[from_addr]['label']
-                    direction = 'outflow'
-                else:
-                    wallet_label = self.tracked_wallets[to_addr]['label']
-                    direction = 'inflow'
-                
-                alerts.append({
-                    'type': 'whale_activity',
-                    'wallet_label': wallet_label,
-                    'direction': direction,
-                    'value_usd': transfer['value_usd'],
-                    'hash': transfer['hash'],
-                    'timestamp': transfer['timestamp'],
-                    'alert_level': 'high' if transfer['value_usd'] > 1000000 else 'medium'
-                })
-        
-        return alerts
+        address = self.client.to_checksum_address(address)
 
+        # Get recent transactions
+        transactions = self.client.get_transactions_by_address(address)
 
-# Pre-configured whale wallets (examples)
-KNOWN_WHALES = {
-    '0x00000000219ab540356cbb839cbe05303d7705fa': {
-        'label': 'Ethereum 2.0 Deposit Contract',
-        'category': 'contract'
-    },
-    '0xda9dfa130df4de4673b89022ee50ff26f6ea73cf': {
-        'label': 'Kraken Exchange',
-        'category': 'exchange'
-    },
-    '0x28c6c06298d514db089934071355e5743bf21d60': {
-        'label': 'Binance Hot Wallet',
-        'category': 'exchange'
-    }
-}
+        # Filter by time window
+        cutoff_time = datetime.now() - timedelta(days=days)
+        recent_txs = [
+            tx for tx in transactions
+            if datetime.fromtimestamp(int(tx['timeStamp'])) >= cutoff_time
+        ]
 
+        if not recent_txs:
+            return TransactionPattern(
+                address=address,
+                total_transactions=0,
+                avg_tx_per_day=0,
+                most_active_hour=0,
+                most_traded_tokens=[],
+                avg_gas_price_gwei=0,
+                total_gas_spent_eth=0,
+                profit_loss_usd=0,
+                win_rate=0
+            )
 
-if __name__ == "__main__":
-    # Test wallet tracker
-    tracker = WalletTracker()
-    
-    print("=== Wallet Tracker Test ===")
-    
-    # Add some wallets to track
-    for address, info in KNOWN_WHALES.items():
-        tracker.add_wallet(address, info['label'], info['category'])
-    
-    # Get summary
-    summary = tracker.get_tracked_wallets_summary()
-    print(f"\nTracking {len(summary)} wallets:")
-    for wallet in summary[:3]:
-        print(f"  {wallet['label']}: {wallet['address'][:10]}...")
-    
-    print("\n✅ Wallet tracker test completed!")
+        # Calculate metrics
+        total_txs = len(recent_txs)
+        avg_per_day = total_txs / days
+
+        # Most active hour
+        hours = [datetime.fromtimestamp(int(tx['timeStamp'])).hour for tx in recent_txs]
+        most_active_hour = max(set(hours), key=hours.count) if hours else 0
+
+        # Gas analysis
+        total_gas_used = sum(int(tx.get('gasUsed', 0)) for tx in recent_txs)
+        total_gas_price = sum(int(tx.get('gasPrice', 0)) for tx in recent_txs)
+        avg_gas_price_gwei = (total_gas_price / len(recent_txs)) / 1e9 if recent_txs else 0
+        total_gas_eth = (total_gas_used * (total_gas_price / len(recent_txs))) / 1e18
+
+        # Most traded tokens (from token transfers)
+        token_transfers = self.client.get_token_transfers(address)
+        recent_token_txs = [
+            tx for tx in token_transfers
+            if datetime.fromtimestamp(int(tx['timeStamp'])) >= cutoff_time
+        ]
+
+        token_counts = defaultdict(int)
+        for tx in recent_token_txs:
+            token_symbol = tx.get('tokenSymbol', 'UNKNOWN')
+            token_counts[token_symbol] += 1
+
+        most_traded = sorted(token_counts.items(), key=lambda x: x[1], reverse=True)[:5]
+        most_traded_tokens = [token for token, _ in most_traded]
+
+        return TransactionPattern(
+            address=address,
+            total_transactions=total_txs,
+            avg_tx_per_day=avg_per_day,
+            most_active_hour=most_active_hour,
+            most_traded_tokens=most_traded_tokens,
+            avg_gas_price_gwei=avg_gas_price_gwei,
+            total_gas_spent_eth=total_gas_eth,
+            profit_loss_usd=0.0,  # Would need price data
+            win_rate=0.0  # Would need trade outcome analysis
+        )
+
+    def detect_whale_movement(
+        self,
+        token_address: str,
+        threshold_usd: float = 100000
+    ) -> List[Dict]:
+        """
+        Detect large token movements (whale activity).
+
+        Args:
+            token_address: Token contract address
+            threshold_usd: Minimum transaction value in USD
+
+        Returns:
+            List of whale transactions
+        """
+        # Get recent token transfers
+        # This would typically monitor in real-time
+        logger.info(f"Monitoring whale movements for {token_address}")
+
+        whale_txs = []
+        # Would implement real-time monitoring logic here
+
+        return whale_txs
+
+    def find_smart_money(
+        self,
+        min_profit: float = 10000,
+        min_trades: int = 10,
+        min_win_rate: float = 0.7
+    ) -> List[str]:
+        """
+        Identify "smart money" wallets with consistent profits.
+
+        Args:
+            min_profit: Minimum total profit in USD
+            min_trades: Minimum number of trades
+            min_win_rate: Minimum win rate (0-1)
+
+        Returns:
+            List of smart money wallet addresses
+        """
+        smart_wallets = []
+
+        for address, profile in self.tracked_wallets.items():
+            pattern = self.analyze_trading_pattern(address)
+
+            # Check criteria
+            if (pattern.total_transactions >= min_trades and
+                pattern.profit_loss_usd >= min_profit and
+                pattern.win_rate >= min_win_rate):
+
+                smart_wallets.append(address)
+                logger.info(f"Smart money identified: {address}")
+
+        return smart_wallets
+
+    def generate_copy_trading_signals(
+        self,
+        smart_wallet: str,
+        watch_tokens: Optional[List[str]] = None
+    ) -> List[Dict]:
+        """
+        Generate copy trading signals from smart wallet.
+
+        Args:
+            smart_wallet: Smart money wallet to copy
+            watch_tokens: Specific tokens to watch (optional)
+
+        Returns:
+            List of trading signals
+        """
+        signals = []
+
+        # Monitor smart wallet transactions
+        recent_txs = self.client.get_token_transfers(smart_wallet)
+
+        for tx in recent_txs[:10]:  # Last 10 transactions
+            token_symbol = tx.get('tokenSymbol', 'UNKNOWN')
+
+            # Filter by watch list if provided
+            if watch_tokens and token_symbol not in watch_tokens:
+                continue
+
+            # Determine action (buy if receiving, sell if sending)
+            is_receiving = tx['to'].lower() == smart_wallet.lower()
+
+            signals.append({
+                'action': 'BUY' if is_receiving else 'SELL',
+                'token': token_symbol,
+                'token_address': tx['contractAddress'],
+                'amount': float(tx['value']) / (10 ** int(tx.get('tokenDecimal', 18))),
+                'wallet': smart_wallet,
+                'timestamp': datetime.fromtimestamp(int(tx['timeStamp'])),
+                'tx_hash': tx['hash']
+            })
+
+        return signals
+
+    def get_wallet_labels(self, address: str) -> List[str]:
+        """
+        Determine wallet labels based on activity.
+
+        Args:
+            address: Wallet address
+
+        Returns:
+            List of labels (whale, trader, degen, etc.)
+        """
+        labels = []
+        profile = self.get_wallet_profile(address)
+
+        # Whale (>$1M)
+        if profile.total_value_usd > 1_000_000:
+            labels.append("whale")
+
+        # Active trader (>10 tx/day)
+        pattern = self.analyze_trading_pattern(address)
+        if pattern.avg_tx_per_day > 10:
+            labels.append("active_trader")
+
+        # Degen (high gas spending, many tx)
+        if pattern.total_gas_spent_eth > 1.0 and pattern.total_transactions > 100:
+            labels.append("degen")
+
+        # Bot (very regular intervals)
+        # Would need more sophisticated analysis
+
+        # Smart money (high win rate, profitable)
+        if pattern.win_rate > 0.7 and pattern.profit_loss_usd > 10000:
+            labels.append("smart_money")
+
+        return labels

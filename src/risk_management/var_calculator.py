@@ -83,7 +83,7 @@ class VaRCalculator:
 
         Args:
             returns: Array of historical returns (as decimals, e.g., 0.01 = 1%)
-            method: Calculation method
+            method: Calculation method (VaRMethod enum or string: 'historical', 'parametric', 'monte_carlo')
             portfolio_value: Current portfolio value
 
         Returns:
@@ -91,6 +91,17 @@ class VaRCalculator:
         """
         if len(returns) < 30:
             logger.warning(f"Only {len(returns)} data points, need at least 30 for reliable VaR")
+
+        # Convert string to enum if needed
+        if isinstance(method, str):
+            method_map = {
+                'historical': VaRMethod.HISTORICAL,
+                'parametric': VaRMethod.PARAMETRIC,
+                'monte_carlo': VaRMethod.MONTE_CARLO
+            }
+            method = method_map.get(method.lower())
+            if method is None:
+                raise ValueError(f"Unknown VaR method: {method}. Use 'historical', 'parametric', or 'monte_carlo'")
 
         if method == VaRMethod.HISTORICAL:
             return self._historical_var(returns, portfolio_value)

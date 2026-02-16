@@ -18,7 +18,8 @@ import logging
 # Add parent directory to path
 sys.path.append(str(Path(__file__).parent.parent.parent))
 
-from src.execution.broker_interface import AlpacaBroker, MockBroker
+from src.execution.alpaca_broker import AlpacaBroker
+from src.execution.broker_interface import MockBroker
 from src.advanced_strategies import AdvancedTradingStrategies
 
 # Configure logging

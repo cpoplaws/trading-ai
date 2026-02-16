@@ -10,7 +10,7 @@ from datetime import datetime, timedelta
 import pandas as pd
 import requests
 from collections import Counter
-from utils.logger import setup_logger
+from ..utils.logger import setup_logger
 
 logger = setup_logger(__name__)
 

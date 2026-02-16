@@ -17,9 +17,9 @@ src_path = project_root / "src"
 if str(src_path) not in sys.path:
     sys.path.insert(0, str(src_path))
 
-from execution.daily_retrain import daily_pipeline
-from strategy.simple_strategy import analyze_signals
-from utils.logger import setup_logger
+from .daily_retrain import daily_pipeline
+from ..strategy.simple_strategy import analyze_signals
+from ..utils.logger import setup_logger
 
 logger = setup_logger("scheduler", "INFO")
 

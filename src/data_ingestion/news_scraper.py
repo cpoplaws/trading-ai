@@ -10,7 +10,7 @@ from datetime import datetime, timedelta
 import requests
 from bs4 import BeautifulSoup
 import pandas as pd
-from utils.logger import setup_logger
+from ..utils.logger import setup_logger
 
 logger = setup_logger(__name__)
 

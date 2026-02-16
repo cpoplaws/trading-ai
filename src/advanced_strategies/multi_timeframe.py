@@ -15,9 +15,9 @@ import os
 # Add project root to path
 sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(__file__))))
 
-from src.feature_engineering.feature_generator import FeatureGenerator
-from src.modeling.train_model import train_model
-from src.strategy.simple_strategy import generate_signals
+from ..feature_engineering.feature_generator import FeatureGenerator
+from ..modeling.train_model import train_model
+from ..strategy.simple_strategy import generate_signals
 
 logger = logging.getLogger(__name__)
 

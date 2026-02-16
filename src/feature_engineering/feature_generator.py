@@ -5,7 +5,7 @@ from typing import Optional, Tuple, Dict
 import numpy as np
 import pandas as pd
 
-from utils.logger import setup_logger
+from ..utils.logger import setup_logger
 
 logger = setup_logger(__name__)
 

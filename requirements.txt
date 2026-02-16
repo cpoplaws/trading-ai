@@ -1,42 +1,46 @@
+# Core Data Science
 numpy>=1.24.0
 pandas>=2.0.0
 scikit-learn>=1.3.0
 matplotlib>=3.7.0
-yfinance>=0.2.0
-joblib>=1.3.0
-schedule>=1.2.0
-TA-Lib>=0.4.28
-python-dotenv>=1.0.0
-loguru>=0.7.0
-pytest>=7.4.0
-requests>=2.31.0
-tensorflow>=2.16.0
 seaborn>=0.12.0
-plotly>=5.15.0
 
-# Phase 2: Broker Integration
+# Machine Learning
+tensorflow>=2.16.0
+
+# Trading Data & Analysis
+yfinance>=0.2.0
+TA-Lib>=0.4.28
+
+# Broker Integration
 alpaca-trade-api>=3.0.0
 
-# Phase 3: Intelligence Network
-beautifulsoup4>=4.12.0
-praw>=7.7.0
-vaderSentiment>=3.3.2
+# Data APIs
 newsapi-python>=0.2.7
+praw>=7.7.1
+fredapi>=0.5.1
 
-# DeFi and Blockchain dependencies
+# Web3 & Blockchain
 web3>=6.15.0
 eth-account>=0.10.0
 eth-keys>=0.4.0
 eth-utils>=3.0.0
 
-# Dashboard and UI
+# Dashboard & Visualization
 streamlit>=1.28.0
 plotly>=5.15.0
 
-# Real Data APIs
-newsapi-python>=0.2.7
-praw>=7.7.1
-fredapi>=0.5.1
+# Sentiment Analysis
+beautifulsoup4>=4.12.0
+vaderSentiment>=3.3.2
 
-# Additional utilities
+# Utilities
+python-dotenv>=1.0.0
+loguru>=0.7.0
 python-dateutil>=2.8.2
+joblib>=1.3.0
+schedule>=1.2.0
+requests>=2.31.0
+
+# Testing
+pytest>=7.4.0
