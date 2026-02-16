@@ -9,7 +9,7 @@
 # NumPy - Fundamental array computing
 numpy>=2.2.0,<3.0
 # Pandas - Data manipulation and analysis
-pandas>=2.3.0,<3.0
+pandas>=2.3.0,<4.0
 # SciKit-Learn - Machine learning algorithms
 scikit-learn>=1.6.0,<2.0
 # Matplotlib - Plotting and visualization
