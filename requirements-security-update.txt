@@ -15,7 +15,7 @@ requests>=2.32.3,<3.0
 certifi>=2024.8.30
 
 # cryptography: Multiple vulnerability patches
-cryptography>=43.0.3,<44.0
+cryptography>=43.0.3,<47.0
 
 # Pillow: Patched CVE-2026-25990 and other image processing vulnerabilities
 pillow>=11.0.0,<12.0
