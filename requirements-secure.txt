@@ -18,7 +18,7 @@ keras>=3.13.1,<4.0  # Patched: CVE-2025-8747, CVE-2025-9906, CVE-2025-9905, CVE-
 # tensorflow>=2.20.0
 
 # Trading Data & Analysis
-yfinance>=0.2.0,<1.0
+yfinance>=0.2.0,<2.0
 TA-Lib>=0.4.28  # Binary dependency, version may vary
 
 # Broker Integration
