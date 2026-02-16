@@ -1,62 +1,127 @@
-version: "3.8"
+version: '3.8'
 
 services:
-  trading-ai:
-    build: 
-      context: .
-      dockerfile: Dockerfile
-    volumes:
-      - .:/app
-      - ./data:/app/data
-      - ./models:/app/models
-      - ./logs:/app/logs
-      - ./signals:/app/signals
-    container_name: trading_ai_dev
-    environment:
-      - PYTHONUNBUFFERED=1
-      - PYTHONPATH=/app/src
-      - TZ=US/Eastern
-    ports:
-      - "8888:8888"  # For Jupyter if needed
-      - "8000:8000"  # For web interface (future)
-    working_dir: /app
-    networks:
-      - trading_network
-    restart: unless-stopped
-    
-  # Future services for scaling
-  redis:
-    image: redis:7-alpine
-    container_name: trading_redis
-    ports:
-      - "6379:6379"
-    volumes:
-      - redis_data:/data
-    networks:
-      - trading_network
-    profiles:
-      - full  # Only start with --profile full
-      
+  # PostgreSQL + TimescaleDB
   postgres:
-    image: postgres:15-alpine
-    container_name: trading_postgres
+    image: timescale/timescaledb:latest-pg15
+    container_name: trading-postgres
     environment:
-      - POSTGRES_DB=trading_ai
-      - POSTGRES_USER=trader
-      - POSTGRES_PASSWORD=secure_password
+      POSTGRES_DB: trading_ai
+      POSTGRES_USER: trader
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-changeme}
     ports:
       - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U trader"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
     networks:
-      - trading_network
-    profiles:
-      - full  # Only start with --profile full
+      - trading-network
 
-networks:
-  trading_network:
-    driver: bridge
+  # Redis (caching & message broker)
+  redis:
+    image: redis:7-alpine
+    container_name: trading-redis
+    command: redis-server --appendonly yes
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - trading-network
+
+  # Trading AI API
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: trading-api
+    environment:
+      DATABASE_URL: postgresql://trader:${POSTGRES_PASSWORD:-changeme}@postgres:5432/trading_ai
+      REDIS_URL: redis://redis:6379/0
+      JWT_SECRET: ${JWT_SECRET:-your-secret-key-change-me}
+      CB_API_KEY: ${CB_API_KEY}
+      CB_API_SECRET: ${CB_API_SECRET}
+      CB_PASSPHRASE: ${CB_PASSPHRASE}
+    ports:
+      - "8000:8000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    volumes:
+      - ./src:/app/src
+      - ./data:/app/data
+    networks:
+      - trading-network
+    restart: unless-stopped
+
+  # WebSocket Server
+  websocket:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: trading-websocket
+    command: python -m src.websocket.server
+    environment:
+      REDIS_URL: redis://redis:6379/0
+    ports:
+      - "8765:8765"
+    depends_on:
+      - redis
+    networks:
+      - trading-network
+    restart: unless-stopped
+
+  # Prometheus (monitoring)
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: trading-prometheus
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./infrastructure/prometheus.yml:/etc/prometheus/prometheus.yml
+      - prometheus_data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+    networks:
+      - trading-network
+    restart: unless-stopped
+
+  # Grafana (dashboards)
+  grafana:
+    image: grafana/grafana:latest
+    container_name: trading-grafana
+    environment:
+      GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_PASSWORD:-admin}
+      GF_INSTALL_PLUGINS: grafana-clock-panel
+    ports:
+      - "3000:3000"
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./infrastructure/grafana:/etc/grafana/provisioning
+    depends_on:
+      - prometheus
+    networks:
+      - trading-network
+    restart: unless-stopped
 
 volumes:
-  redis_data:
   postgres_data:
+  redis_data:
+  prometheus_data:
+  grafana_data:
+
+networks:
+  trading-network:
+    driver: bridge

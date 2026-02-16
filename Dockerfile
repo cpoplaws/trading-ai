@@ -1,38 +1,45 @@
-FROM python:3.11-slim
+# Multi-stage Docker build for trading AI system
+FROM python:3.11-slim as base
 
-# Install system dependencies for TA-Lib
+# Set environment variables
+ENV PYTHONUNBUFFERED=1 \
+    PYTHONDONTWRITEBYTECODE=1 \
+    PIP_NO_CACHE_DIR=1 \
+    PIP_DISABLE_PIP_VERSION_CHECK=1
+
+# Install system dependencies
 RUN apt-get update && apt-get install -y \
-    build-essential \
-    wget \
+    gcc \
+    g++ \
+    postgresql-client \
+    curl \
     && rm -rf /var/lib/apt/lists/*
-
-# Install TA-Lib from source
-RUN wget http://prdownloads.sourceforge.net/ta-lib/ta-lib-0.4.0-src.tar.gz && \
-    tar -xzf ta-lib-0.4.0-src.tar.gz && \
-    cd ta-lib/ && \
-    ./configure --prefix=/usr && \
-    make && \
-    make install && \
-    cd .. && \
-    rm -rf ta-lib ta-lib-0.4.0-src.tar.gz
 
 # Set working directory
 WORKDIR /app
 
-# Copy requirements first for better caching
+# Copy requirements
 COPY requirements.txt .
 
 # Install Python dependencies
-RUN pip install --no-cache-dir -r requirements.txt
+RUN pip install --upgrade pip && \
+    pip install -r requirements.txt
 
-# Copy source code
+# Copy application code
 COPY . .
 
-# Create necessary directories
-RUN mkdir -p data/raw data/processed models signals logs
+# Create non-root user
+RUN useradd -m -u 1000 trader && \
+    chown -R trader:trader /app
 
-# Set Python path
-ENV PYTHONPATH=/app/src
+USER trader
+
+# Expose ports
+EXPOSE 8000 8765
+
+# Health check
+HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
+    CMD curl -f http://localhost:8000/health || exit 1
 
 # Default command
-CMD ["python", "src/execution/daily_retrain.py"]
+CMD ["python", "-m", "src.api.main"]
