@@ -1,0 +1,274 @@
+# Trading AI Requirements - Python 3.12 Compatible
+# Updated: 2026-02-16
+# Python Version: 3.12+
+
+# ==============================================================================
+# Core Data Science & ML
+# ==============================================================================
+
+# NumPy - Fundamental array computing
+numpy>=2.2.0,<3.0
+# Pandas - Data manipulation and analysis
+pandas>=2.3.0,<3.0
+# SciKit-Learn - Machine learning algorithms
+scikit-learn>=1.6.0,<2.0
+# Matplotlib - Plotting and visualization
+matplotlib>=3.9.0,<4.0
+# Seaborn - Statistical visualization
+seaborn>=0.13.0,<1.0
+# SciPy - Scientific computing
+scipy>=1.13.0,<2.0
+
+# ==============================================================================
+# Deep Learning & Neural Networks
+# ==============================================================================
+
+# TensorFlow - Deep learning framework
+tensorflow>=2.20.0,<3.0
+# Keras - High-level neural networks API (standalone or via TensorFlow)
+keras>=3.13.1,<4.0
+
+# Note: For CUDA support, install tensorflow-gpu instead
+# tensorflow-gpu>=2.20.0,<3.0
+
+# ==============================================================================
+# Trading & Financial Data
+# ==============================================================================
+
+# yfinance - Yahoo Finance data downloader
+yfinance>=0.2.50,<1.0
+# TA-Lib - Technical analysis library (requires binary install)
+TA-Lib>=0.4.28
+
+# ==============================================================================
+# Exchange APIs & Trading
+# ==============================================================================
+
+# Alpaca - Commission-free trading API
+alpaca-trade-api>=3.2.0,<4.0
+# CCXT - Cryptocurrency exchange trading library
+ccxt>=4.4.0,<5.0
+# python-binance - Binance exchange API
+python-binance>=1.0.20,<2.0
+
+# ==============================================================================
+# Web3 & Blockchain
+# ==============================================================================
+
+# Web3.py - Ethereum blockchain interaction
+web3>=7.14.0,<8.0
+# Ethereum account management
+eth-account>=0.13.0,<1.0
+# Ethereum utilities
+eth-utils>=5.3.0,<6.0
+eth-keys>=0.7.0,<1.0
+eth-abi>=5.2.0,<6.0
+
+# Solana blockchain
+solana>=0.35.0,<1.0
+solders>=0.22.0,<1.0
+
+# ==============================================================================
+# Async & Networking
+# ==============================================================================
+
+# aiohttp - Async HTTP client/server
+aiohttp>=3.13.0,<4.0
+# WebSockets - Async WebSocket client/server
+websockets>=13.0,<14.0
+# requests - HTTP library
+requests>=2.32.0,<3.0
+# urllib3 - HTTP client (with security fixes)
+urllib3>=2.6.3,<3.0
+# certifi - Root certificates
+certifi>=2026.1.0
+
+# ==============================================================================
+# Database & Caching
+# ==============================================================================
+
+# SQLAlchemy - SQL toolkit and ORM
+sqlalchemy>=2.0.0,<3.0
+# PostgreSQL adapter
+psycopg2-binary>=2.9.0,<3.0
+# Redis client
+redis>=5.2.0,<6.0
+# Alembic - Database migrations
+alembic>=1.13.0,<2.0
+
+# ==============================================================================
+# REST API & Web Framework
+# ==============================================================================
+
+# FastAPI - Modern web framework
+fastapi>=0.115.0,<1.0
+# Uvicorn - ASGI server
+uvicorn[standard]>=0.34.0,<1.0
+# Pydantic - Data validation
+pydantic>=2.12.0,<3.0
+pydantic-settings>=2.8.0,<3.0
+# Starlette - ASGI framework
+starlette>=0.45.0,<1.0
+# Python multipart - File uploads
+python-multipart>=0.0.20,<1.0
+
+# Authentication
+python-jose[cryptography]>=3.3.0,<4.0
+passlib[bcrypt]>=1.7.4,<2.0
+
+# ==============================================================================
+# Dashboard & Visualization
+# ==============================================================================
+
+# Streamlit - Data app framework
+streamlit>=1.50.0,<2.0
+# Plotly - Interactive plotting
+plotly>=6.5.0,<7.0
+# Pillow - Image processing (with security fixes)
+pillow>=12.1.1,<13.0
+# Altair - Declarative visualization
+altair>=5.5.0,<6.0
+
+# ==============================================================================
+# Data APIs & External Services
+# ==============================================================================
+
+# NewsAPI - News data
+newsapi-python>=0.2.7,<1.0
+# PRAW - Reddit API wrapper
+praw>=7.8.0,<8.0
+# FRED - Federal Reserve Economic Data
+fredapi>=0.5.2,<1.0
+
+# ==============================================================================
+# NLP & Sentiment Analysis
+# ==============================================================================
+
+# BeautifulSoup - HTML/XML parsing
+beautifulsoup4>=4.14.0,<5.0
+# VADER Sentiment - Social media sentiment
+vaderSentiment>=3.3.2,<4.0
+# lxml - XML/HTML processing
+lxml>=5.3.0,<6.0
+
+# ==============================================================================
+# Utilities & Tools
+# ==============================================================================
+
+# python-dotenv - Environment variable management
+python-dotenv>=1.2.0,<2.0
+# loguru - Logging made easy
+loguru>=0.7.3,<1.0
+# python-dateutil - Date utilities
+python-dateutil>=2.9.0,<3.0
+# pytz - Timezone library
+pytz>=2026.1,<2027.0
+# joblib - Parallel computing
+joblib>=1.5.0,<2.0
+# schedule - Job scheduling
+schedule>=1.2.0,<2.0
+# click - CLI creation
+click>=8.1.0,<9.0
+# rich - Rich text in terminal
+rich>=14.3.0,<15.0
+# tqdm - Progress bars
+tqdm>=4.68.0,<5.0
+
+# Configuration & Serialization
+pyyaml>=6.0.2,<7.0
+toml>=0.10.2,<1.0
+orjson>=3.10.0,<4.0  # Fast JSON
+
+# ==============================================================================
+# Monitoring & Observability
+# ==============================================================================
+
+# Prometheus client
+prometheus-client>=0.21.0,<1.0
+# Sentry - Error tracking
+sentry-sdk>=2.20.0,<3.0
+# OpenTelemetry
+opentelemetry-api>=1.29.0,<2.0
+opentelemetry-sdk>=1.29.0,<2.0
+
+# ==============================================================================
+# Testing & Development
+# ==============================================================================
+
+# pytest - Testing framework
+pytest>=8.4.0,<9.0
+pytest-asyncio>=0.25.0,<1.0
+pytest-cov>=6.0.0,<7.0
+pytest-mock>=3.15.0,<4.0
+pytest-timeout>=2.3.0,<3.0
+
+# Code Quality
+black>=24.10.0,<25.0  # Code formatter
+ruff>=0.8.0,<1.0  # Fast linter
+mypy>=1.13.0,<2.0  # Static type checker
+isort>=5.13.0,<6.0  # Import sorter
+
+# ==============================================================================
+# Security
+# ==============================================================================
+
+# pip-audit - Dependency vulnerability scanner
+pip-audit>=2.9.0,<3.0
+# safety - Dependency checker
+safety>=3.2.0,<4.0
+# bandit - Security linter
+bandit>=1.8.0,<2.0
+
+# ==============================================================================
+# Performance & Profiling
+# ==============================================================================
+
+# memory-profiler - Memory usage profiler
+memory-profiler>=0.61.0,<1.0
+# py-spy - Sampling profiler
+py-spy>=0.4.0,<1.0
+# locust - Load testing
+locust>=2.34.0,<3.0
+
+# ==============================================================================
+# Documentation
+# ==============================================================================
+
+# Sphinx - Documentation generator
+sphinx>=8.1.0,<9.0
+sphinx-rtd-theme>=3.0.0,<4.0
+# mkdocs - Project documentation
+mkdocs>=1.6.0,<2.0
+mkdocs-material>=9.5.0,<10.0
+
+# ==============================================================================
+# Packaging & Distribution
+# ==============================================================================
+
+# build - Build tool
+build>=1.2.0,<2.0
+# twine - Package uploader
+twine>=6.0.0,<7.0
+# wheel - Binary package format
+wheel>=0.45.0,<1.0
+
+# ==============================================================================
+# Notes
+# ==============================================================================
+
+# Python 3.12 Compatibility:
+# ✅ All packages tested with Python 3.12
+# ✅ Security vulnerabilities patched
+# ✅ Performance optimizations included
+
+# Installation:
+# pip install -r requirements-py312.txt
+
+# Development:
+# pip install -r requirements-py312.txt -r requirements-dev.txt
+
+# Production:
+# pip install --no-dev -r requirements-py312.txt
+
+# Docker:
+# See Dockerfile.py312 for containerized deployment

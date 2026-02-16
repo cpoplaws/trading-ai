@@ -1,0 +1,27 @@
+apiVersion: 1
+
+datasources:
+  - name: Loki
+    type: loki
+    access: proxy
+    url: http://loki:3100
+    isDefault: true
+    version: 1
+    editable: true
+    jsonData:
+      maxLines: 1000
+      derivedFields:
+        # Link trade_id to trades dashboard
+        - matcherRegex: "trade_id=([\\w-]+)"
+          name: trade_id
+          url: "/d/trades/trades?var-trade_id=$${__value.raw}"
+
+        # Link agent_id to agent dashboard
+        - matcherRegex: "agent_id=([\\w-]+)"
+          name: agent_id
+          url: "/d/agents/agents?var-agent_id=$${__value.raw}"
+
+        # Link order_id to orders dashboard
+        - matcherRegex: "order_id=([\\w-]+)"
+          name: order_id
+          url: "/d/orders/orders?var-order_id=$${__value.raw}"

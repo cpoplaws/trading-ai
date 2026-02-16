@@ -1,0 +1,155 @@
+server:
+  http_listen_port: 9080
+  grpc_listen_port: 0
+
+positions:
+  filename: /tmp/positions.yaml
+
+clients:
+  - url: http://loki:3100/loki/api/v1/push
+
+scrape_configs:
+  # Scrape logs from Docker containers
+  - job_name: docker
+    docker_sd_configs:
+      - host: unix:///var/run/docker.sock
+        refresh_interval: 5s
+    relabel_configs:
+      # Extract container name
+      - source_labels: ['__meta_docker_container_name']
+        regex: '/(.*)'
+        target_label: 'container'
+
+      # Extract container ID
+      - source_labels: ['__meta_docker_container_id']
+        target_label: 'container_id'
+
+      # Extract image name
+      - source_labels: ['__meta_docker_container_image']
+        target_label: 'image'
+
+      # Extract network
+      - source_labels: ['__meta_docker_network_name']
+        target_label: 'network'
+
+      # Extract compose project
+      - source_labels: ['__meta_docker_container_label_com_docker_compose_project']
+        target_label: 'compose_project'
+
+      # Extract service name
+      - source_labels: ['__meta_docker_container_label_com_docker_compose_service']
+        target_label: 'service'
+
+    pipeline_stages:
+      # Parse JSON logs
+      - json:
+          expressions:
+            level: level
+            message: message
+            timestamp: timestamp
+            service: service
+            environment: environment
+            logger: logger
+            module: module
+            function: function
+            trade_id: trade_id
+            order_id: order_id
+            agent_id: agent_id
+            symbol: symbol
+
+      # Parse timestamp
+      - timestamp:
+          source: timestamp
+          format: RFC3339
+          fallback_formats:
+            - RFC3339Nano
+            - 2006-01-02T15:04:05.000Z
+
+      # Set labels
+      - labels:
+          level:
+          service:
+          environment:
+          logger:
+          agent_id:
+
+      # Output format
+      - output:
+          source: message
+
+  # Scrape system logs
+  - job_name: system
+    static_configs:
+      - targets:
+          - localhost
+        labels:
+          job: varlogs
+          __path__: /var/log/*.log
+
+  # Scrape application logs
+  - job_name: trading-agent
+    static_configs:
+      - targets:
+          - localhost
+        labels:
+          job: trading-agent
+          service: trading-agent
+          __path__: /var/log/trading-agent/*.log
+
+    pipeline_stages:
+      # Parse JSON logs
+      - json:
+          expressions:
+            level: level
+            message: message
+            timestamp: timestamp
+            service: service
+            agent_id: agent_id
+            trade_id: trade_id
+
+      # Set timestamp
+      - timestamp:
+          source: timestamp
+          format: RFC3339
+
+      # Set labels
+      - labels:
+          level:
+          agent_id:
+
+      # Output
+      - output:
+          source: message
+
+  # Scrape API logs
+  - job_name: trading-api
+    static_configs:
+      - targets:
+          - localhost
+        labels:
+          job: trading-api
+          service: trading-api
+          __path__: /var/log/trading-api/*.log
+
+    pipeline_stages:
+      - json:
+          expressions:
+            level: level
+            message: message
+            timestamp: timestamp
+            method: extra.method
+            path: extra.path
+            status_code: extra.status_code
+            duration_ms: extra.duration_ms
+
+      - timestamp:
+          source: timestamp
+          format: RFC3339
+
+      - labels:
+          level:
+          method:
+          status_code:
+
+      - output:
+          source: message
