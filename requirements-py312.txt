@@ -92,7 +92,7 @@ sqlalchemy>=2.0.0,<3.0
 # PostgreSQL adapter
 psycopg2-binary>=2.9.0,<3.0
 # Redis client
-redis>=5.2.0,<6.0
+redis>=5.2.0,<8.0
 # Alembic - Database migrations
 alembic>=1.13.0,<2.0
 
