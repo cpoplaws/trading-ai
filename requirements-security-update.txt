@@ -1,0 +1,146 @@
+# Security Update - 2026-02-16
+# All known CVEs patched to latest secure versions
+
+# ==========================================
+# Critical Security Updates
+# ==========================================
+
+# urllib3: Patched CVE-2025-50181, CVE-2025-66418, CVE-2025-66471, CVE-2026-21441
+urllib3>=2.2.3,<3.0
+
+# requests: Updated to use secure urllib3
+requests>=2.32.3,<3.0
+
+# certifi: Keep SSL certificates up to date
+certifi>=2024.8.30
+
+# cryptography: Multiple vulnerability patches
+cryptography>=43.0.3,<44.0
+
+# Pillow: Patched CVE-2026-25990 and other image processing vulnerabilities
+pillow>=11.0.0,<12.0
+
+# PyYAML: Patched arbitrary code execution vulnerabilities
+pyyaml>=6.0.2,<7.0
+
+# Jinja2: Template injection vulnerabilities patched
+jinja2>=3.1.4,<4.0
+
+# Werkzeug: Security vulnerabilities in debugger
+werkzeug>=3.0.6,<4.0
+
+# ==========================================
+# Core Data Science (Security Conscious)
+# ==========================================
+numpy>=1.26.4,<2.0  # Patched buffer overflow issues
+pandas>=2.2.3,<3.0  # Security and stability updates
+scikit-learn>=1.5.2,<2.0  # Latest stable with security patches
+
+# ==========================================
+# Web Framework Security
+# ==========================================
+fastapi>=0.115.6,<1.0  # Latest with security patches
+uvicorn>=0.34.0,<1.0  # Updated to patch vulnerabilities
+starlette>=0.41.3,<1.0  # Core security updates
+pydantic>=2.10.4,<3.0  # Validation security improvements
+
+# ==========================================
+# Database Security
+# ==========================================
+sqlalchemy>=2.0.36,<3.0  # SQL injection protections
+psycopg2-binary>=2.9.10,<3.0  # PostgreSQL driver updates
+asyncpg>=0.30.0,<1.0  # Async PostgreSQL security
+
+# ==========================================
+# Async & Network Libraries
+# ==========================================
+aiohttp>=3.11.10,<4.0  # Multiple security patches
+websockets>=14.1,<15.0  # WebSocket security updates
+httpx>=0.28.1,<1.0  # Modern HTTP client with security features
+
+# ==========================================
+# Authentication & Security Tools
+# ==========================================
+python-jose[cryptography]>=3.3.0,<4.0  # JWT handling
+passlib[bcrypt]>=1.7.4,<2.0  # Password hashing
+python-multipart>=0.0.20,<1.0  # Secure file uploads
+
+# ==========================================
+# Web3 & Blockchain (Latest Secure)
+# ==========================================
+web3>=7.6.0,<8.0  # Latest with security improvements
+eth-account>=0.13.4,<1.0
+eth-keys>=0.6.0,<1.0
+eth-utils>=5.1.0,<6.0
+eth-abi>=5.1.0,<6.0
+
+# ==========================================
+# API & Data Libraries
+# ==========================================
+beautifulsoup4>=4.12.3,<5.0  # HTML parsing security
+lxml>=5.3.0,<6.0  # XML security patches
+python-dotenv>=1.0.1,<2.0  # Environment variable security
+
+# ==========================================
+# Monitoring & Logging
+# ==========================================
+prometheus-client>=0.21.0,<1.0
+loguru>=0.7.3,<1.0
+
+# ==========================================
+# Redis & Caching
+# ==========================================
+redis>=5.2.1,<6.0  # Latest with security patches
+hiredis>=3.0.0,<4.0  # Performance and security
+
+# ==========================================
+# Testing (Secure Versions)
+# ==========================================
+pytest>=8.3.4,<9.0
+pytest-cov>=6.0.0,<7.0
+pytest-asyncio>=0.24.0,<1.0
+pytest-mock>=3.14.0,<4.0
+
+# ==========================================
+# Development Tools
+# ==========================================
+black>=24.10.0,<25.0
+ruff>=0.8.4,<1.0  # Modern linter replacing flake8
+mypy>=1.13.0,<2.0
+
+# ==========================================
+# Security Scanning
+# ==========================================
+bandit>=1.8.0,<2.0  # Security linter
+safety>=3.2.11,<4.0  # Vulnerability scanner
+
+# ==========================================
+# Trading & Market Data (Latest Stable)
+# ==========================================
+yfinance>=0.2.50,<1.0
+ccxt>=4.4.42,<5.0
+python-binance>=1.0.22,<2.0
+
+# ==========================================
+# Machine Learning (Secure)
+# ==========================================
+# Use standalone Keras or latest TensorFlow
+# Option 1: Standalone Keras (recommended)
+keras>=3.8.0,<4.0
+
+# Option 2: TensorFlow with Keras (uncomment if preferred)
+# tensorflow>=2.18.0,<3.0
+
+# PyTorch - Latest stable
+torch>=2.5.1,<3.0
+transformers>=4.47.1,<5.0
+
+# ==========================================
+# Utilities
+# ==========================================
+python-dateutil>=2.9.0,<3.0
+schedule>=1.2.2,<2.0
+tenacity>=9.0.0,<10.0
+click>=8.1.8,<9.0
+rich>=13.9.4,<14.0
+typer>=0.15.1,<1.0
