@@ -1,6 +1,6 @@
 """
 Trading AI - FastAPI Backend
-Connects to real Alpaca data and serves dashboard
+Multi-chain crypto trading with supervisor agent
 """
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect
 from fastapi.middleware.cors import CORSMiddleware
@@ -24,6 +24,13 @@ from ml import get_model_server
 from swarm import get_swarm_controller
 from intelligence import get_intelligence_service
 from crypto_config import get_strategy_symbols, Chain, CryptoConfig
+
+# Import multi-chain execution components (Phase 1)
+import sys
+sys.path.append(os.path.join(os.path.dirname(__file__), '../..'))
+from src.agents.supervisor_agent import SupervisorAgent
+from src.execution.strategy_instance_manager import StrategyInstanceManager, Chain as ExecutionChain
+from src.execution.execution_router import ExecutionRouter
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -97,6 +104,11 @@ strategy_states = {
 
 # Strategy runner instance
 strategy_runner: StrategyRunner = None
+
+# Multi-chain execution components (Phase 1)
+supervisor_agent: SupervisorAgent = None
+instance_manager: StrategyInstanceManager = None
+execution_router: ExecutionRouter = None
 
 @app.get("/")
 async def root():
@@ -404,6 +416,108 @@ async def analyze_market(symbol: str = "SPY"):
         logger.error(f"Error analyzing market: {e}")
         return {"error": str(e)}, 500
 
+@app.get("/api/supervisor/status")
+async def get_supervisor_status():
+    """Get supervisor agent status and instance overview"""
+    try:
+        if not supervisor_agent or not instance_manager:
+            return {
+                "enabled": False,
+                "message": "Multi-chain supervisor not initialized",
+                "instances": []
+            }
+
+        # Get instance summary
+        summary = instance_manager.get_instance_summary()
+
+        # Get supervisor metrics
+        supervisor_metrics = supervisor_agent.get_summary()
+
+        return {
+            "enabled": True,
+            "total_instances": summary["total_instances"],
+            "enabled_instances": summary["enabled_instances"],
+            "total_capital": summary["total_capital"],
+            "by_chain": summary["by_chain"],
+            "by_strategy": summary["by_strategy"],
+            "supervisor_metrics": supervisor_metrics,
+            "timestamp": datetime.now().isoformat()
+        }
+    except Exception as e:
+        logger.error(f"Error fetching supervisor status: {e}")
+        return {"error": str(e)}, 500
+
+@app.get("/api/supervisor/instances")
+async def get_all_instances():
+    """Get all strategy instances"""
+    try:
+        if not instance_manager:
+            return {"instances": [], "message": "Instance manager not initialized"}
+
+        instances = []
+        for instance_id, instance in instance_manager.instances.items():
+            instances.append({
+                "instance_id": instance_id,
+                "strategy_name": instance.strategy_name,
+                "chain": instance.chain.value,
+                "symbols": instance.symbols,
+                "allocated_capital": instance.allocated_capital,
+                "enabled": instance.enabled
+            })
+
+        return {"instances": instances, "total": len(instances)}
+    except Exception as e:
+        logger.error(f"Error fetching instances: {e}")
+        return {"error": str(e)}, 500
+
+@app.post("/api/supervisor/instances/{instance_id}/toggle")
+async def toggle_instance(instance_id: str):
+    """Toggle a strategy instance on/off"""
+    try:
+        if not instance_manager:
+            return {"error": "Instance manager not initialized"}, 500
+
+        instance = instance_manager.get_instance(instance_id)
+        if not instance:
+            return {"error": f"Instance '{instance_id}' not found"}, 404
+
+        # Toggle the instance
+        if instance.enabled:
+            success = instance_manager.disable_instance(instance_id)
+        else:
+            success = instance_manager.enable_instance(instance_id)
+
+        if success:
+            return {
+                "success": True,
+                "instance_id": instance_id,
+                "enabled": not instance.enabled
+            }
+        else:
+            return {"error": "Failed to toggle instance"}, 500
+
+    except Exception as e:
+        logger.error(f"Error toggling instance: {e}")
+        return {"error": str(e)}, 500
+
+@app.get("/api/supervisor/arbitrage")
+async def get_arbitrage_opportunities():
+    """Get current arbitrage opportunities detected by supervisor"""
+    try:
+        if not supervisor_agent:
+            return {"opportunities": [], "message": "Supervisor not initialized"}
+
+        # This would normally be populated by the supervisor's detection loop
+        # For now, return empty or mock data
+        return {
+            "opportunities": [],
+            "last_check": datetime.now().isoformat(),
+            "threshold": supervisor_agent.arb_threshold if supervisor_agent else 0.01
+        }
+    except Exception as e:
+        logger.error(f"Error fetching arbitrage opportunities: {e}")
+        return {"error": str(e)}, 500
+
 @app.websocket("/ws")
 async def websocket_endpoint(websocket: WebSocket):
     """WebSocket for real-time updates"""
@@ -492,7 +606,7 @@ async def intelligence_update_loop():
 @app.on_event("startup")
 async def startup_event():
     """Startup tasks"""
-    global strategy_runner
+    global strategy_runner, supervisor_agent, instance_manager, execution_router
 
     logger.info("🚀 Trading AI API starting up...")
     logger.info(f"Alpaca connected: {trading_client is not None}")
@@ -520,9 +634,116 @@ async def startup_event():
     # Start intelligence update loop
     asyncio.create_task(intelligence_update_loop())
 
-    # Initialize strategy runner
+    # =================================================================
+    # PHASE 1: Multi-Chain Execution Infrastructure
+    # =================================================================
+    logger.info("\n" + "="*70)
+    logger.info("🌐 PHASE 1: Initializing Multi-Chain Execution Infrastructure")
+    logger.info("="*70)
+
+    # Initialize Supervisor Agent
+    logger.info("📊 Initializing Supervisor Agent...")
+    supervisor_agent = SupervisorAgent(
+        total_capital=30000.0,  # $30k total portfolio
+        rebalance_interval_hours=6,
+        max_position_pct=0.50,  # Max 50% in any asset
+        max_single_position_pct=0.10,  # Max 10% per position
+        daily_loss_limit_pct=0.15,  # 15% daily circuit breaker
+        arb_threshold=0.01  # 1% minimum arbitrage profit
+    )
+    logger.info("✅ Supervisor Agent initialized")
+    logger.info(f"   💰 Total Capital: $30,000")
+    logger.info(f"   🔄 Rebalance Interval: 6 hours")
+    logger.info(f"   ⚠️  Risk Limits: 50% per asset, 10% per position, 15% daily loss limit")
+
+    # Initialize Strategy Instance Manager
+    logger.info("\n🎯 Initializing Strategy Instance Manager...")
+    instance_manager = StrategyInstanceManager()
+    logger.info("✅ Instance Manager initialized")
+
+    # Spawn strategy instances across chains
+    logger.info("\n🚀 Spawning strategy instances across chains...")
+
+    # Mean Reversion on Base, Solana, and Binance
+    mean_rev_ids = instance_manager.spawn_strategy_instances(
+        strategy_name="mean_reversion",
+        strategy_class=MeanReversionStrategy,
+        chains=[ExecutionChain.BASE, ExecutionChain.SOLANA, ExecutionChain.CEX_BINANCE],
+        capital_per_instance=1000.0
+    )
+    logger.info(f"   ✅ Mean Reversion: {len(mean_rev_ids)} instances")
+
+    # Momentum on Solana and Binance
+    momentum_ids = instance_manager.spawn_strategy_instances(
+        strategy_name="momentum",
+        strategy_class=MomentumStrategy,
+        chains=[ExecutionChain.SOLANA, ExecutionChain.CEX_BINANCE],
+        capital_per_instance=1000.0
+    )
+    logger.info(f"   ✅ Momentum: {len(momentum_ids)} instances")
+
+    # RSI on Base and Arbitrum
+    rsi_ids = instance_manager.spawn_strategy_instances(
+        strategy_name="rsi",
+        strategy_class=RSIStrategy,
+        chains=[ExecutionChain.BASE, ExecutionChain.ARBITRUM],
+        capital_per_instance=1000.0
+    )
+    logger.info(f"   ✅ RSI: {len(rsi_ids)} instances")
+
+    # ML Ensemble on Base and Optimism
+    ml_ids = instance_manager.spawn_strategy_instances(
+        strategy_name="ml_ensemble",
+        strategy_class=MLEnsembleStrategy,
+        chains=[ExecutionChain.BASE, ExecutionChain.OPTIMISM],
+        capital_per_instance=1500.0
+    )
+    logger.info(f"   ✅ ML Ensemble: {len(ml_ids)} instances")
+
+    # RL Agent on Solana
+    rl_ids = instance_manager.spawn_strategy_instances(
+        strategy_name="ppo_rl",
+        strategy_class=RLAgentStrategy,
+        chains=[ExecutionChain.SOLANA],
+        capital_per_instance=1500.0
+    )
+    logger.info(f"   ✅ RL Agent: {len(rl_ids)} instances")
+
+    # Get instance summary
+    summary = instance_manager.get_instance_summary()
+    logger.info(f"\n📈 Instance Summary:")
+    logger.info(f"   Total Instances: {summary['total_instances']}")
+    logger.info(f"   Total Capital Allocated: ${summary['total_capital']:,.2f}")
+    logger.info(f"   By Chain:")
+    for chain, data in summary['by_chain'].items():
+        logger.info(f"      {chain}: {data['count']} instances, ${data['capital']:,.2f}")
+
+    # Initialize Execution Router
+    logger.info("\n🔀 Initializing Execution Router...")
+    execution_router = ExecutionRouter(
+        max_gas_pct=0.02,  # 2% max gas
+        cex_priority=False  # Prefer DEX when equal
+    )
+    logger.info("✅ Execution Router initialized")
+    logger.info(f"   ⛽ Max Gas Threshold: 2% of trade value")
+    logger.info(f"   🎯 Routing Logic: Best net output after fees & gas")
+
+    logger.info("\n" + "="*70)
+    logger.info("✅ PHASE 1 INITIALIZATION COMPLETE")
+    logger.info("="*70)
+    logger.info("📊 System Status:")
+    logger.info(f"   • {summary['total_instances']} strategy instances spawned")
+    logger.info(f"   • Covering {len(summary['by_chain'])} chains")
+    logger.info(f"   • ${summary['total_capital']:,.2f} total capital")
+    logger.info(f"   • Supervisor agent monitoring performance")
+    logger.info(f"   • Smart CEX/DEX routing enabled")
+    logger.info("\n⚠️  Note: Currently using MOCK execution")
+    logger.info("   Next phases will integrate real CEX and DEX connectors")
+    logger.info("="*70 + "\n")
+
+    # Legacy single-strategy runner (keep for backwards compatibility)
     if trading_client and data_client:
-        logger.info("Initializing Strategy Runner...")
+        logger.info("Initializing Legacy Strategy Runner...")
         strategy_runner = StrategyRunner(trading_client, data_client, strategy_states)
 
         # Register crypto strategies
