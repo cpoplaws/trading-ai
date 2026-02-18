@@ -1,0 +1,5125 @@
+
+
++===========================================================================================================================================================================================+
+
+
+DEPRECATED: this command (`check`) has been DEPRECATED, and will be unsupported beyond 01 June 2024.
+
+
+We highly encourage switching to the new `scan` command which is easier to use, more powerful, and can be set up to mimic the deprecated command if required.
+
+
++===========================================================================================================================================================================================+
+
+
+{
+    "report_meta": {
+        "scan_target": "environment",
+        "scanned": [
+            "/Users/silasmarkowicz/Library/Python/3.9/lib/python/site-packages",
+            "/Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework/Versions/3.9/lib/python3.9/site-packages"
+        ],
+        "scanned_full_path": [
+            "/Users/silasmarkowicz/Library/Python/3.9/lib/python/site-packages",
+            "/Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework/Versions/3.9/lib/python3.9/site-packages"
+        ],
+        "target_languages": [
+            "python"
+        ],
+        "policy_file": null,
+        "policy_file_source": "local",
+        "audit_and_monitor": false,
+        "api_key": false,
+        "account": "",
+        "local_database_path": null,
+        "safety_version": "3.7.0",
+        "timestamp": "2026-02-16 01:36:39",
+        "packages_found": 192,
+        "vulnerabilities_found": 13,
+        "vulnerabilities_ignored": 0,
+        "remediations_recommended": 0,
+        "telemetry": {
+            "safety_options": {
+                "json": {
+                    "--json": 1
+                }
+            },
+            "safety_version": "3.7.0",
+            "safety_source": "cli",
+            "os_type": "Darwin",
+            "os_release": "25.3.0",
+            "os_description": "macOS-26.3-arm64-arm-64bit",
+            "python_version": "3.9.6",
+            "safety_command": "check"
+        },
+        "git": {
+            "branch": "main",
+            "tag": "",
+            "commit": "d2d48eb9148eae3e4a838aed414150df39d55aa1",
+            "dirty": "False",
+            "origin": "https://github.com/cpoplaws/trading-ai.git"
+        },
+        "project": null,
+        "json_version": "1.1",
+        "remediations_attempted": 0,
+        "remediations_completed": 0,
+        "remediation_mode": "NON_INTERACTIVE"
+    },
+    "scanned_packages": {
+        "anyio": {
+            "name": "anyio",
+            "version": "4.12.1",
+            "requirements": [
+                {
+                    "raw": "anyio==4.12.1",
+                    "extras": [],
+                    "marker": null,
+                    "name": "anyio",
+                    "specifier": "==4.12.1",
+                    "url": null,
+                    "found": "/Users/silasmarkowicz/Library/Python/3.9/lib/python/site-packages/anyio-4.12.1.dist-info"
+                }
+            ]
+        },
+        "tomli": {
+            "name": "tomli",
+            "version": "2.4.0",
+            "requirements": [
+                {
+                    "raw": "tomli==2.4.0",
+                    "extras": [],
+                    "marker": null,
+                    "name": "tomli",
+                    "specifier": "==2.4.0",
+                    "url": null,
+                    "found": "/Users/silasmarkowicz/Library/Python/3.9/lib/python/site-packages/tomli-2.4.0.dist-info"
+                }
+            ]
+        },
+        "shellingham": {
+            "name": "shellingham",
+            "version": "1.5.4",
+            "requirements": [
+                {
+                    "raw": "shellingham==1.5.4",
+                    "extras": [],
+                    "marker": null,
+                    "name": "shellingham",
+                    "specifier": "==1.5.4",
+                    "url": null,
+                    "found": "/Users/silasmarkowicz/Library/Python/3.9/lib/python/site-packages/shellingham-1.5.4.dist-info"
+                }
+            ]
+        },
+        "pydantic-settings": {
+            "name": "pydantic-settings",
+            "version": "2.11.0",
+            "requirements": [
+                {
+                    "raw": "pydantic-settings==2.11.0",
+                    "extras": [],
+                    "marker": null,
+                    "name": "pydantic-settings",
+                    "specifier": "==2.11.0",
+                    "url": null,
+                    "found": "/Users/silasmarkowicz/Library/Python/3.9/lib/python/site-packages/pydantic_settings-2.11.0.dist-info"
+                }
+            ]
+        },
+        "ccxt": {
+            "name": "ccxt",
+            "version": "4.5.38",
+            "requirements": [
+                {
+                    "raw": "ccxt==4.5.38",
+                    "extras": [],
+                    "marker": null,
+                    "name": "ccxt",
+                    "specifier": "==4.5.38",
+                    "url": null,
+                    "found": "/Users/silasmarkowicz/Library/Python/3.9/lib/python/site-packages/ccxt-4.5.38.dist-info"
+                }
+            ]
+        },
+        "CacheControl": {
+            "name": "CacheControl",
+            "version": "0.14.3",
+            "requirements": [
+                {
+                    "raw": "CacheControl==0.14.3",
+                    "extras": [],
+                    "marker": null,
+                    "name": "CacheControl",
+                    "specifier": "==0.14.3",
+                    "url": null,
+                    "found": "/Users/silasmarkowicz/Library/Python/3.9/lib/python/site-packages/cachecontrol-0.14.3.dist-info"
+                }
+            ]
+        },
+        "threadpoolctl": {
+            "name": "threadpoolctl",
+            "version": "3.6.0",
+            "requirements": [
+                {
+                    "raw": "threadpoolctl==3.6.0",
+                    "extras": [],
+                    "marker": null,
+                    "name": "threadpoolctl",
+                    "specifier": "==3.6.0",
+                    "url": null,
+                    "found": "/Users/silasmarkowicz/Library/Python/3.9/lib/python/site-packages/threadpoolctl-3.6.0.dist-info"
+                }
+            ]
+        },
+        "ruamel.yaml": {
+            "name": "ruamel.yaml",
+            "version": "0.19.1",
+            "requirements": [
+                {
+                    "raw": "ruamel.yaml==0.19.1",
+                    "extras": [],
+                    "marker": null,
+                    "name": "ruamel.yaml",
+                    "specifier": "==0.19.1",
+                    "url": null,
+                    "found": "/Users/silasmarkowicz/Library/Python/3.9/lib/python/site-packages/ruamel_yaml-0.19.1.dist-info"
+                }
+            ]
+        },
+        "license-expression": {
+            "name": "license-expression",
+            "version": "30.4.4",
+            "requirements": [
+                {
+                    "raw": "license-expression==30.4.4",
+                    "extras": [],
+                    "marker": null,
+                    "name": "license-expression",
+                    "specifier": "==30.4.4",
+                    "url": null,
+                    "found": "/Users/silasmarkowicz/Library/Python/3.9/lib/python/site-packages/license_expression-30.4.4.dist-info"
+                }
+            ]
+        },
+        "cytoolz": {
+            "name": "cytoolz",
+            "version": "1.1.0",
+            "requirements": [
+                {
+                    "raw": "cytoolz==1.1.0",
+                    "extras": [],
+                    "marker": null,
+                    "name": "cytoolz",
+                    "specifier": "==1.1.0",
+                    "url": null,
+                    "found": "/Users/silasmarkowicz/Library/Python/3.9/lib/python/site-packages/cytoolz-1.1.0.dist-info"
+                }
+            ]
+        },
+        "cloudpickle": {
+            "name": "cloudpickle",
+            "version": "3.1.2",
+            "requirements": [
+                {
+                    "raw": "cloudpickle==3.1.2",
+                    "extras": [],
+                    "marker": null,
+                    "name": "cloudpickle",
+                    "specifier": "==3.1.2",
+                    "url": null,
+                    "found": "/Users/silasmarkowicz/Library/Python/3.9/lib/python/site-packages/cloudpickle-3.1.2.dist-info"
+                }
+            ]
+        },
+        "async-timeout": {
+            "name": "async-timeout",
+            "version": "5.0.1",
+            "requirements": [
+                {
+                    "raw": "async-timeout==5.0.1",
+                    "extras": [],
+                    "marker": null,
+                    "name": "async-timeout",
+                    "specifier": "==5.0.1",
+                    "url": null,
+                    "found": "/Users/silasmarkowicz/Library/Python/3.9/lib/python/site-packages/async_timeout-5.0.1.dist-info"
+                }
+            ]
+        },
+        "requests": {
+            "name": "requests",
+            "version": "2.32.5",
+            "requirements": [
+                {
+                    "raw": "requests==2.32.5",
+                    "extras": [],
+                    "marker": null,
+                    "name": "requests",
+                    "specifier": "==2.32.5",
+                    "url": null,
+                    "found": "/Users/silasmarkowicz/Library/Python/3.9/lib/python/site-packages/requests-2.32.5.dist-info"
+                }
+            ]
+        },
+        "toolz": {
+            "name": "toolz",
+            "version": "1.1.0",
+            "requirements": [
+                {
+                    "raw": "toolz==1.1.0",
+                    "extras": [],
+                    "marker": null,
+                    "name": "toolz",
+                    "specifier": "==1.1.0",
+                    "url": null,
+                    "found": "/Users/silasmarkowicz/Library/Python/3.9/lib/python/site-packages/toolz-1.1.0.dist-info"
+                }
+            ]
+        },
+        "yfinance": {
+            "name": "yfinance",
+            "version": "1.1.0",
+            "requirements": [
+                {
+                    "raw": "yfinance==1.1.0",
+                    "extras": [],
+                    "marker": null,
+                    "name": "yfinance",
+                    "specifier": "==1.1.0",
+                    "url": null,
+                    "found": "/Users/silasmarkowicz/Library/Python/3.9/lib/python/site-packages/yfinance-1.1.0.dist-info"
+                }
+            ]
+        },
+        "aiohttp": {
+            "name": "aiohttp",
+            "version": "3.13.3",
+            "requirements": [
+                {
+                    "raw": "aiohttp==3.13.3",
+                    "extras": [],
+                    "marker": null,
+                    "name": "aiohttp",
+                    "specifier": "==3.13.3",
+                    "url": null,
+                    "found": "/Users/silasmarkowicz/Library/Python/3.9/lib/python/site-packages/aiohttp-3.13.3.dist-info"
+                }
+            ]
+        },
+        "exceptiongroup": {
+            "name": "exceptiongroup",
+            "version": "1.3.1",
+            "requirements": [
+                {
+                    "raw": "exceptiongroup==1.3.1",
+                    "extras": [],
+                    "marker": null,
+                    "name": "exceptiongroup",
+                    "specifier": "==1.3.1",
+                    "url": null,
+                    "found": "/Users/silasmarkowicz/Library/Python/3.9/lib/python/site-packages/exceptiongroup-1.3.1.dist-info"
+                }
+            ]
+        },
+        "starlette": {
+            "name": "starlette",
+            "version": "0.49.3",
+            "requirements": [
+                {
+                    "raw": "starlette==0.49.3",
+                    "extras": [],
+                    "marker": null,
+                    "name": "starlette",
+                    "specifier": "==0.49.3",
+                    "url": null,
+                    "found": "/Users/silasmarkowicz/Library/Python/3.9/lib/python/site-packages/starlette-0.49.3.dist-info"
+                }
+            ]
+        },
+        "multidict": {
+            "name": "multidict",
+            "version": "6.7.1",
+            "requirements": [
+                {
+                    "raw": "multidict==6.7.1",
+                    "extras": [],
+                    "marker": null,
+                    "name": "multidict",
+                    "specifier": "==6.7.1",
+                    "url": null,
+                    "found": "/Users/silasmarkowicz/Library/Python/3.9/lib/python/site-packages/multidict-6.7.1.dist-info"
+                }
+            ]
+        },
+        "pyarrow": {
+            "name": "pyarrow",
+            "version": "21.0.0",
+            "requirements": [
+                {
+                    "raw": "pyarrow==21.0.0",
+                    "extras": [],
+                    "marker": null,
+                    "name": "pyarrow",
+                    "specifier": "==21.0.0",
+                    "url": null,
+                    "found": "/Users/silasmarkowicz/Library/Python/3.9/lib/python/site-packages/pyarrow-21.0.0.dist-info"
+                }
+            ]
+        },
+        "dparse": {
+            "name": "dparse",
+            "version": "0.6.4",
+            "requirements": [
+                {
+                    "raw": "dparse==0.6.4",
+                    "extras": [],
+                    "marker": null,
+                    "name": "dparse",
+                    "specifier": "==0.6.4",
+                    "url": null,
+                    "found": "/Users/silasmarkowicz/Library/Python/3.9/lib/python/site-packages/dparse-0.6.4.dist-info"
+                }
+            ]
+        },
+        "gymnasium": {
+            "name": "gymnasium",
+            "version": "1.1.1",
+            "requirements": [
+                {
+                    "raw": "gymnasium==1.1.1",
+                    "extras": [],
+                    "marker": null,
+                    "name": "gymnasium",
+                    "specifier": "==1.1.1",
+                    "url": null,
+                    "found": "/Users/silasmarkowicz/Library/Python/3.9/lib/python/site-packages/gymnasium-1.1.1.dist-info"
+                }
+            ]
+        },
+        "pytest-mock": {
+            "name": "pytest-mock",
+            "version": "3.15.1",
+            "requirements": [
+                {
+                    "raw": "pytest-mock==3.15.1",
+                    "extras": [],
+                    "marker": null,
+                    "name": "pytest-mock",
+                    "specifier": "==3.15.1",
+                    "url": null,
+                    "found": "/Users/silasmarkowicz/Library/Python/3.9/lib/python/site-packages/pytest_mock-3.15.1.dist-info"
+                }
+            ]
+        },
+        "redis": {
+            "name": "redis",
+            "version": "7.0.1",
+            "requirements": [
+                {
+                    "raw": "redis==7.0.1",
+                    "extras": [],
+                    "marker": null,
+                    "name": "redis",
+                    "specifier": "==7.0.1",
+                    "url": null,
+                    "found": "/Users/silasmarkowicz/Library/Python/3.9/lib/python/site-packages/redis-7.0.1.dist-info"
+                }
+            ]
+        },
+        "tzdata": {
+            "name": "tzdata",
+            "version": "2025.3",
+            "requirements": [
+                {
+                    "raw": "tzdata==2025.3",
+                    "extras": [],
+                    "marker": null,
+                    "name": "tzdata",
+                    "specifier": "==2025.3",
+                    "url": null,
+                    "found": "/Users/silasmarkowicz/Library/Python/3.9/lib/python/site-packages/tzdata-2025.3.dist-info"
+                }
+            ]
+        },
+        "rich": {
+            "name": "rich",
+            "version": "14.3.2",
+            "requirements": [
+                {
+                    "raw": "rich==14.3.2",
+                    "extras": [],
+                    "marker": null,
+                    "name": "rich",
+                    "specifier": "==14.3.2",
+                    "url": null,
+                    "found": "/Users/silasmarkowicz/Library/Python/3.9/lib/python/site-packages/rich-14.3.2.dist-info"
+                }
+            ]
+        },
+        "pytz": {
+            "name": "pytz",
+            "version": "2025.2",
+            "requirements": [
+                {
+                    "raw": "pytz==2025.2",
+                    "extras": [],
+                    "marker": null,
+                    "name": "pytz",
+                    "specifier": "==2025.2",
+                    "url": null,
+                    "found": "/Users/silasmarkowicz/Library/Python/3.9/lib/python/site-packages/pytz-2025.2.dist-info"
+                }
+            ]
+        },
+        "scipy": {
+            "name": "scipy",
+            "version": "1.13.1",
+            "requirements": [
+                {
+                    "raw": "scipy==1.13.1",
+                    "extras": [],
+                    "marker": null,
+                    "name": "scipy",
+                    "specifier": "==1.13.1",
+                    "url": null,
+                    "found": "/Users/silasmarkowicz/Library/Python/3.9/lib/python/site-packages/scipy-1.13.1.dist-info"
+                }
+            ]
+        },
+        "toml": {
+            "name": "toml",
+            "version": "0.10.2",
+            "requirements": [
+                {
+                    "raw": "toml==0.10.2",
+                    "extras": [],
+                    "marker": null,
+                    "name": "toml",
+                    "specifier": "==0.10.2",
+                    "url": null,
+                    "found": "/Users/silasmarkowicz/Library/Python/3.9/lib/python/site-packages/toml-0.10.2.dist-info"
+                }
+            ]
+        },
+        "matplotlib": {
+            "name": "matplotlib",
+            "version": "3.9.4",
+            "requirements": [
+                {
+                    "raw": "matplotlib==3.9.4",
+                    "extras": [],
+                    "marker": null,
+                    "name": "matplotlib",
+                    "specifier": "==3.9.4",
+                    "url": null,
+                    "found": "/Users/silasmarkowicz/Library/Python/3.9/lib/python/site-packages/matplotlib-3.9.4.dist-info"
+                }
+            ]
+        },
+        "streamlit": {
+            "name": "streamlit",
+            "version": "1.50.0",
+            "requirements": [
+                {
+                    "raw": "streamlit==1.50.0",
+                    "extras": [],
+                    "marker": null,
+                    "name": "streamlit",
+                    "specifier": "==1.50.0",
+                    "url": null,
+                    "found": "/Users/silasmarkowicz/Library/Python/3.9/lib/python/site-packages/streamlit-1.50.0.dist-info"
+                }
+            ]
+        },
+        "certifi": {
+            "name": "certifi",
+            "version": "2026.1.4",
+            "requirements": [
+                {
+                    "raw": "certifi==2026.1.4",
+                    "extras": [],
+                    "marker": null,
+                    "name": "certifi",
+                    "specifier": "==2026.1.4",
+                    "url": null,
+                    "found": "/Users/silasmarkowicz/Library/Python/3.9/lib/python/site-packages/certifi-2026.1.4.dist-info"
+                }
+            ]
+        },
+        "safety": {
+            "name": "safety",
+            "version": "3.7.0",
+            "requirements": [
+                {
+                    "raw": "safety==3.7.0",
+                    "extras": [],
+                    "marker": null,
+                    "name": "safety",
+                    "specifier": "==3.7.0",
+                    "url": null,
+                    "found": "/Users/silasmarkowicz/Library/Python/3.9/lib/python/site-packages/safety-3.7.0.dist-info"
+                }
+            ]
+        },
+        "prometheus_client": {
+            "name": "prometheus_client",
+            "version": "0.24.1",
+            "requirements": [
+                {
+                    "raw": "prometheus_client==0.24.1",
+                    "extras": [],
+                    "marker": null,
+                    "name": "prometheus_client",
+                    "specifier": "==0.24.1",
+                    "url": null,
+                    "found": "/Users/silasmarkowicz/Library/Python/3.9/lib/python/site-packages/prometheus_client-0.24.1.dist-info"
+                }
+            ]
+        },
+        "cyclonedx-python-lib": {
+            "name": "cyclonedx-python-lib",
+            "version": "9.1.0",
+            "requirements": [
+                {
+                    "raw": "cyclonedx-python-lib==9.1.0",
+                    "extras": [],
+                    "marker": null,
+                    "name": "cyclonedx-python-lib",
+                    "specifier": "==9.1.0",
+                    "url": null,
+                    "found": "/Users/silasmarkowicz/Library/Python/3.9/lib/python/site-packages/cyclonedx_python_lib-9.1.0.dist-info"
+                }
+            ]
+        },
+        "pytest-asyncio": {
+            "name": "pytest-asyncio",
+            "version": "1.2.0",
+            "requirements": [
+                {
+                    "raw": "pytest-asyncio==1.2.0",
+                    "extras": [],
+                    "marker": null,
+                    "name": "pytest-asyncio",
+                    "specifier": "==1.2.0",
+                    "url": null,
+                    "found": "/Users/silasmarkowicz/Library/Python/3.9/lib/python/site-packages/pytest_asyncio-1.2.0.dist-info"
+                }
+            ]
+        },
+        "pydeck": {
+            "name": "pydeck",
+            "version": "0.9.1",
+            "requirements": [
+                {
+                    "raw": "pydeck==0.9.1",
+                    "extras": [],
+                    "marker": null,
+                    "name": "pydeck",
+                    "specifier": "==0.9.1",
+                    "url": null,
+                    "found": "/Users/silasmarkowicz/Library/Python/3.9/lib/python/site-packages/pydeck-0.9.1.dist-info"
+                }
+            ]
+        },
+        "jsonschema-specifications": {
+            "name": "jsonschema-specifications",
+            "version": "2025.9.1",
+            "requirements": [
+                {
+                    "raw": "jsonschema-specifications==2025.9.1",
+                    "extras": [],
+                    "marker": null,
+                    "name": "jsonschema-specifications",
+                    "specifier": "==2025.9.1",
+                    "url": null,
+                    "found": "/Users/silasmarkowicz/Library/Python/3.9/lib/python/site-packages/jsonschema_specifications-2025.9.1.dist-info"
+                }
+            ]
+        },
+        "narwhals": {
+            "name": "narwhals",
+            "version": "2.16.0",
+            "requirements": [
+                {
+                    "raw": "narwhals==2.16.0",
+                    "extras": [],
+                    "marker": null,
+                    "name": "narwhals",
+                    "specifier": "==2.16.0",
+                    "url": null,
+                    "found": "/Users/silasmarkowicz/Library/Python/3.9/lib/python/site-packages/narwhals-2.16.0.dist-info"
+                }
+            ]
+        },
+        "platformdirs": {
+            "name": "platformdirs",
+            "version": "4.4.0",
+            "requirements": [
+                {
+                    "raw": "platformdirs==4.4.0",
+                    "extras": [],
+                    "marker": null,
+                    "name": "platformdirs",
+                    "specifier": "==4.4.0",
+                    "url": null,
+                    "found": "/Users/silasmarkowicz/Library/Python/3.9/lib/python/site-packages/platformdirs-4.4.0.dist-info"
+                }
+            ]
+        },
+        "pydantic": {
+            "name": "pydantic",
+            "version": "2.12.5",
+            "requirements": [
+                {
+                    "raw": "pydantic==2.12.5",
+                    "extras": [],
+                    "marker": null,
+                    "name": "pydantic",
+                    "specifier": "==2.12.5",
+                    "url": null,
+                    "found": "/Users/silasmarkowicz/Library/Python/3.9/lib/python/site-packages/pydantic-2.12.5.dist-info"
+                }
+            ]
+        },
+        "defusedxml": {
+            "name": "defusedxml",
+            "version": "0.7.1",
+            "requirements": [
+                {
+                    "raw": "defusedxml==0.7.1",
+                    "extras": [],
+                    "marker": null,
+                    "name": "defusedxml",
+                    "specifier": "==0.7.1",
+                    "url": null,
+                    "found": "/Users/silasmarkowicz/Library/Python/3.9/lib/python/site-packages/defusedxml-0.7.1.dist-info"
+                }
+            ]
+        },
+        "boolean.py": {
+            "name": "boolean.py",
+            "version": "5.0",
+            "requirements": [
+                {
+                    "raw": "boolean.py==5.0",
+                    "extras": [],
+                    "marker": null,
+                    "name": "boolean.py",
+                    "specifier": "==5.0",
+                    "url": null,
+                    "found": "/Users/silasmarkowicz/Library/Python/3.9/lib/python/site-packages/boolean_py-5.0.dist-info"
+                }
+            ]
+        },
+        "coincurve": {
+            "name": "coincurve",
+            "version": "21.0.0",
+            "requirements": [
+                {
+                    "raw": "coincurve==21.0.0",
+                    "extras": [],
+                    "marker": null,
+                    "name": "coincurve",
+                    "specifier": "==21.0.0",
+                    "url": null,
+                    "found": "/Users/silasmarkowicz/Library/Python/3.9/lib/python/site-packages/coincurve-21.0.0.dist-info"
+                }
+            ]
+        },
+        "grpcio": {
+            "name": "grpcio",
+            "version": "1.78.0",
+            "requirements": [
+                {
+                    "raw": "grpcio==1.78.0",
+                    "extras": [],
+                    "marker": null,
+                    "name": "grpcio",
+                    "specifier": "==1.78.0",
+                    "url": null,
+                    "found": "/Users/silasmarkowicz/Library/Python/3.9/lib/python/site-packages/grpcio-1.78.0.dist-info"
+                }
+            ]
+        },
+        "propcache": {
+            "name": "propcache",
+            "version": "0.4.1",
+            "requirements": [
+                {
+                    "raw": "propcache==0.4.1",
+                    "extras": [],
+                    "marker": null,
+                    "name": "propcache",
+                    "specifier": "==0.4.1",
+                    "url": null,
+                    "found": "/Users/silasmarkowicz/Library/Python/3.9/lib/python/site-packages/propcache-0.4.1.dist-info"
+                }
+            ]
+        },
+        "TA-Lib": {
+            "name": "TA-Lib",
+            "version": "0.6.8",
+            "requirements": [
+                {
+                    "raw": "TA-Lib==0.6.8",
+                    "extras": [],
+                    "marker": null,
+                    "name": "TA-Lib",
+                    "specifier": "==0.6.8",
+                    "url": null,
+                    "found": "/Users/silasmarkowicz/Library/Python/3.9/lib/python/site-packages/ta_lib-0.6.8.dist-info"
+                }
+            ]
+        },
+        "torch": {
+            "name": "torch",
+            "version": "2.8.0",
+            "requirements": [
+                {
+                    "raw": "torch==2.8.0",
+                    "extras": [],
+                    "marker": null,
+                    "name": "torch",
+                    "specifier": "==2.8.0",
+                    "url": null,
+                    "found": "/Users/silasmarkowicz/Library/Python/3.9/lib/python/site-packages/torch-2.8.0.dist-info"
+                }
+            ]
+        },
+        "protobuf": {
+            "name": "protobuf",
+            "version": "6.33.5",
+            "requirements": [
+                {
+                    "raw": "protobuf==6.33.5",
+                    "extras": [],
+                    "marker": null,
+                    "name": "protobuf",
+                    "specifier": "==6.33.5",
+                    "url": null,
+                    "found": "/Users/silasmarkowicz/Library/Python/3.9/lib/python/site-packages/protobuf-6.33.5.dist-info"
+                }
+            ]
+        },
+        "python-dotenv": {
+            "name": "python-dotenv",
+            "version": "1.2.1",
+            "requirements": [
+                {
+                    "raw": "python-dotenv==1.2.1",
+                    "extras": [],
+                    "marker": null,
+                    "name": "python-dotenv",
+                    "specifier": "==1.2.1",
+                    "url": null,
+                    "found": "/Users/silasmarkowicz/Library/Python/3.9/lib/python/site-packages/python_dotenv-1.2.1.dist-info"
+                }
+            ]
+        },
+        "blinker": {
+            "name": "blinker",
+            "version": "1.9.0",
+            "requirements": [
+                {
+                    "raw": "blinker==1.9.0",
+                    "extras": [],
+                    "marker": null,
+                    "name": "blinker",
+                    "specifier": "==1.9.0",
+                    "url": null,
+                    "found": "/Users/silasmarkowicz/Library/Python/3.9/lib/python/site-packages/blinker-1.9.0.dist-info"
+                }
+            ]
+        },
+        "tenacity": {
+            "name": "tenacity",
+            "version": "9.1.2",
+            "requirements": [
+                {
+                    "raw": "tenacity==9.1.2",
+                    "extras": [],
+                    "marker": null,
+                    "name": "tenacity",
+                    "specifier": "==9.1.2",
+                    "url": null,
+                    "found": "/Users/silasmarkowicz/Library/Python/3.9/lib/python/site-packages/tenacity-9.1.2.dist-info"
+                }
+            ]
+        },
+        "markdown-it-py": {
+            "name": "markdown-it-py",
+            "version": "3.0.0",
+            "requirements": [
+                {
+                    "raw": "markdown-it-py==3.0.0",
+                    "extras": [],
+                    "marker": null,
+                    "name": "markdown-it-py",
+                    "specifier": "==3.0.0",
+                    "url": null,
+                    "found": "/Users/silasmarkowicz/Library/Python/3.9/lib/python/site-packages/markdown_it_py-3.0.0.dist-info"
+                }
+            ]
+        },
+        "tomlkit": {
+            "name": "tomlkit",
+            "version": "0.14.0",
+            "requirements": [
+                {
+                    "raw": "tomlkit==0.14.0",
+                    "extras": [],
+                    "marker": null,
+                    "name": "tomlkit",
+                    "specifier": "==0.14.0",
+                    "url": null,
+                    "found": "/Users/silasmarkowicz/Library/Python/3.9/lib/python/site-packages/tomlkit-0.14.0.dist-info"
+                }
+            ]
+        },
+        "marshmallow": {
+            "name": "marshmallow",
+            "version": "4.0.1",
+            "requirements": [
+                {
+                    "raw": "marshmallow==4.0.1",
+                    "extras": [],
+                    "marker": null,
+                    "name": "marshmallow",
+                    "specifier": "==4.0.1",
+                    "url": null,
+                    "found": "/Users/silasmarkowicz/Library/Python/3.9/lib/python/site-packages/marshmallow-4.0.1.dist-info"
+                }
+            ]
+        },
+        "filelock": {
+            "name": "filelock",
+            "version": "3.19.1",
+            "requirements": [
+                {
+                    "raw": "filelock==3.19.1",
+                    "extras": [],
+                    "marker": null,
+                    "name": "filelock",
+                    "specifier": "==3.19.1",
+                    "url": null,
+                    "found": "/Users/silasmarkowicz/Library/Python/3.9/lib/python/site-packages/filelock-3.19.1.dist-info"
+                }
+            ]
+        },
+        "seaborn": {
+            "name": "seaborn",
+            "version": "0.13.2",
+            "requirements": [
+                {
+                    "raw": "seaborn==0.13.2",
+                    "extras": [],
+                    "marker": null,
+                    "name": "seaborn",
+                    "specifier": "==0.13.2",
+                    "url": null,
+                    "found": "/Users/silasmarkowicz/Library/Python/3.9/lib/python/site-packages/seaborn-0.13.2.dist-info"
+                }
+            ]
+        },
+        "Farama-Notifications": {
+            "name": "Farama-Notifications",
+            "version": "0.0.4",
+            "requirements": [
+                {
+                    "raw": "Farama-Notifications==0.0.4",
+                    "extras": [],
+                    "marker": null,
+                    "name": "Farama-Notifications",
+                    "specifier": "==0.0.4",
+                    "url": null,
+                    "found": "/Users/silasmarkowicz/Library/Python/3.9/lib/python/site-packages/Farama_Notifications-0.0.4.dist-info"
+                }
+            ]
+        },
+        "pyunormalize": {
+            "name": "pyunormalize",
+            "version": "17.0.0",
+            "requirements": [
+                {
+                    "raw": "pyunormalize==17.0.0",
+                    "extras": [],
+                    "marker": null,
+                    "name": "pyunormalize",
+                    "specifier": "==17.0.0",
+                    "url": null,
+                    "found": "/Users/silasmarkowicz/Library/Python/3.9/lib/python/site-packages/pyunormalize-17.0.0.dist-info"
+                }
+            ]
+        },
+        "safety-schemas": {
+            "name": "safety-schemas",
+            "version": "0.0.16",
+            "requirements": [
+                {
+                    "raw": "safety-schemas==0.0.16",
+                    "extras": [],
+                    "marker": null,
+                    "name": "safety-schemas",
+                    "specifier": "==0.0.16",
+                    "url": null,
+                    "found": "/Users/silasmarkowicz/Library/Python/3.9/lib/python/site-packages/safety_schemas-0.0.16.dist-info"
+                }
+            ]
+        },
+        "asyncpg": {
+            "name": "asyncpg",
+            "version": "0.31.0",
+            "requirements": [
+                {
+                    "raw": "asyncpg==0.31.0",
+                    "extras": [],
+                    "marker": null,
+                    "name": "asyncpg",
+                    "specifier": "==0.31.0",
+                    "url": null,
+                    "found": "/Users/silasmarkowicz/Library/Python/3.9/lib/python/site-packages/asyncpg-0.31.0.dist-info"
+                }
+            ]
+        },
+        "eth_abi": {
+            "name": "eth_abi",
+            "version": "5.2.0",
+            "requirements": [
+                {
+                    "raw": "eth_abi==5.2.0",
+                    "extras": [],
+                    "marker": null,
+                    "name": "eth_abi",
+                    "specifier": "==5.2.0",
+                    "url": null,
+                    "found": "/Users/silasmarkowicz/Library/Python/3.9/lib/python/site-packages/eth_abi-5.2.0.dist-info"
+                }
+            ]
+        },
+        "parsimonious": {
+            "name": "parsimonious",
+            "version": "0.10.0",
+            "requirements": [
+                {
+                    "raw": "parsimonious==0.10.0",
+                    "extras": [],
+                    "marker": null,
+                    "name": "parsimonious",
+                    "specifier": "==0.10.0",
+                    "url": null,
+                    "found": "/Users/silasmarkowicz/Library/Python/3.9/lib/python/site-packages/parsimonious-0.10.0.dist-info"
+                }
+            ]
+        },
+        "tornado": {
+            "name": "tornado",
+            "version": "6.5.4",
+            "requirements": [
+                {
+                    "raw": "tornado==6.5.4",
+                    "extras": [],
+                    "marker": null,
+                    "name": "tornado",
+                    "specifier": "==6.5.4",
+                    "url": null,
+                    "found": "/Users/silasmarkowicz/Library/Python/3.9/lib/python/site-packages/tornado-6.5.4.dist-info"
+                }
+            ]
+        },
+        "bitarray": {
+            "name": "bitarray",
+            "version": "3.8.0",
+            "requirements": [
+                {
+                    "raw": "bitarray==3.8.0",
+                    "extras": [],
+                    "marker": null,
+                    "name": "bitarray",
+                    "specifier": "==3.8.0",
+                    "url": null,
+                    "found": "/Users/silasmarkowicz/Library/Python/3.9/lib/python/site-packages/bitarray-3.8.0.dist-info"
+                }
+            ]
+        },
+        "idna": {
+            "name": "idna",
+            "version": "3.11",
+            "requirements": [
+                {
+                    "raw": "idna==3.11",
+                    "extras": [],
+                    "marker": null,
+                    "name": "idna",
+                    "specifier": "==3.11",
+                    "url": null,
+                    "found": "/Users/silasmarkowicz/Library/Python/3.9/lib/python/site-packages/idna-3.11.dist-info"
+                }
+            ]
+        },
+        "cffi": {
+            "name": "cffi",
+            "version": "2.0.0",
+            "requirements": [
+                {
+                    "raw": "cffi==2.0.0",
+                    "extras": [],
+                    "marker": null,
+                    "name": "cffi",
+                    "specifier": "==2.0.0",
+                    "url": null,
+                    "found": "/Users/silasmarkowicz/Library/Python/3.9/lib/python/site-packages/cffi-2.0.0.dist-info"
+                }
+            ]
+        },
+        "aiodns": {
+            "name": "aiodns",
+            "version": "3.6.1",
+            "requirements": [
+                {
+                    "raw": "aiodns==3.6.1",
+                    "extras": [],
+                    "marker": null,
+                    "name": "aiodns",
+                    "specifier": "==3.6.1",
+                    "url": null,
+                    "found": "/Users/silasmarkowicz/Library/Python/3.9/lib/python/site-packages/aiodns-3.6.1.dist-info"
+                }
+            ]
+        },
+        "scikit-learn": {
+            "name": "scikit-learn",
+            "version": "1.6.1",
+            "requirements": [
+                {
+                    "raw": "scikit-learn==1.6.1",
+                    "extras": [],
+                    "marker": null,
+                    "name": "scikit-learn",
+                    "specifier": "==1.6.1",
+                    "url": null,
+                    "found": "/Users/silasmarkowicz/Library/Python/3.9/lib/python/site-packages/scikit_learn-1.6.1.dist-info"
+                }
+            ]
+        },
+        "setuptools": {
+            "name": "setuptools",
+            "version": "58.0.4",
+            "requirements": [
+                {
+                    "raw": "setuptools==58.0.4",
+                    "extras": [],
+                    "marker": null,
+                    "name": "setuptools",
+                    "specifier": "==58.0.4",
+                    "url": null,
+                    "found": "/Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework/Versions/3.9/lib/python3.9/site-packages/setuptools-58.0.4.dist-info"
+                }
+            ]
+        },
+        "eth-rlp": {
+            "name": "eth-rlp",
+            "version": "2.2.0",
+            "requirements": [
+                {
+                    "raw": "eth-rlp==2.2.0",
+                    "extras": [],
+                    "marker": null,
+                    "name": "eth-rlp",
+                    "specifier": "==2.2.0",
+                    "url": null,
+                    "found": "/Users/silasmarkowicz/Library/Python/3.9/lib/python/site-packages/eth_rlp-2.2.0.dist-info"
+                }
+            ]
+        },
+        "click": {
+            "name": "click",
+            "version": "8.1.8",
+            "requirements": [
+                {
+                    "raw": "click==8.1.8",
+                    "extras": [],
+                    "marker": null,
+                    "name": "click",
+                    "specifier": "==8.1.8",
+                    "url": null,
+                    "found": "/Users/silasmarkowicz/Library/Python/3.9/lib/python/site-packages/click-8.1.8.dist-info"
+                }
+            ]
+        },
+        "pip-api": {
+            "name": "pip-api",
+            "version": "0.0.34",
+            "requirements": [
+                {
+                    "raw": "pip-api==0.0.34",
+                    "extras": [],
+                    "marker": null,
+                    "name": "pip-api",
+                    "specifier": "==0.0.34",
+                    "url": null,
+                    "found": "/Users/silasmarkowicz/Library/Python/3.9/lib/python/site-packages/pip_api-0.0.34.dist-info"
+                }
+            ]
+        },
+        "eth-account": {
+            "name": "eth-account",
+            "version": "0.13.7",
+            "requirements": [
+                {
+                    "raw": "eth-account==0.13.7",
+                    "extras": [],
+                    "marker": null,
+                    "name": "eth-account",
+                    "specifier": "==0.13.7",
+                    "url": null,
+                    "found": "/Users/silasmarkowicz/Library/Python/3.9/lib/python/site-packages/eth_account-0.13.7.dist-info"
+                }
+            ]
+        },
+        "psycopg2-binary": {
+            "name": "psycopg2-binary",
+            "version": "2.9.11",
+            "requirements": [
+                {
+                    "raw": "psycopg2-binary==2.9.11",
+                    "extras": [],
+                    "marker": null,
+                    "name": "psycopg2-binary",
+                    "specifier": "==2.9.11",
+                    "url": null,
+                    "found": "/Users/silasmarkowicz/Library/Python/3.9/lib/python/site-packages/psycopg2_binary-2.9.11.dist-info"
+                }
+            ]
+        },
+        "httpcore": {
+            "name": "httpcore",
+            "version": "1.0.9",
+            "requirements": [
+                {
+                    "raw": "httpcore==1.0.9",
+                    "extras": [],
+                    "marker": null,
+                    "name": "httpcore",
+                    "specifier": "==1.0.9",
+                    "url": null,
+                    "found": "/Users/silasmarkowicz/Library/Python/3.9/lib/python/site-packages/httpcore-1.0.9.dist-info"
+                }
+            ]
+        },
+        "rpds-py": {
+            "name": "rpds-py",
+            "version": "0.27.1",
+            "requirements": [
+                {
+                    "raw": "rpds-py==0.27.1",
+                    "extras": [],
+                    "marker": null,
+                    "name": "rpds-py",
+                    "specifier": "==0.27.1",
+                    "url": null,
+                    "found": "/Users/silasmarkowicz/Library/Python/3.9/lib/python/site-packages/rpds_py-0.27.1.dist-info"
+                }
+            ]
+        },
+        "numpy": {
+            "name": "numpy",
+            "version": "2.0.2",
+            "requirements": [
+                {
+                    "raw": "numpy==2.0.2",
+                    "extras": [],
+                    "marker": null,
+                    "name": "numpy",
+                    "specifier": "==2.0.2",
+                    "url": null,
+                    "found": "/Users/silasmarkowicz/Library/Python/3.9/lib/python/site-packages/numpy-2.0.2.dist-info"
+                }
+            ]
+        },
+        "fsspec": {
+            "name": "fsspec",
+            "version": "2025.10.0",
+            "requirements": [
+                {
+                    "raw": "fsspec==2025.10.0",
+                    "extras": [],
+                    "marker": null,
+                    "name": "fsspec",
+                    "specifier": "==2025.10.0",
+                    "url": null,
+                    "found": "/Users/silasmarkowicz/Library/Python/3.9/lib/python/site-packages/fsspec-2025.10.0.dist-info"
+                }
+            ]
+        },
+        "soupsieve": {
+            "name": "soupsieve",
+            "version": "2.8.3",
+            "requirements": [
+                {
+                    "raw": "soupsieve==2.8.3",
+                    "extras": [],
+                    "marker": null,
+                    "name": "soupsieve",
+                    "specifier": "==2.8.3",
+                    "url": null,
+                    "found": "/Users/silasmarkowicz/Library/Python/3.9/lib/python/site-packages/soupsieve-2.8.3.dist-info"
+                }
+            ]
+        },
+        "hexbytes": {
+            "name": "hexbytes",
+            "version": "1.3.1",
+            "requirements": [
+                {
+                    "raw": "hexbytes==1.3.1",
+                    "extras": [],
+                    "marker": null,
+                    "name": "hexbytes",
+                    "specifier": "==1.3.1",
+                    "url": null,
+                    "found": "/Users/silasmarkowicz/Library/Python/3.9/lib/python/site-packages/hexbytes-1.3.1.dist-info"
+                }
+            ]
+        },
+        "coverage": {
+            "name": "coverage",
+            "version": "7.10.7",
+            "requirements": [
+                {
+                    "raw": "coverage==7.10.7",
+                    "extras": [],
+                    "marker": null,
+                    "name": "coverage",
+                    "specifier": "==7.10.7",
+                    "url": null,
+                    "found": "/Users/silasmarkowicz/Library/Python/3.9/lib/python/site-packages/coverage-7.10.7.dist-info"
+                }
+            ]
+        },
+        "charset-normalizer": {
+            "name": "charset-normalizer",
+            "version": "3.4.4",
+            "requirements": [
+                {
+                    "raw": "charset-normalizer==3.4.4",
+                    "extras": [],
+                    "marker": null,
+                    "name": "charset-normalizer",
+                    "specifier": "==3.4.4",
+                    "url": null,
+                    "found": "/Users/silasmarkowicz/Library/Python/3.9/lib/python/site-packages/charset_normalizer-3.4.4.dist-info"
+                }
+            ]
+        },
+        "sympy": {
+            "name": "sympy",
+            "version": "1.14.0",
+            "requirements": [
+                {
+                    "raw": "sympy==1.14.0",
+                    "extras": [],
+                    "marker": null,
+                    "name": "sympy",
+                    "specifier": "==1.14.0",
+                    "url": null,
+                    "found": "/Users/silasmarkowicz/Library/Python/3.9/lib/python/site-packages/sympy-1.14.0.dist-info"
+                }
+            ]
+        },
+        "jsonschema": {
+            "name": "jsonschema",
+            "version": "4.25.1",
+            "requirements": [
+                {
+                    "raw": "jsonschema==4.25.1",
+                    "extras": [],
+                    "marker": null,
+                    "name": "jsonschema",
+                    "specifier": "==4.25.1",
+                    "url": null,
+                    "found": "/Users/silasmarkowicz/Library/Python/3.9/lib/python/site-packages/jsonschema-4.25.1.dist-info"
+                }
+            ]
+        },
+        "ckzg": {
+            "name": "ckzg",
+            "version": "2.1.5",
+            "requirements": [
+                {
+                    "raw": "ckzg==2.1.5",
+                    "extras": [],
+                    "marker": null,
+                    "name": "ckzg",
+                    "specifier": "==2.1.5",
+                    "url": null,
+                    "found": "/Users/silasmarkowicz/Library/Python/3.9/lib/python/site-packages/ckzg-2.1.5.dist-info"
+                }
+            ]
+        },
+        "kiwisolver": {
+            "name": "kiwisolver",
+            "version": "1.4.7",
+            "requirements": [
+                {
+                    "raw": "kiwisolver==1.4.7",
+                    "extras": [],
+                    "marker": null,
+                    "name": "kiwisolver",
+                    "specifier": "==1.4.7",
+                    "url": null,
+                    "found": "/Users/silasmarkowicz/Library/Python/3.9/lib/python/site-packages/kiwisolver-1.4.7.dist-info"
+                }
+            ]
+        },
+        "eth-typing": {
+            "name": "eth-typing",
+            "version": "5.2.1",
+            "requirements": [
+                {
+                    "raw": "eth-typing==5.2.1",
+                    "extras": [],
+                    "marker": null,
+                    "name": "eth-typing",
+                    "specifier": "==5.2.1",
+                    "url": null,
+                    "found": "/Users/silasmarkowicz/Library/Python/3.9/lib/python/site-packages/eth_typing-5.2.1.dist-info"
+                }
+            ]
+        },
+        "referencing": {
+            "name": "referencing",
+            "version": "0.36.2",
+            "requirements": [
+                {
+                    "raw": "referencing==0.36.2",
+                    "extras": [],
+                    "marker": null,
+                    "name": "referencing",
+                    "specifier": "==0.36.2",
+                    "url": null,
+                    "found": "/Users/silasmarkowicz/Library/Python/3.9/lib/python/site-packages/referencing-0.36.2.dist-info"
+                }
+            ]
+        },
+        "contourpy": {
+            "name": "contourpy",
+            "version": "1.3.0",
+            "requirements": [
+                {
+                    "raw": "contourpy==1.3.0",
+                    "extras": [],
+                    "marker": null,
+                    "name": "contourpy",
+                    "specifier": "==1.3.0",
+                    "url": null,
+                    "found": "/Users/silasmarkowicz/Library/Python/3.9/lib/python/site-packages/contourpy-1.3.0.dist-info"
+                }
+            ]
+        },
+        "dateparser": {
+            "name": "dateparser",
+            "version": "1.2.2",
+            "requirements": [
+                {
+                    "raw": "dateparser==1.2.2",
+                    "extras": [],
+                    "marker": null,
+                    "name": "dateparser",
+                    "specifier": "==1.2.2",
+                    "url": null,
+                    "found": "/Users/silasmarkowicz/Library/Python/3.9/lib/python/site-packages/dateparser-1.2.2.dist-info"
+                }
+            ]
+        },
+        "absl-py": {
+            "name": "absl-py",
+            "version": "2.3.1",
+            "requirements": [
+                {
+                    "raw": "absl-py==2.3.1",
+                    "extras": [],
+                    "marker": null,
+                    "name": "absl-py",
+                    "specifier": "==2.3.1",
+                    "url": null,
+                    "found": "/Users/silasmarkowicz/Library/Python/3.9/lib/python/site-packages/absl_py-2.3.1.dist-info"
+                }
+            ]
+        },
+        "watchfiles": {
+            "name": "watchfiles",
+            "version": "1.1.1",
+            "requirements": [
+                {
+                    "raw": "watchfiles==1.1.1",
+                    "extras": [],
+                    "marker": null,
+                    "name": "watchfiles",
+                    "specifier": "==1.1.1",
+                    "url": null,
+                    "found": "/Users/silasmarkowicz/Library/Python/3.9/lib/python/site-packages/watchfiles-1.1.1.dist-info"
+                }
+            ]
+        },
+        "loguru": {
+            "name": "loguru",
+            "version": "0.7.3",
+            "requirements": [
+                {
+                    "raw": "loguru==0.7.3",
+                    "extras": [],
+                    "marker": null,
+                    "name": "loguru",
+                    "specifier": "==0.7.3",
+                    "url": null,
+                    "found": "/Users/silasmarkowicz/Library/Python/3.9/lib/python/site-packages/loguru-0.7.3.dist-info"
+                }
+            ]
+        },
+        "eth-utils": {
+            "name": "eth-utils",
+            "version": "5.3.1",
+            "requirements": [
+                {
+                    "raw": "eth-utils==5.3.1",
+                    "extras": [],
+                    "marker": null,
+                    "name": "eth-utils",
+                    "specifier": "==5.3.1",
+                    "url": null,
+                    "found": "/Users/silasmarkowicz/Library/Python/3.9/lib/python/site-packages/eth_utils-5.3.1.dist-info"
+                }
+            ]
+        },
+        "h11": {
+            "name": "h11",
+            "version": "0.16.0",
+            "requirements": [
+                {
+                    "raw": "h11==0.16.0",
+                    "extras": [],
+                    "marker": null,
+                    "name": "h11",
+                    "specifier": "==0.16.0",
+                    "url": null,
+                    "found": "/Users/silasmarkowicz/Library/Python/3.9/lib/python/site-packages/h11-0.16.0.dist-info"
+                }
+            ]
+        },
+        "gitdb": {
+            "name": "gitdb",
+            "version": "4.0.12",
+            "requirements": [
+                {
+                    "raw": "gitdb==4.0.12",
+                    "extras": [],
+                    "marker": null,
+                    "name": "gitdb",
+                    "specifier": "==4.0.12",
+                    "url": null,
+                    "found": "/Users/silasmarkowicz/Library/Python/3.9/lib/python/site-packages/gitdb-4.0.12.dist-info"
+                }
+            ]
+        },
+        "httptools": {
+            "name": "httptools",
+            "version": "0.7.1",
+            "requirements": [
+                {
+                    "raw": "httptools==0.7.1",
+                    "extras": [],
+                    "marker": null,
+                    "name": "httptools",
+                    "specifier": "==0.7.1",
+                    "url": null,
+                    "found": "/Users/silasmarkowicz/Library/Python/3.9/lib/python/site-packages/httptools-0.7.1.dist-info"
+                }
+            ]
+        },
+        "fastapi": {
+            "name": "fastapi",
+            "version": "0.128.8",
+            "requirements": [
+                {
+                    "raw": "fastapi==0.128.8",
+                    "extras": [],
+                    "marker": null,
+                    "name": "fastapi",
+                    "specifier": "==0.128.8",
+                    "url": null,
+                    "found": "/Users/silasmarkowicz/Library/Python/3.9/lib/python/site-packages/fastapi-0.128.8.dist-info"
+                }
+            ]
+        },
+        "cachetools": {
+            "name": "cachetools",
+            "version": "6.2.6",
+            "requirements": [
+                {
+                    "raw": "cachetools==6.2.6",
+                    "extras": [],
+                    "marker": null,
+                    "name": "cachetools",
+                    "specifier": "==6.2.6",
+                    "url": null,
+                    "found": "/Users/silasmarkowicz/Library/Python/3.9/lib/python/site-packages/cachetools-6.2.6.dist-info"
+                }
+            ]
+        },
+        "types-requests": {
+            "name": "types-requests",
+            "version": "2.32.4.20260107",
+            "requirements": [
+                {
+                    "raw": "types-requests==2.32.4.20260107",
+                    "extras": [],
+                    "marker": null,
+                    "name": "types-requests",
+                    "specifier": "==2.32.4.20260107",
+                    "url": null,
+                    "found": "/Users/silasmarkowicz/Library/Python/3.9/lib/python/site-packages/types_requests-2.32.4.20260107.dist-info"
+                }
+            ]
+        },
+        "regex": {
+            "name": "regex",
+            "version": "2026.1.15",
+            "requirements": [
+                {
+                    "raw": "regex==2026.1.15",
+                    "extras": [],
+                    "marker": null,
+                    "name": "regex",
+                    "specifier": "==2026.1.15",
+                    "url": null,
+                    "found": "/Users/silasmarkowicz/Library/Python/3.9/lib/python/site-packages/regex-2026.1.15.dist-info"
+                }
+            ]
+        },
+        "importlib_metadata": {
+            "name": "importlib_metadata",
+            "version": "8.7.1",
+            "requirements": [
+                {
+                    "raw": "importlib_metadata==8.7.1",
+                    "extras": [],
+                    "marker": null,
+                    "name": "importlib_metadata",
+                    "specifier": "==8.7.1",
+                    "url": null,
+                    "found": "/Users/silasmarkowicz/Library/Python/3.9/lib/python/site-packages/importlib_metadata-8.7.1.dist-info"
+                }
+            ]
+        },
+        "Authlib": {
+            "name": "Authlib",
+            "version": "1.6.8",
+            "requirements": [
+                {
+                    "raw": "Authlib==1.6.8",
+                    "extras": [],
+                    "marker": null,
+                    "name": "Authlib",
+                    "specifier": "==1.6.8",
+                    "url": null,
+                    "found": "/Users/silasmarkowicz/Library/Python/3.9/lib/python/site-packages/authlib-1.6.8.dist-info"
+                }
+            ]
+        },
+        "mdurl": {
+            "name": "mdurl",
+            "version": "0.1.2",
+            "requirements": [
+                {
+                    "raw": "mdurl==0.1.2",
+                    "extras": [],
+                    "marker": null,
+                    "name": "mdurl",
+                    "specifier": "==0.1.2",
+                    "url": null,
+                    "found": "/Users/silasmarkowicz/Library/Python/3.9/lib/python/site-packages/mdurl-0.1.2.dist-info"
+                }
+            ]
+        },
+        "python-dateutil": {
+            "name": "python-dateutil",
+            "version": "2.9.0.post0",
+            "requirements": [
+                {
+                    "raw": "python-dateutil==2.9.0.post0",
+                    "extras": [],
+                    "marker": null,
+                    "name": "python-dateutil",
+                    "specifier": "==2.9.0.post0",
+                    "url": null,
+                    "found": "/Users/silasmarkowicz/Library/Python/3.9/lib/python/site-packages/python_dateutil-2.9.0.post0.dist-info"
+                }
+            ]
+        },
+        "mpmath": {
+            "name": "mpmath",
+            "version": "1.3.0",
+            "requirements": [
+                {
+                    "raw": "mpmath==1.3.0",
+                    "extras": [],
+                    "marker": null,
+                    "name": "mpmath",
+                    "specifier": "==1.3.0",
+                    "url": null,
+                    "found": "/Users/silasmarkowicz/Library/Python/3.9/lib/python/site-packages/mpmath-1.3.0.dist-info"
+                }
+            ]
+        },
+        "PyYAML": {
+            "name": "PyYAML",
+            "version": "6.0.3",
+            "requirements": [
+                {
+                    "raw": "PyYAML==6.0.3",
+                    "extras": [],
+                    "marker": null,
+                    "name": "PyYAML",
+                    "specifier": "==6.0.3",
+                    "url": null,
+                    "found": "/Users/silasmarkowicz/Library/Python/3.9/lib/python/site-packages/pyyaml-6.0.3.dist-info"
+                }
+            ]
+        },
+        "fonttools": {
+            "name": "fonttools",
+            "version": "4.60.2",
+            "requirements": [
+                {
+                    "raw": "fonttools==4.60.2",
+                    "extras": [],
+                    "marker": null,
+                    "name": "fonttools",
+                    "specifier": "==4.60.2",
+                    "url": null,
+                    "found": "/Users/silasmarkowicz/Library/Python/3.9/lib/python/site-packages/fonttools-4.60.2.dist-info"
+                }
+            ]
+        },
+        "curl_cffi": {
+            "name": "curl_cffi",
+            "version": "0.13.0",
+            "requirements": [
+                {
+                    "raw": "curl_cffi==0.13.0",
+                    "extras": [],
+                    "marker": null,
+                    "name": "curl_cffi",
+                    "specifier": "==0.13.0",
+                    "url": null,
+                    "found": "/Users/silasmarkowicz/Library/Python/3.9/lib/python/site-packages/curl_cffi-0.13.0.dist-info"
+                }
+            ]
+        },
+        "eth-hash": {
+            "name": "eth-hash",
+            "version": "0.7.1",
+            "requirements": [
+                {
+                    "raw": "eth-hash==0.7.1",
+                    "extras": [],
+                    "marker": null,
+                    "name": "eth-hash",
+                    "specifier": "==0.7.1",
+                    "url": null,
+                    "found": "/Users/silasmarkowicz/Library/Python/3.9/lib/python/site-packages/eth_hash-0.7.1.dist-info"
+                }
+            ]
+        },
+        "sortedcontainers": {
+            "name": "sortedcontainers",
+            "version": "2.4.0",
+            "requirements": [
+                {
+                    "raw": "sortedcontainers==2.4.0",
+                    "extras": [],
+                    "marker": null,
+                    "name": "sortedcontainers",
+                    "specifier": "==2.4.0",
+                    "url": null,
+                    "found": "/Users/silasmarkowicz/Library/Python/3.9/lib/python/site-packages/sortedcontainers-2.4.0.dist-info"
+                }
+            ]
+        },
+        "pytest": {
+            "name": "pytest",
+            "version": "8.4.2",
+            "requirements": [
+                {
+                    "raw": "pytest==8.4.2",
+                    "extras": [],
+                    "marker": null,
+                    "name": "pytest",
+                    "specifier": "==8.4.2",
+                    "url": null,
+                    "found": "/Users/silasmarkowicz/Library/Python/3.9/lib/python/site-packages/pytest-8.4.2.dist-info"
+                }
+            ]
+        },
+        "stable_baselines3": {
+            "name": "stable_baselines3",
+            "version": "2.7.1",
+            "requirements": [
+                {
+                    "raw": "stable_baselines3==2.7.1",
+                    "extras": [],
+                    "marker": null,
+                    "name": "stable_baselines3",
+                    "specifier": "==2.7.1",
+                    "url": null,
+                    "found": "/Users/silasmarkowicz/Library/Python/3.9/lib/python/site-packages/stable_baselines3-2.7.1.dist-info"
+                }
+            ]
+        },
+        "tzlocal": {
+            "name": "tzlocal",
+            "version": "5.3.1",
+            "requirements": [
+                {
+                    "raw": "tzlocal==5.3.1",
+                    "extras": [],
+                    "marker": null,
+                    "name": "tzlocal",
+                    "specifier": "==5.3.1",
+                    "url": null,
+                    "found": "/Users/silasmarkowicz/Library/Python/3.9/lib/python/site-packages/tzlocal-5.3.1.dist-info"
+                }
+            ]
+        },
+        "pydantic_core": {
+            "name": "pydantic_core",
+            "version": "2.41.5",
+            "requirements": [
+                {
+                    "raw": "pydantic_core==2.41.5",
+                    "extras": [],
+                    "marker": null,
+                    "name": "pydantic_core",
+                    "specifier": "==2.41.5",
+                    "url": null,
+                    "found": "/Users/silasmarkowicz/Library/Python/3.9/lib/python/site-packages/pydantic_core-2.41.5.dist-info"
+                }
+            ]
+        },
+        "Mako": {
+            "name": "Mako",
+            "version": "1.3.10",
+            "requirements": [
+                {
+                    "raw": "Mako==1.3.10",
+                    "extras": [],
+                    "marker": null,
+                    "name": "Mako",
+                    "specifier": "==1.3.10",
+                    "url": null,
+                    "found": "/Users/silasmarkowicz/Library/Python/3.9/lib/python/site-packages/mako-1.3.10.dist-info"
+                }
+            ]
+        },
+        "urllib3": {
+            "name": "urllib3",
+            "version": "2.6.3",
+            "requirements": [
+                {
+                    "raw": "urllib3==2.6.3",
+                    "extras": [],
+                    "marker": null,
+                    "name": "urllib3",
+                    "specifier": "==2.6.3",
+                    "url": null,
+                    "found": "/Users/silasmarkowicz/Library/Python/3.9/lib/python/site-packages/urllib3-2.6.3.dist-info"
+                }
+            ]
+        },
+        "frozenlist": {
+            "name": "frozenlist",
+            "version": "1.8.0",
+            "requirements": [
+                {
+                    "raw": "frozenlist==1.8.0",
+                    "extras": [],
+                    "marker": null,
+                    "name": "frozenlist",
+                    "specifier": "==1.8.0",
+                    "url": null,
+                    "found": "/Users/silasmarkowicz/Library/Python/3.9/lib/python/site-packages/frozenlist-1.8.0.dist-info"
+                }
+            ]
+        },
+        "tensorboard": {
+            "name": "tensorboard",
+            "version": "2.20.0",
+            "requirements": [
+                {
+                    "raw": "tensorboard==2.20.0",
+                    "extras": [],
+                    "marker": null,
+                    "name": "tensorboard",
+                    "specifier": "==2.20.0",
+                    "url": null,
+                    "found": "/Users/silasmarkowicz/Library/Python/3.9/lib/python/site-packages/tensorboard-2.20.0.dist-info"
+                }
+            ]
+        },
+        "typer": {
+            "name": "typer",
+            "version": "0.23.1",
+            "requirements": [
+                {
+                    "raw": "typer==0.23.1",
+                    "extras": [],
+                    "marker": null,
+                    "name": "typer",
+                    "specifier": "==0.23.1",
+                    "url": null,
+                    "found": "/Users/silasmarkowicz/Library/Python/3.9/lib/python/site-packages/typer-0.23.1.dist-info"
+                }
+            ]
+        },
+        "py-serializable": {
+            "name": "py-serializable",
+            "version": "2.1.0",
+            "requirements": [
+                {
+                    "raw": "py-serializable==2.1.0",
+                    "extras": [],
+                    "marker": null,
+                    "name": "py-serializable",
+                    "specifier": "==2.1.0",
+                    "url": null,
+                    "found": "/Users/silasmarkowicz/Library/Python/3.9/lib/python/site-packages/py_serializable-2.1.0.dist-info"
+                }
+            ]
+        },
+        "typing_extensions": {
+            "name": "typing_extensions",
+            "version": "4.15.0",
+            "requirements": [
+                {
+                    "raw": "typing_extensions==4.15.0",
+                    "extras": [],
+                    "marker": null,
+                    "name": "typing_extensions",
+                    "specifier": "==4.15.0",
+                    "url": null,
+                    "found": "/Users/silasmarkowicz/Library/Python/3.9/lib/python/site-packages/typing_extensions-4.15.0.dist-info"
+                }
+            ]
+        },
+        "aiosignal": {
+            "name": "aiosignal",
+            "version": "1.4.0",
+            "requirements": [
+                {
+                    "raw": "aiosignal==1.4.0",
+                    "extras": [],
+                    "marker": null,
+                    "name": "aiosignal",
+                    "specifier": "==1.4.0",
+                    "url": null,
+                    "found": "/Users/silasmarkowicz/Library/Python/3.9/lib/python/site-packages/aiosignal-1.4.0.dist-info"
+                }
+            ]
+        },
+        "Werkzeug": {
+            "name": "Werkzeug",
+            "version": "3.1.5",
+            "requirements": [
+                {
+                    "raw": "Werkzeug==3.1.5",
+                    "extras": [],
+                    "marker": null,
+                    "name": "Werkzeug",
+                    "specifier": "==3.1.5",
+                    "url": null,
+                    "found": "/Users/silasmarkowicz/Library/Python/3.9/lib/python/site-packages/werkzeug-3.1.5.dist-info"
+                }
+            ]
+        },
+        "beautifulsoup4": {
+            "name": "beautifulsoup4",
+            "version": "4.14.3",
+            "requirements": [
+                {
+                    "raw": "beautifulsoup4==4.14.3",
+                    "extras": [],
+                    "marker": null,
+                    "name": "beautifulsoup4",
+                    "specifier": "==4.14.3",
+                    "url": null,
+                    "found": "/Users/silasmarkowicz/Library/Python/3.9/lib/python/site-packages/beautifulsoup4-4.14.3.dist-info"
+                }
+            ]
+        },
+        "packaging": {
+            "name": "packaging",
+            "version": "25.0",
+            "requirements": [
+                {
+                    "raw": "packaging==25.0",
+                    "extras": [],
+                    "marker": null,
+                    "name": "packaging",
+                    "specifier": "==25.0",
+                    "url": null,
+                    "found": "/Users/silasmarkowicz/Library/Python/3.9/lib/python/site-packages/packaging-25.0.dist-info"
+                }
+            ]
+        },
+        "joblib": {
+            "name": "joblib",
+            "version": "1.5.3",
+            "requirements": [
+                {
+                    "raw": "joblib==1.5.3",
+                    "extras": [],
+                    "marker": null,
+                    "name": "joblib",
+                    "specifier": "==1.5.3",
+                    "url": null,
+                    "found": "/Users/silasmarkowicz/Library/Python/3.9/lib/python/site-packages/joblib-1.5.3.dist-info"
+                }
+            ]
+        },
+        "frozendict": {
+            "name": "frozendict",
+            "version": "2.4.7",
+            "requirements": [
+                {
+                    "raw": "frozendict==2.4.7",
+                    "extras": [],
+                    "marker": null,
+                    "name": "frozendict",
+                    "specifier": "==2.4.7",
+                    "url": null,
+                    "found": "/Users/silasmarkowicz/Library/Python/3.9/lib/python/site-packages/frozendict-2.4.7.dist-info"
+                }
+            ]
+        },
+        "cycler": {
+            "name": "cycler",
+            "version": "0.12.1",
+            "requirements": [
+                {
+                    "raw": "cycler==0.12.1",
+                    "extras": [],
+                    "marker": null,
+                    "name": "cycler",
+                    "specifier": "==0.12.1",
+                    "url": null,
+                    "found": "/Users/silasmarkowicz/Library/Python/3.9/lib/python/site-packages/cycler-0.12.1.dist-info"
+                }
+            ]
+        },
+        "Jinja2": {
+            "name": "Jinja2",
+            "version": "3.1.6",
+            "requirements": [
+                {
+                    "raw": "Jinja2==3.1.6",
+                    "extras": [],
+                    "marker": null,
+                    "name": "Jinja2",
+                    "specifier": "==3.1.6",
+                    "url": null,
+                    "found": "/Users/silasmarkowicz/Library/Python/3.9/lib/python/site-packages/jinja2-3.1.6.dist-info"
+                }
+            ]
+        },
+        "uvicorn": {
+            "name": "uvicorn",
+            "version": "0.39.0",
+            "requirements": [
+                {
+                    "raw": "uvicorn==0.39.0",
+                    "extras": [],
+                    "marker": null,
+                    "name": "uvicorn",
+                    "specifier": "==0.39.0",
+                    "url": null,
+                    "found": "/Users/silasmarkowicz/Library/Python/3.9/lib/python/site-packages/uvicorn-0.39.0.dist-info"
+                }
+            ]
+        },
+        "pyparsing": {
+            "name": "pyparsing",
+            "version": "3.3.2",
+            "requirements": [
+                {
+                    "raw": "pyparsing==3.3.2",
+                    "extras": [],
+                    "marker": null,
+                    "name": "pyparsing",
+                    "specifier": "==3.3.2",
+                    "url": null,
+                    "found": "/Users/silasmarkowicz/Library/Python/3.9/lib/python/site-packages/pyparsing-3.3.2.dist-info"
+                }
+            ]
+        },
+        "pandas": {
+            "name": "pandas",
+            "version": "2.3.3",
+            "requirements": [
+                {
+                    "raw": "pandas==2.3.3",
+                    "extras": [],
+                    "marker": null,
+                    "name": "pandas",
+                    "specifier": "==2.3.3",
+                    "url": null,
+                    "found": "/Users/silasmarkowicz/Library/Python/3.9/lib/python/site-packages/pandas-2.3.3.dist-info"
+                }
+            ]
+        },
+        "MarkupSafe": {
+            "name": "MarkupSafe",
+            "version": "3.0.3",
+            "requirements": [
+                {
+                    "raw": "MarkupSafe==3.0.3",
+                    "extras": [],
+                    "marker": null,
+                    "name": "MarkupSafe",
+                    "specifier": "==3.0.3",
+                    "url": null,
+                    "found": "/Users/silasmarkowicz/Library/Python/3.9/lib/python/site-packages/markupsafe-3.0.3.dist-info"
+                }
+            ]
+        },
+        "pip": {
+            "name": "pip",
+            "version": "21.2.4",
+            "requirements": [
+                {
+                    "raw": "pip==21.2.4",
+                    "extras": [],
+                    "marker": null,
+                    "name": "pip",
+                    "specifier": "==21.2.4",
+                    "url": null,
+                    "found": "/Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework/Versions/3.9/lib/python3.9/site-packages/pip-21.2.4.dist-info"
+                }
+            ]
+        },
+        "msgpack": {
+            "name": "msgpack",
+            "version": "1.1.2",
+            "requirements": [
+                {
+                    "raw": "msgpack==1.1.2",
+                    "extras": [],
+                    "marker": null,
+                    "name": "msgpack",
+                    "specifier": "==1.1.2",
+                    "url": null,
+                    "found": "/Users/silasmarkowicz/Library/Python/3.9/lib/python/site-packages/msgpack-1.1.2.dist-info"
+                }
+            ]
+        },
+        "backports.asyncio.runner": {
+            "name": "backports.asyncio.runner",
+            "version": "1.2.0",
+            "requirements": [
+                {
+                    "raw": "backports.asyncio.runner==1.2.0",
+                    "extras": [],
+                    "marker": null,
+                    "name": "backports.asyncio.runner",
+                    "specifier": "==1.2.0",
+                    "url": null,
+                    "found": "/Users/silasmarkowicz/Library/Python/3.9/lib/python/site-packages/backports_asyncio_runner-1.2.0.dist-info"
+                }
+            ]
+        },
+        "GitPython": {
+            "name": "GitPython",
+            "version": "3.1.46",
+            "requirements": [
+                {
+                    "raw": "GitPython==3.1.46",
+                    "extras": [],
+                    "marker": null,
+                    "name": "GitPython",
+                    "specifier": "==3.1.46",
+                    "url": null,
+                    "found": "/Users/silasmarkowicz/Library/Python/3.9/lib/python/site-packages/gitpython-3.1.46.dist-info"
+                }
+            ]
+        },
+        "Markdown": {
+            "name": "Markdown",
+            "version": "3.9",
+            "requirements": [
+                {
+                    "raw": "Markdown==3.9",
+                    "extras": [],
+                    "marker": null,
+                    "name": "Markdown",
+                    "specifier": "==3.9",
+                    "url": null,
+                    "found": "/Users/silasmarkowicz/Library/Python/3.9/lib/python/site-packages/markdown-3.9.dist-info"
+                }
+            ]
+        },
+        "gym-notices": {
+            "name": "gym-notices",
+            "version": "0.1.0",
+            "requirements": [
+                {
+                    "raw": "gym-notices==0.1.0",
+                    "extras": [],
+                    "marker": null,
+                    "name": "gym-notices",
+                    "specifier": "==0.1.0",
+                    "url": null,
+                    "found": "/Users/silasmarkowicz/Library/Python/3.9/lib/python/site-packages/gym_notices-0.1.0.dist-info"
+                }
+            ]
+        },
+        "pluggy": {
+            "name": "pluggy",
+            "version": "1.6.0",
+            "requirements": [
+                {
+                    "raw": "pluggy==1.6.0",
+                    "extras": [],
+                    "marker": null,
+                    "name": "pluggy",
+                    "specifier": "==1.6.0",
+                    "url": null,
+                    "found": "/Users/silasmarkowicz/Library/Python/3.9/lib/python/site-packages/pluggy-1.6.0.dist-info"
+                }
+            ]
+        },
+        "Pygments": {
+            "name": "Pygments",
+            "version": "2.19.2",
+            "requirements": [
+                {
+                    "raw": "Pygments==2.19.2",
+                    "extras": [],
+                    "marker": null,
+                    "name": "Pygments",
+                    "specifier": "==2.19.2",
+                    "url": null,
+                    "found": "/Users/silasmarkowicz/Library/Python/3.9/lib/python/site-packages/pygments-2.19.2.dist-info"
+                }
+            ]
+        },
+        "multitasking": {
+            "name": "multitasking",
+            "version": "0.0.12",
+            "requirements": [
+                {
+                    "raw": "multitasking==0.0.12",
+                    "extras": [],
+                    "marker": null,
+                    "name": "multitasking",
+                    "specifier": "==0.0.12",
+                    "url": null,
+                    "found": "/Users/silasmarkowicz/Library/Python/3.9/lib/python/site-packages/multitasking-0.0.12.dist-info"
+                }
+            ]
+        },
+        "aiohappyeyeballs": {
+            "name": "aiohappyeyeballs",
+            "version": "2.6.1",
+            "requirements": [
+                {
+                    "raw": "aiohappyeyeballs==2.6.1",
+                    "extras": [],
+                    "marker": null,
+                    "name": "aiohappyeyeballs",
+                    "specifier": "==2.6.1",
+                    "url": null,
+                    "found": "/Users/silasmarkowicz/Library/Python/3.9/lib/python/site-packages/aiohappyeyeballs-2.6.1.dist-info"
+                }
+            ]
+        },
+        "websockets": {
+            "name": "websockets",
+            "version": "15.0.1",
+            "requirements": [
+                {
+                    "raw": "websockets==15.0.1",
+                    "extras": [],
+                    "marker": null,
+                    "name": "websockets",
+                    "specifier": "==15.0.1",
+                    "url": null,
+                    "found": "/Users/silasmarkowicz/Library/Python/3.9/lib/python/site-packages/websockets-15.0.1.dist-info"
+                }
+            ]
+        },
+        "attrs": {
+            "name": "attrs",
+            "version": "25.4.0",
+            "requirements": [
+                {
+                    "raw": "attrs==25.4.0",
+                    "extras": [],
+                    "marker": null,
+                    "name": "attrs",
+                    "specifier": "==25.4.0",
+                    "url": null,
+                    "found": "/Users/silasmarkowicz/Library/Python/3.9/lib/python/site-packages/attrs-25.4.0.dist-info"
+                }
+            ]
+        },
+        "networkx": {
+            "name": "networkx",
+            "version": "3.2.1",
+            "requirements": [
+                {
+                    "raw": "networkx==3.2.1",
+                    "extras": [],
+                    "marker": null,
+                    "name": "networkx",
+                    "specifier": "==3.2.1",
+                    "url": null,
+                    "found": "/Users/silasmarkowicz/Library/Python/3.9/lib/python/site-packages/networkx-3.2.1.dist-info"
+                }
+            ]
+        },
+        "nltk": {
+            "name": "nltk",
+            "version": "3.9.2",
+            "requirements": [
+                {
+                    "raw": "nltk==3.9.2",
+                    "extras": [],
+                    "marker": null,
+                    "name": "nltk",
+                    "specifier": "==3.9.2",
+                    "url": null,
+                    "found": "/Users/silasmarkowicz/Library/Python/3.9/lib/python/site-packages/nltk-3.9.2.dist-info"
+                }
+            ]
+        },
+        "plotly": {
+            "name": "plotly",
+            "version": "6.5.2",
+            "requirements": [
+                {
+                    "raw": "plotly==6.5.2",
+                    "extras": [],
+                    "marker": null,
+                    "name": "plotly",
+                    "specifier": "==6.5.2",
+                    "url": null,
+                    "found": "/Users/silasmarkowicz/Library/Python/3.9/lib/python/site-packages/plotly-6.5.2.dist-info"
+                }
+            ]
+        },
+        "httpx": {
+            "name": "httpx",
+            "version": "0.28.1",
+            "requirements": [
+                {
+                    "raw": "httpx==0.28.1",
+                    "extras": [],
+                    "marker": null,
+                    "name": "httpx",
+                    "specifier": "==0.28.1",
+                    "url": null,
+                    "found": "/Users/silasmarkowicz/Library/Python/3.9/lib/python/site-packages/httpx-0.28.1.dist-info"
+                }
+            ]
+        },
+        "smmap": {
+            "name": "smmap",
+            "version": "5.0.2",
+            "requirements": [
+                {
+                    "raw": "smmap==5.0.2",
+                    "extras": [],
+                    "marker": null,
+                    "name": "smmap",
+                    "specifier": "==5.0.2",
+                    "url": null,
+                    "found": "/Users/silasmarkowicz/Library/Python/3.9/lib/python/site-packages/smmap-5.0.2.dist-info"
+                }
+            ]
+        },
+        "tqdm": {
+            "name": "tqdm",
+            "version": "4.67.3",
+            "requirements": [
+                {
+                    "raw": "tqdm==4.67.3",
+                    "extras": [],
+                    "marker": null,
+                    "name": "tqdm",
+                    "specifier": "==4.67.3",
+                    "url": null,
+                    "found": "/Users/silasmarkowicz/Library/Python/3.9/lib/python/site-packages/tqdm-4.67.3.dist-info"
+                }
+            ]
+        },
+        "pillow": {
+            "name": "pillow",
+            "version": "11.3.0",
+            "requirements": [
+                {
+                    "raw": "pillow==11.3.0",
+                    "extras": [],
+                    "marker": null,
+                    "name": "pillow",
+                    "specifier": "==11.3.0",
+                    "url": null,
+                    "found": "/Users/silasmarkowicz/Library/Python/3.9/lib/python/site-packages/pillow-11.3.0.dist-info"
+                }
+            ]
+        },
+        "tensorboard-data-server": {
+            "name": "tensorboard-data-server",
+            "version": "0.7.2",
+            "requirements": [
+                {
+                    "raw": "tensorboard-data-server==0.7.2",
+                    "extras": [],
+                    "marker": null,
+                    "name": "tensorboard-data-server",
+                    "specifier": "==0.7.2",
+                    "url": null,
+                    "found": "/Users/silasmarkowicz/Library/Python/3.9/lib/python/site-packages/tensorboard_data_server-0.7.2.dist-info"
+                }
+            ]
+        },
+        "peewee": {
+            "name": "peewee",
+            "version": "3.19.0",
+            "requirements": [
+                {
+                    "raw": "peewee==3.19.0",
+                    "extras": [],
+                    "marker": null,
+                    "name": "peewee",
+                    "specifier": "==3.19.0",
+                    "url": null,
+                    "found": "/Users/silasmarkowicz/Library/Python/3.9/lib/python/site-packages/peewee-3.19.0.dist-info"
+                }
+            ]
+        },
+        "uvloop": {
+            "name": "uvloop",
+            "version": "0.22.1",
+            "requirements": [
+                {
+                    "raw": "uvloop==0.22.1",
+                    "extras": [],
+                    "marker": null,
+                    "name": "uvloop",
+                    "specifier": "==0.22.1",
+                    "url": null,
+                    "found": "/Users/silasmarkowicz/Library/Python/3.9/lib/python/site-packages/uvloop-0.22.1.dist-info"
+                }
+            ]
+        },
+        "alembic": {
+            "name": "alembic",
+            "version": "1.16.5",
+            "requirements": [
+                {
+                    "raw": "alembic==1.16.5",
+                    "extras": [],
+                    "marker": null,
+                    "name": "alembic",
+                    "specifier": "==1.16.5",
+                    "url": null,
+                    "found": "/Users/silasmarkowicz/Library/Python/3.9/lib/python/site-packages/alembic-1.16.5.dist-info"
+                }
+            ]
+        },
+        "pyproject_hooks": {
+            "name": "pyproject_hooks",
+            "version": "1.2.0",
+            "requirements": [
+                {
+                    "raw": "pyproject_hooks==1.2.0",
+                    "extras": [],
+                    "marker": null,
+                    "name": "pyproject_hooks",
+                    "specifier": "==1.2.0",
+                    "url": null,
+                    "found": "/Users/silasmarkowicz/Library/Python/3.9/lib/python/site-packages/pyproject_hooks-1.2.0.dist-info"
+                }
+            ]
+        },
+        "packageurl-python": {
+            "name": "packageurl-python",
+            "version": "0.17.6",
+            "requirements": [
+                {
+                    "raw": "packageurl-python==0.17.6",
+                    "extras": [],
+                    "marker": null,
+                    "name": "packageurl-python",
+                    "specifier": "==0.17.6",
+                    "url": null,
+                    "found": "/Users/silasmarkowicz/Library/Python/3.9/lib/python/site-packages/packageurl_python-0.17.6.dist-info"
+                }
+            ]
+        },
+        "altair": {
+            "name": "altair",
+            "version": "5.5.0",
+            "requirements": [
+                {
+                    "raw": "altair==5.5.0",
+                    "extras": [],
+                    "marker": null,
+                    "name": "altair",
+                    "specifier": "==5.5.0",
+                    "url": null,
+                    "found": "/Users/silasmarkowicz/Library/Python/3.9/lib/python/site-packages/altair-5.5.0.dist-info"
+                }
+            ]
+        },
+        "python-binance": {
+            "name": "python-binance",
+            "version": "1.0.34",
+            "requirements": [
+                {
+                    "raw": "python-binance==1.0.34",
+                    "extras": [],
+                    "marker": null,
+                    "name": "python-binance",
+                    "specifier": "==1.0.34",
+                    "url": null,
+                    "found": "/Users/silasmarkowicz/Library/Python/3.9/lib/python/site-packages/python_binance-1.0.34.dist-info"
+                }
+            ]
+        },
+        "iniconfig": {
+            "name": "iniconfig",
+            "version": "2.1.0",
+            "requirements": [
+                {
+                    "raw": "iniconfig==2.1.0",
+                    "extras": [],
+                    "marker": null,
+                    "name": "iniconfig",
+                    "specifier": "==2.1.0",
+                    "url": null,
+                    "found": "/Users/silasmarkowicz/Library/Python/3.9/lib/python/site-packages/iniconfig-2.1.0.dist-info"
+                }
+            ]
+        },
+        "build": {
+            "name": "build",
+            "version": "1.4.0",
+            "requirements": [
+                {
+                    "raw": "build==1.4.0",
+                    "extras": [],
+                    "marker": null,
+                    "name": "build",
+                    "specifier": "==1.4.0",
+                    "url": null,
+                    "found": "/Users/silasmarkowicz/Library/Python/3.9/lib/python/site-packages/build-1.4.0.dist-info"
+                }
+            ]
+        },
+        "typing-inspection": {
+            "name": "typing-inspection",
+            "version": "0.4.2",
+            "requirements": [
+                {
+                    "raw": "typing-inspection==0.4.2",
+                    "extras": [],
+                    "marker": null,
+                    "name": "typing-inspection",
+                    "specifier": "==0.4.2",
+                    "url": null,
+                    "found": "/Users/silasmarkowicz/Library/Python/3.9/lib/python/site-packages/typing_inspection-0.4.2.dist-info"
+                }
+            ]
+        },
+        "pycares": {
+            "name": "pycares",
+            "version": "4.11.0",
+            "requirements": [
+                {
+                    "raw": "pycares==4.11.0",
+                    "extras": [],
+                    "marker": null,
+                    "name": "pycares",
+                    "specifier": "==4.11.0",
+                    "url": null,
+                    "found": "/Users/silasmarkowicz/Library/Python/3.9/lib/python/site-packages/pycares-4.11.0.dist-info"
+                }
+            ]
+        },
+        "pip-requirements-parser": {
+            "name": "pip-requirements-parser",
+            "version": "32.0.1",
+            "requirements": [
+                {
+                    "raw": "pip-requirements-parser==32.0.1",
+                    "extras": [],
+                    "marker": null,
+                    "name": "pip-requirements-parser",
+                    "specifier": "==32.0.1",
+                    "url": null,
+                    "found": "/Users/silasmarkowicz/Library/Python/3.9/lib/python/site-packages/pip_requirements_parser-32.0.1.dist-info"
+                }
+            ]
+        },
+        "zipp": {
+            "name": "zipp",
+            "version": "3.23.0",
+            "requirements": [
+                {
+                    "raw": "zipp==3.23.0",
+                    "extras": [],
+                    "marker": null,
+                    "name": "zipp",
+                    "specifier": "==3.23.0",
+                    "url": null,
+                    "found": "/Users/silasmarkowicz/Library/Python/3.9/lib/python/site-packages/zipp-3.23.0.dist-info"
+                }
+            ]
+        },
+        "gym": {
+            "name": "gym",
+            "version": "0.26.2",
+            "requirements": [
+                {
+                    "raw": "gym==0.26.2",
+                    "extras": [],
+                    "marker": null,
+                    "name": "gym",
+                    "specifier": "==0.26.2",
+                    "url": null,
+                    "found": "/Users/silasmarkowicz/Library/Python/3.9/lib/python/site-packages/gym-0.26.2.dist-info"
+                }
+            ]
+        },
+        "annotated-types": {
+            "name": "annotated-types",
+            "version": "0.7.0",
+            "requirements": [
+                {
+                    "raw": "annotated-types==0.7.0",
+                    "extras": [],
+                    "marker": null,
+                    "name": "annotated-types",
+                    "specifier": "==0.7.0",
+                    "url": null,
+                    "found": "/Users/silasmarkowicz/Library/Python/3.9/lib/python/site-packages/annotated_types-0.7.0.dist-info"
+                }
+            ]
+        },
+        "pip_audit": {
+            "name": "pip_audit",
+            "version": "2.9.0",
+            "requirements": [
+                {
+                    "raw": "pip_audit==2.9.0",
+                    "extras": [],
+                    "marker": null,
+                    "name": "pip_audit",
+                    "specifier": "==2.9.0",
+                    "url": null,
+                    "found": "/Users/silasmarkowicz/Library/Python/3.9/lib/python/site-packages/pip_audit-2.9.0.dist-info"
+                }
+            ]
+        },
+        "hiredis": {
+            "name": "hiredis",
+            "version": "3.3.0",
+            "requirements": [
+                {
+                    "raw": "hiredis==3.3.0",
+                    "extras": [],
+                    "marker": null,
+                    "name": "hiredis",
+                    "specifier": "==3.3.0",
+                    "url": null,
+                    "found": "/Users/silasmarkowicz/Library/Python/3.9/lib/python/site-packages/hiredis-3.3.0.dist-info"
+                }
+            ]
+        },
+        "pycryptodome": {
+            "name": "pycryptodome",
+            "version": "3.23.0",
+            "requirements": [
+                {
+                    "raw": "pycryptodome==3.23.0",
+                    "extras": [],
+                    "marker": null,
+                    "name": "pycryptodome",
+                    "specifier": "==3.23.0",
+                    "url": null,
+                    "found": "/Users/silasmarkowicz/Library/Python/3.9/lib/python/site-packages/pycryptodome-3.23.0.dist-info"
+                }
+            ]
+        },
+        "cryptography": {
+            "name": "cryptography",
+            "version": "46.0.5",
+            "requirements": [
+                {
+                    "raw": "cryptography==46.0.5",
+                    "extras": [],
+                    "marker": null,
+                    "name": "cryptography",
+                    "specifier": "==46.0.5",
+                    "url": null,
+                    "found": "/Users/silasmarkowicz/Library/Python/3.9/lib/python/site-packages/cryptography-46.0.5.dist-info"
+                }
+            ]
+        },
+        "rlp": {
+            "name": "rlp",
+            "version": "4.1.0",
+            "requirements": [
+                {
+                    "raw": "rlp==4.1.0",
+                    "extras": [],
+                    "marker": null,
+                    "name": "rlp",
+                    "specifier": "==4.1.0",
+                    "url": null,
+                    "found": "/Users/silasmarkowicz/Library/Python/3.9/lib/python/site-packages/rlp-4.1.0.dist-info"
+                }
+            ]
+        },
+        "eth-keyfile": {
+            "name": "eth-keyfile",
+            "version": "0.8.1",
+            "requirements": [
+                {
+                    "raw": "eth-keyfile==0.8.1",
+                    "extras": [],
+                    "marker": null,
+                    "name": "eth-keyfile",
+                    "specifier": "==0.8.1",
+                    "url": null,
+                    "found": "/Users/silasmarkowicz/Library/Python/3.9/lib/python/site-packages/eth_keyfile-0.8.1.dist-info"
+                }
+            ]
+        },
+        "backports-datetime-fromisoformat": {
+            "name": "backports-datetime-fromisoformat",
+            "version": "2.0.3",
+            "requirements": [
+                {
+                    "raw": "backports-datetime-fromisoformat==2.0.3",
+                    "extras": [],
+                    "marker": null,
+                    "name": "backports-datetime-fromisoformat",
+                    "specifier": "==2.0.3",
+                    "url": null,
+                    "found": "/Users/silasmarkowicz/Library/Python/3.9/lib/python/site-packages/backports_datetime_fromisoformat-2.0.3.dist-info"
+                }
+            ]
+        },
+        "yarl": {
+            "name": "yarl",
+            "version": "1.22.0",
+            "requirements": [
+                {
+                    "raw": "yarl==1.22.0",
+                    "extras": [],
+                    "marker": null,
+                    "name": "yarl",
+                    "specifier": "==1.22.0",
+                    "url": null,
+                    "found": "/Users/silasmarkowicz/Library/Python/3.9/lib/python/site-packages/yarl-1.22.0.dist-info"
+                }
+            ]
+        },
+        "pycparser": {
+            "name": "pycparser",
+            "version": "2.23",
+            "requirements": [
+                {
+                    "raw": "pycparser==2.23",
+                    "extras": [],
+                    "marker": null,
+                    "name": "pycparser",
+                    "specifier": "==2.23",
+                    "url": null,
+                    "found": "/Users/silasmarkowicz/Library/Python/3.9/lib/python/site-packages/pycparser-2.23.dist-info"
+                }
+            ]
+        },
+        "importlib_resources": {
+            "name": "importlib_resources",
+            "version": "6.5.2",
+            "requirements": [
+                {
+                    "raw": "importlib_resources==6.5.2",
+                    "extras": [],
+                    "marker": null,
+                    "name": "importlib_resources",
+                    "specifier": "==6.5.2",
+                    "url": null,
+                    "found": "/Users/silasmarkowicz/Library/Python/3.9/lib/python/site-packages/importlib_resources-6.5.2.dist-info"
+                }
+            ]
+        },
+        "pytest-cov": {
+            "name": "pytest-cov",
+            "version": "7.0.0",
+            "requirements": [
+                {
+                    "raw": "pytest-cov==7.0.0",
+                    "extras": [],
+                    "marker": null,
+                    "name": "pytest-cov",
+                    "specifier": "==7.0.0",
+                    "url": null,
+                    "found": "/Users/silasmarkowicz/Library/Python/3.9/lib/python/site-packages/pytest_cov-7.0.0.dist-info"
+                }
+            ]
+        },
+        "web3": {
+            "name": "web3",
+            "version": "7.14.1",
+            "requirements": [
+                {
+                    "raw": "web3==7.14.1",
+                    "extras": [],
+                    "marker": null,
+                    "name": "web3",
+                    "specifier": "==7.14.1",
+                    "url": null,
+                    "found": "/Users/silasmarkowicz/Library/Python/3.9/lib/python/site-packages/web3-7.14.1.dist-info"
+                }
+            ]
+        },
+        "eth-keys": {
+            "name": "eth-keys",
+            "version": "0.7.0",
+            "requirements": [
+                {
+                    "raw": "eth-keys==0.7.0",
+                    "extras": [],
+                    "marker": null,
+                    "name": "eth-keys",
+                    "specifier": "==0.7.0",
+                    "url": null,
+                    "found": "/Users/silasmarkowicz/Library/Python/3.9/lib/python/site-packages/eth_keys-0.7.0.dist-info"
+                }
+            ]
+        },
+        "SQLAlchemy": {
+            "name": "SQLAlchemy",
+            "version": "2.0.46",
+            "requirements": [
+                {
+                    "raw": "SQLAlchemy==2.0.46",
+                    "extras": [],
+                    "marker": null,
+                    "name": "SQLAlchemy",
+                    "specifier": "==2.0.46",
+                    "url": null,
+                    "found": "/Users/silasmarkowicz/Library/Python/3.9/lib/python/site-packages/sqlalchemy-2.0.46.dist-info"
+                }
+            ]
+        },
+        "annotated-doc": {
+            "name": "annotated-doc",
+            "version": "0.0.4",
+            "requirements": [
+                {
+                    "raw": "annotated-doc==0.0.4",
+                    "extras": [],
+                    "marker": null,
+                    "name": "annotated-doc",
+                    "specifier": "==0.0.4",
+                    "url": null,
+                    "found": "/Users/silasmarkowicz/Library/Python/3.9/lib/python/site-packages/annotated_doc-0.0.4.dist-info"
+                }
+            ]
+        },
+        "future": {
+            "name": "future",
+            "version": "0.18.2",
+            "requirements": [
+                {
+                    "raw": "future==0.18.2",
+                    "extras": [],
+                    "marker": null,
+                    "name": "future",
+                    "specifier": "==0.18.2",
+                    "url": null,
+                    "found": "/Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework/Versions/3.9/lib/python3.9/site-packages/future-0.18.2.dist-info"
+                }
+            ]
+        },
+        "six": {
+            "name": "six",
+            "version": "1.15.0",
+            "requirements": [
+                {
+                    "raw": "six==1.15.0",
+                    "extras": [],
+                    "marker": null,
+                    "name": "six",
+                    "specifier": "==1.15.0",
+                    "url": null,
+                    "found": "/Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework/Versions/3.9/lib/python3.9/site-packages/six-1.15.0.dist-info"
+                }
+            ]
+        },
+        "wheel": {
+            "name": "wheel",
+            "version": "0.37.0",
+            "requirements": [
+                {
+                    "raw": "wheel==0.37.0",
+                    "extras": [],
+                    "marker": null,
+                    "name": "wheel",
+                    "specifier": "==0.37.0",
+                    "url": null,
+                    "found": "/Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework/Versions/3.9/lib/python3.9/site-packages/wheel-0.37.0.dist-info"
+                }
+            ]
+        },
+        "altgraph": {
+            "name": "altgraph",
+            "version": "0.17.2",
+            "requirements": [
+                {
+                    "raw": "altgraph==0.17.2",
+                    "extras": [],
+                    "marker": null,
+                    "name": "altgraph",
+                    "specifier": "==0.17.2",
+                    "url": null,
+                    "found": "/Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework/Versions/3.9/lib/python3.9/site-packages/altgraph-0.17.2.dist-info"
+                }
+            ]
+        },
+        "macholib": {
+            "name": "macholib",
+            "version": "1.15.2",
+            "requirements": [
+                {
+                    "raw": "macholib==1.15.2",
+                    "extras": [],
+                    "marker": null,
+                    "name": "macholib",
+                    "specifier": "==1.15.2",
+                    "url": null,
+                    "found": "/Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework/Versions/3.9/lib/python3.9/site-packages/macholib-1.15.2.dist-info"
+                }
+            ]
+        }
+    },
+    "affected_packages": {
+        "setuptools": {
+            "name": "setuptools",
+            "version": "58.0.4",
+            "requirements": [
+                {
+                    "raw": "setuptools==58.0.4",
+                    "extras": [],
+                    "marker": null,
+                    "name": "setuptools",
+                    "specifier": "==58.0.4",
+                    "url": null,
+                    "found": "/Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework/Versions/3.9/lib/python3.9/site-packages/setuptools-58.0.4.dist-info"
+                }
+            ],
+            "found": null,
+            "insecure_versions": [
+                "0.6b1",
+                "0.6b2",
+                "0.6b3",
+                "0.6b4",
+                "0.6rc1",
+                "0.6rc10",
+                "0.6rc11",
+                "0.6rc2",
+                "0.6rc3",
+                "0.6rc4",
+                "0.6rc5",
+                "0.6rc6",
+                "0.6rc7",
+                "0.6rc8",
+                "0.6rc9",
+                "0.7.2",
+                "0.7.3",
+                "0.7.4",
+                "0.7.5",
+                "0.7.6",
+                "0.7.7",
+                "0.7.8",
+                "0.8",
+                "0.9",
+                "0.9.1",
+                "0.9.2",
+                "0.9.3",
+                "0.9.4",
+                "0.9.5",
+                "0.9.6",
+                "0.9.7",
+                "0.9.8",
+                "1.0",
+                "10.0",
+                "10.0.1",
+                "10.1",
+                "10.2",
+                "10.2.1",
+                "1.1",
+                "11.0",
+                "1.1.1",
+                "11.1",
+                "1.1.2",
+                "11.2",
+                "1.1.3",
+                "11.3",
+                "11.3.1",
+                "1.1.4",
+                "1.1.5",
+                "1.1.6",
+                "1.1.7",
+                "1.2",
+                "12.0",
+                "12.0.1",
+                "12.0.2",
+                "12.0.3",
+                "12.0.4",
+                "12.0.5",
+                "12.1",
+                "12.2",
+                "12.3",
+                "12.4",
+                "1.3",
+                "13.0",
+                "13.0.1",
+                "13.0.2",
+                "1.3.1",
+                "1.3.2",
+                "1.4",
+                "14.0",
+                "1.4.1",
+                "14.1",
+                "14.1.1",
+                "1.4.2",
+                "14.2",
+                "14.3",
+                "14.3.1",
+                "15.0",
+                "15.1",
+                "15.2",
+                "16.0",
+                "17.0",
+                "17.1",
+                "17.1.1",
+                "18.0",
+                "18.0.1",
+                "18.1",
+                "18.2",
+                "18.3",
+                "18.3.1",
+                "18.3.2",
+                "18.4",
+                "18.5",
+                "18.6",
+                "18.6.1",
+                "18.7",
+                "18.7.1",
+                "18.8",
+                "18.8.1",
+                "19.0",
+                "19.1",
+                "19.1.1",
+                "19.2",
+                "19.3",
+                "19.4",
+                "19.4.1",
+                "19.5",
+                "19.6",
+                "19.6.1",
+                "19.6.2",
+                "19.7",
+                "2.0",
+                "20.0",
+                "2.0.1",
+                "20.1",
+                "20.10.1",
+                "20.1.1",
+                "2.0.2",
+                "20.2.2",
+                "20.3",
+                "20.3.1",
+                "20.4",
+                "20.6.6",
+                "20.6.7",
+                "20.6.8",
+                "20.7.0",
+                "20.8.0",
+                "20.8.1",
+                "20.9.0",
+                "2.1",
+                "21.0.0",
+                "2.1.1",
+                "21.1.0",
+                "2.1.2",
+                "21.2.0",
+                "21.2.1",
+                "21.2.2",
+                "2.2",
+                "22.0.0",
+                "22.0.1",
+                "22.0.2",
+                "22.0.4",
+                "22.0.5",
+                "23.0.0",
+                "23.1.0",
+                "23.2.0",
+                "23.2.1",
+                "24.0.0",
+                "24.0.1",
+                "24.0.2",
+                "24.0.3",
+                "24.1.0",
+                "24.1.1",
+                "24.2.0",
+                "24.2.1",
+                "24.3.0",
+                "24.3.1",
+                "25.0.0",
+                "25.0.1",
+                "25.0.2",
+                "25.1.0",
+                "25.1.1",
+                "25.1.2",
+                "25.1.3",
+                "25.1.4",
+                "25.1.5",
+                "25.1.6",
+                "25.2.0",
+                "25.3.0",
+                "25.4.0",
+                "26.0.0",
+                "26.1.0",
+                "26.1.1",
+                "27.0.0",
+                "27.1.0",
+                "27.1.2",
+                "27.2.0",
+                "27.3.0",
+                "27.3.1",
+                "28.0.0",
+                "28.1.0",
+                "28.2.0",
+                "28.3.0",
+                "28.4.0",
+                "28.5.0",
+                "28.6.0",
+                "28.6.1",
+                "28.7.0",
+                "28.7.1",
+                "28.8.0",
+                "28.8.1",
+                "29.0.0",
+                "29.0.1",
+                "3.0",
+                "30.0.0",
+                "3.0.1",
+                "30.1.0",
+                "3.0.2",
+                "30.2.0",
+                "30.2.1",
+                "30.3.0",
+                "30.4.0",
+                "3.1",
+                "31.0.0",
+                "31.0.1",
+                "3.2",
+                "32.0.0",
+                "32.1.0",
+                "32.1.1",
+                "32.1.2",
+                "32.1.3",
+                "32.2.0",
+                "32.3.0",
+                "32.3.1",
+                "3.3",
+                "33.1.0",
+                "33.1.1",
+                "3.4",
+                "34.0.0",
+                "34.0.1",
+                "34.0.2",
+                "34.0.3",
+                "3.4.1",
+                "34.1.0",
+                "34.1.1",
+                "3.4.2",
+                "34.2.0",
+                "3.4.3",
+                "34.3.0",
+                "34.3.1",
+                "34.3.2",
+                "34.3.3",
+                "3.4.4",
+                "34.4.0",
+                "34.4.1",
+                "3.5",
+                "35.0.0",
+                "35.0.1",
+                "35.0.2",
+                "3.5.1",
+                "3.5.2",
+                "3.6",
+                "36.0.1",
+                "36.1.0",
+                "36.1.1",
+                "36.2.0",
+                "36.2.1",
+                "36.2.2",
+                "36.2.3",
+                "36.2.4",
+                "36.2.5",
+                "36.2.6",
+                "36.2.7",
+                "36.3.0",
+                "36.4.0",
+                "36.5.0",
+                "36.6.0",
+                "36.6.1",
+                "36.7.0",
+                "36.7.1",
+                "36.7.2",
+                "36.8.0",
+                "3.7",
+                "37.0.0",
+                "3.7.1",
+                "3.8",
+                "38.0.0",
+                "3.8.1",
+                "38.1.0",
+                "38.2.0",
+                "38.2.1",
+                "38.2.3",
+                "38.2.4",
+                "38.2.5",
+                "38.3.0",
+                "38.4.0",
+                "38.4.1",
+                "38.5.0",
+                "38.5.1",
+                "38.5.2",
+                "38.6.0",
+                "38.6.1",
+                "38.7.0",
+                "39.0.0",
+                "39.0.1",
+                "39.1.0",
+                "39.2.0",
+                "4.0",
+                "40.0.0",
+                "4.0.1",
+                "40.1.0",
+                "40.1.1",
+                "40.2.0",
+                "40.3.0",
+                "40.4.0",
+                "40.4.1",
+                "40.4.2",
+                "40.4.3",
+                "40.5.0",
+                "40.6.0",
+                "40.6.1",
+                "40.6.2",
+                "40.6.3",
+                "40.7.0",
+                "40.7.1",
+                "40.7.2",
+                "40.7.3",
+                "40.8.0",
+                "40.9.0",
+                "41.0.0",
+                "41.0.1",
+                "41.1.0",
+                "41.2.0",
+                "41.3.0",
+                "41.4.0",
+                "41.5.0",
+                "41.5.1",
+                "41.6.0",
+                "42.0.0",
+                "42.0.1",
+                "42.0.2",
+                "43.0.0",
+                "44.0.0",
+                "44.1.0",
+                "44.1.1",
+                "45.0.0",
+                "45.1.0",
+                "45.2.0",
+                "45.3.0",
+                "46.0.0",
+                "46.1.0",
+                "46.1.1",
+                "46.1.2",
+                "46.1.3",
+                "46.2.0",
+                "46.3.0",
+                "46.3.1",
+                "46.4.0",
+                "47.0.0",
+                "47.1.0",
+                "47.1.1",
+                "47.2.0",
+                "47.3.0",
+                "47.3.1",
+                "47.3.2",
+                "48.0.0",
+                "49.0.0",
+                "49.0.1",
+                "49.1.0",
+                "49.1.1",
+                "49.1.2",
+                "49.1.3",
+                "49.2.0",
+                "49.2.1",
+                "49.3.0",
+                "49.3.1",
+                "49.3.2",
+                "49.4.0",
+                "49.5.0",
+                "49.6.0",
+                "5.0",
+                "50.0.0",
+                "50.0.1",
+                "50.0.2",
+                "50.0.3",
+                "5.0.1",
+                "50.1.0",
+                "5.0.2",
+                "50.2.0",
+                "50.3.0",
+                "50.3.1",
+                "50.3.2",
+                "5.1",
+                "51.0.0",
+                "51.1.0",
+                "51.1.0.post20201221",
+                "51.1.1",
+                "51.1.2",
+                "51.2.0",
+                "51.3.0",
+                "51.3.1",
+                "51.3.2",
+                "51.3.3",
+                "5.2",
+                "52.0.0",
+                "5.3",
+                "53.0.0",
+                "53.1.0",
+                "5.4",
+                "54.0.0",
+                "5.4.1",
+                "54.1.0",
+                "54.1.1",
+                "54.1.2",
+                "54.1.3",
+                "5.4.2",
+                "54.2.0",
+                "5.5",
+                "5.5.1",
+                "5.6",
+                "56.0.0",
+                "56.1.0",
+                "56.2.0",
+                "5.7",
+                "57.0.0",
+                "57.1.0",
+                "57.2.0",
+                "57.3.0",
+                "57.4.0",
+                "57.5.0",
+                "5.8",
+                "58.0.0",
+                "58.0.1",
+                "58.0.2",
+                "58.0.3",
+                "58.0.4",
+                "58.1.0",
+                "58.2.0",
+                "58.3.0",
+                "58.4.0",
+                "58.5.0",
+                "58.5.1",
+                "58.5.2",
+                "58.5.3",
+                "59.0.1",
+                "59.1.0",
+                "59.1.1",
+                "59.2.0",
+                "59.3.0",
+                "59.4.0",
+                "59.5.0",
+                "59.6.0",
+                "59.7.0",
+                "59.8.0",
+                "60.0.0",
+                "60.0.1",
+                "60.0.2",
+                "60.0.3",
+                "60.0.4",
+                "60.0.5",
+                "6.0.1",
+                "60.1.0",
+                "60.10.0",
+                "60.1.1",
+                "6.0.2",
+                "60.2.0",
+                "60.3.0",
+                "60.3.1",
+                "60.4.0",
+                "60.5.0",
+                "60.6.0",
+                "60.7.0",
+                "60.7.1",
+                "60.8.0",
+                "60.8.1",
+                "60.8.2",
+                "60.9.0",
+                "60.9.1",
+                "60.9.2",
+                "60.9.3",
+                "6.1",
+                "61.0.0",
+                "61.1.0",
+                "61.1.1",
+                "61.2.0",
+                "61.3.0",
+                "61.3.1",
+                "62.0.0",
+                "62.1.0",
+                "62.2.0",
+                "62.3.0",
+                "62.3.1",
+                "62.3.2",
+                "62.3.3",
+                "62.3.4",
+                "62.4.0",
+                "62.5.0",
+                "62.6.0",
+                "63.0.0",
+                "63.0.0b1",
+                "63.1.0",
+                "63.2.0",
+                "63.3.0",
+                "63.4.0",
+                "63.4.1",
+                "63.4.2",
+                "63.4.3",
+                "64.0.0",
+                "64.0.1",
+                "64.0.2",
+                "64.0.3",
+                "65.0.0",
+                "65.0.1",
+                "65.0.2",
+                "65.1.0",
+                "65.1.1",
+                "65.2.0",
+                "65.3.0",
+                "65.4.0",
+                "65.4.1",
+                "65.5.0",
+                "65.5.1",
+                "65.6.0",
+                "65.6.1",
+                "65.6.2",
+                "65.6.3",
+                "65.7.0",
+                "66.0.0",
+                "66.1.0",
+                "66.1.1",
+                "67.0.0",
+                "67.1.0",
+                "67.2.0",
+                "67.3.1",
+                "67.3.2",
+                "67.3.3",
+                "67.4.0",
+                "67.5.0",
+                "67.5.1",
+                "67.6.0",
+                "67.6.1",
+                "67.7.0",
+                "67.7.1",
+                "67.7.2",
+                "67.8.0",
+                "68.0.0",
+                "68.1.0",
+                "68.1.2",
+                "68.2.0",
+                "68.2.1",
+                "68.2.2",
+                "69.0.0",
+                "69.0.1",
+                "69.0.2",
+                "69.0.3",
+                "69.1.0",
+                "69.1.1",
+                "69.2.0",
+                "69.3.0",
+                "69.3.1",
+                "69.4.0",
+                "69.4.1",
+                "69.4.2",
+                "69.5.0",
+                "69.5.1",
+                "7.0",
+                "70.0.0",
+                "70.1.0",
+                "70.1.1",
+                "70.2.0",
+                "70.3.0",
+                "71.0.0",
+                "71.0.1",
+                "71.0.2",
+                "71.0.3",
+                "71.0.4",
+                "71.1.0",
+                "72.0.0",
+                "72.1.0",
+                "72.2.0",
+                "73.0.0",
+                "73.0.1",
+                "74.0.0",
+                "74.1.0",
+                "74.1.1",
+                "74.1.2",
+                "74.1.3",
+                "75.0.0",
+                "75.1.0",
+                "75.2.0",
+                "75.3.0",
+                "75.3.1",
+                "75.3.2",
+                "75.3.3",
+                "75.3.4",
+                "75.4.0",
+                "75.5.0",
+                "75.6.0",
+                "75.7.0",
+                "75.8.0",
+                "75.8.1",
+                "75.8.2",
+                "75.9.0",
+                "75.9.1",
+                "76.0.0",
+                "76.1.0",
+                "77.0.1",
+                "77.0.3",
+                "78.0.1",
+                "78.0.2",
+                "78.1.0",
+                "8.0",
+                "8.0.1",
+                "8.0.2",
+                "8.0.3",
+                "8.0.4",
+                "8.1",
+                "8.2",
+                "8.2.1",
+                "8.3",
+                "9.0",
+                "9.0.1",
+                "9.1"
+            ],
+            "secure_versions": [
+                "82.0.0",
+                "81.0.0",
+                "80.10.2",
+                "80.10.1",
+                "80.9.0",
+                "80.8.0",
+                "80.7.1",
+                "80.7.0",
+                "80.6.0",
+                "80.4.0",
+                "80.3.1",
+                "80.3.0",
+                "80.2.0",
+                "80.1.0",
+                "80.0.1",
+                "80.0.0",
+                "79.0.1",
+                "79.0.0",
+                "78.1.1"
+            ],
+            "latest_version_without_known_vulnerabilities": "82.0.0",
+            "latest_version": "82.0.0",
+            "more_info_url": "https://data.safetycli.com/p/pypi/setuptools/97c/"
+        },
+        "pip": {
+            "name": "pip",
+            "version": "21.2.4",
+            "requirements": [
+                {
+                    "raw": "pip==21.2.4",
+                    "extras": [],
+                    "marker": null,
+                    "name": "pip",
+                    "specifier": "==21.2.4",
+                    "url": null,
+                    "found": "/Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework/Versions/3.9/lib/python3.9/site-packages/pip-21.2.4.dist-info"
+                }
+            ],
+            "found": null,
+            "insecure_versions": [
+                "0.2",
+                "0.2.1",
+                "0.3",
+                "0.3.1",
+                "0.4",
+                "0.5",
+                "0.5.1",
+                "0.6",
+                "0.6.1",
+                "0.6.2",
+                "0.6.3",
+                "0.7",
+                "0.7.1",
+                "0.7.2",
+                "0.8",
+                "0.8.1",
+                "0.8.2",
+                "0.8.3",
+                "1.0",
+                "10.0.0",
+                "10.0.0b1",
+                "10.0.0b2",
+                "10.0.1",
+                "1.0.1",
+                "1.0.2",
+                "1.1",
+                "1.2",
+                "1.2.1",
+                "1.3",
+                "1.3.1",
+                "1.4",
+                "1.4.1",
+                "1.5",
+                "1.5.1",
+                "1.5.2",
+                "1.5.3",
+                "1.5.4",
+                "1.5.5",
+                "1.5.6",
+                "18.0",
+                "18.1",
+                "19.0",
+                "19.0.1",
+                "19.0.2",
+                "19.0.3",
+                "19.1",
+                "19.1.1",
+                "19.2",
+                "19.2.1",
+                "19.2.2",
+                "19.2.3",
+                "19.3",
+                "19.3.1",
+                "20.0",
+                "20.0.1",
+                "20.0.2",
+                "20.1",
+                "20.1.1",
+                "20.1b1",
+                "20.2",
+                "20.2.1",
+                "20.2.2",
+                "20.2.3",
+                "20.2.4",
+                "20.2b1",
+                "20.3",
+                "20.3.1",
+                "20.3.2",
+                "20.3.3",
+                "20.3.4",
+                "20.3b1",
+                "21.0",
+                "21.0.1",
+                "21.1",
+                "21.1.1",
+                "21.1.2",
+                "21.1.3",
+                "21.2",
+                "21.2.1",
+                "21.2.2",
+                "21.2.3",
+                "21.2.4",
+                "21.3",
+                "21.3.1",
+                "22.0",
+                "22.0.1",
+                "22.0.2",
+                "22.0.3",
+                "22.0.4",
+                "22.1",
+                "22.1.1",
+                "22.1.2",
+                "22.1b1",
+                "22.2",
+                "22.2.1",
+                "22.2.2",
+                "22.3",
+                "22.3.1",
+                "23.0",
+                "23.0.1",
+                "23.1",
+                "23.1.1",
+                "23.1.2",
+                "23.2",
+                "23.2.1",
+                "23.3",
+                "23.3.1",
+                "23.3.2",
+                "24.0",
+                "24.1",
+                "24.1.1",
+                "24.1.2",
+                "24.1b1",
+                "24.1b2",
+                "24.2",
+                "24.3",
+                "24.3.1",
+                "25.0",
+                "25.0.1",
+                "25.1",
+                "25.1.1",
+                "25.2",
+                "25.3",
+                "6.0",
+                "6.0.1",
+                "6.0.2",
+                "6.0.3",
+                "6.0.4",
+                "6.0.5",
+                "6.0.6",
+                "6.0.7",
+                "6.0.8",
+                "6.1.0",
+                "6.1.1",
+                "7.0.0",
+                "7.0.1",
+                "7.0.2",
+                "7.0.3",
+                "7.1.0",
+                "7.1.1",
+                "7.1.2",
+                "8.0.0",
+                "8.0.1",
+                "8.0.2",
+                "8.0.3",
+                "8.1.0",
+                "8.1.1",
+                "8.1.2",
+                "9.0.0",
+                "9.0.1",
+                "9.0.2",
+                "9.0.3"
+            ],
+            "secure_versions": [
+                "26.0.1",
+                "26.0"
+            ],
+            "latest_version_without_known_vulnerabilities": "26.0.1",
+            "latest_version": "26.0.1",
+            "more_info_url": "https://data.safetycli.com/p/pypi/pip/97c/"
+        },
+        "wheel": {
+            "name": "wheel",
+            "version": "0.37.0",
+            "requirements": [
+                {
+                    "raw": "wheel==0.37.0",
+                    "extras": [],
+                    "marker": null,
+                    "name": "wheel",
+                    "specifier": "==0.37.0",
+                    "url": null,
+                    "found": "/Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework/Versions/3.9/lib/python3.9/site-packages/wheel-0.37.0.dist-info"
+                }
+            ],
+            "found": null,
+            "insecure_versions": [
+                "0.1",
+                "0.10.0",
+                "0.10.1",
+                "0.10.2",
+                "0.10.3",
+                "0.11.0",
+                "0.12.0",
+                "0.13.0",
+                "0.14.0",
+                "0.15.0",
+                "0.16.0",
+                "0.17.0",
+                "0.18.0",
+                "0.19.0",
+                "0.2",
+                "0.21.0",
+                "0.22.0",
+                "0.23.0",
+                "0.24.0",
+                "0.25.0",
+                "0.26.0",
+                "0.27.0",
+                "0.28.0",
+                "0.29.0",
+                "0.3",
+                "0.30.0",
+                "0.30.0a0",
+                "0.31.0",
+                "0.31.1",
+                "0.32.0",
+                "0.32.1",
+                "0.32.2",
+                "0.32.3",
+                "0.33.0",
+                "0.33.1",
+                "0.33.4",
+                "0.33.5",
+                "0.33.6",
+                "0.34.0",
+                "0.34.1",
+                "0.34.2",
+                "0.35.0",
+                "0.35.1",
+                "0.36.0",
+                "0.36.1",
+                "0.36.2",
+                "0.37.0",
+                "0.37.1",
+                "0.38.0",
+                "0.38.1",
+                "0.38.2",
+                "0.38.3",
+                "0.38.4",
+                "0.4",
+                "0.40.0",
+                "0.4.1",
+                "0.41.0",
+                "0.41.1",
+                "0.41.2",
+                "0.41.3",
+                "0.4.2",
+                "0.42.0",
+                "0.43.0",
+                "0.44.0",
+                "0.45.0",
+                "0.45.1",
+                "0.46.0",
+                "0.46.1",
+                "0.5",
+                "0.6",
+                "0.7",
+                "0.8",
+                "0.9",
+                "0.9.1",
+                "0.9.2",
+                "0.9.3",
+                "0.9.4",
+                "0.9.5",
+                "0.9.6",
+                "0.9.7"
+            ],
+            "secure_versions": [
+                "0.46.3",
+                "0.46.2"
+            ],
+            "latest_version_without_known_vulnerabilities": "0.46.3",
+            "latest_version": "0.46.3",
+            "more_info_url": "https://data.safetycli.com/p/pypi/wheel/97c/"
+        },
+        "future": {
+            "name": "future",
+            "version": "0.18.2",
+            "requirements": [
+                {
+                    "raw": "future==0.18.2",
+                    "extras": [],
+                    "marker": null,
+                    "name": "future",
+                    "specifier": "==0.18.2",
+                    "url": null,
+                    "found": "/Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework/Versions/3.9/lib/python3.9/site-packages/future-0.18.2.dist-info"
+                }
+            ],
+            "found": null,
+            "insecure_versions": [
+                "0.0.1",
+                "0.0.2",
+                "0.0.3",
+                "0.1.0",
+                "0.10.0",
+                "0.10.1",
+                "0.10.2",
+                "0.11.0",
+                "0.11.1",
+                "0.11.2",
+                "0.11.3",
+                "0.11.4",
+                "0.12.0",
+                "0.12.1",
+                "0.12.2",
+                "0.12.3",
+                "0.12.4",
+                "0.13.0",
+                "0.13.1",
+                "0.14.0",
+                "0.14.1",
+                "0.14.2",
+                "0.14.3",
+                "0.15.0",
+                "0.15.1",
+                "0.15.2",
+                "0.16.0",
+                "0.17.0",
+                "0.17.1",
+                "0.18.0",
+                "0.18.1",
+                "0.18.2",
+                "0.2.0",
+                "0.3.0",
+                "0.3.1",
+                "0.3.2",
+                "0.3.3",
+                "0.3.4",
+                "0.3.5",
+                "0.4.0",
+                "0.4.1",
+                "0.5.0",
+                "0.5.1",
+                "0.5.2",
+                "0.6.0",
+                "0.7.0",
+                "0.8.0",
+                "0.8.1",
+                "0.8.2",
+                "0.9.0"
+            ],
+            "secure_versions": [
+                "1.0.0",
+                "0.18.3"
+            ],
+            "latest_version_without_known_vulnerabilities": "1.0.0",
+            "latest_version": "1.0.0",
+            "more_info_url": "https://data.safetycli.com/p/pypi/future/97c/"
+        },
+        "fonttools": {
+            "name": "fonttools",
+            "version": "4.60.2",
+            "requirements": [
+                {
+                    "raw": "fonttools==4.60.2",
+                    "extras": [],
+                    "marker": null,
+                    "name": "fonttools",
+                    "specifier": "==4.60.2",
+                    "url": null,
+                    "found": "/Users/silasmarkowicz/Library/Python/3.9/lib/python/site-packages/fonttools-4.60.2.dist-info"
+                }
+            ],
+            "found": null,
+            "insecure_versions": [
+                "1.0",
+                "2.0b1",
+                "2.3",
+                "2.4",
+                "2.5",
+                "3.0",
+                "3.1.0",
+                "3.10.0",
+                "3.1.1",
+                "3.11.0",
+                "3.1.2",
+                "3.12.0",
+                "3.12.1",
+                "3.13.0",
+                "3.13.1",
+                "3.14.0",
+                "3.15.0",
+                "3.15.1",
+                "3.16.0",
+                "3.17.0",
+                "3.18.0",
+                "3.19.0",
+                "3.2.0",
+                "3.20.0",
+                "3.20.1",
+                "3.2.1",
+                "3.21.0",
+                "3.21.1",
+                "3.21.2",
+                "3.2.2",
+                "3.22.0",
+                "3.2.3",
+                "3.23.0",
+                "3.24.0",
+                "3.24.1",
+                "3.24.2",
+                "3.25.0",
+                "3.26.0",
+                "3.27.0",
+                "3.27.1",
+                "3.28.0",
+                "3.29.0",
+                "3.29.1",
+                "3.3.0",
+                "3.30.0",
+                "3.3.1",
+                "3.31.0",
+                "3.32.0",
+                "3.33.0",
+                "3.34.0",
+                "3.34.1",
+                "3.34.2",
+                "3.35.0",
+                "3.35.1",
+                "3.35.2",
+                "3.36.0",
+                "3.37.0",
+                "3.37.1",
+                "3.37.2",
+                "3.37.3",
+                "3.38.0",
+                "3.39.0",
+                "3.4.0",
+                "3.40.0",
+                "3.41.0",
+                "3.41.1",
+                "3.41.2",
+                "3.42.0",
+                "3.43.0",
+                "3.43.1",
+                "3.43.2",
+                "3.44.0",
+                "3.5.0",
+                "3.6.0",
+                "3.6.1",
+                "3.6.2",
+                "3.6.3",
+                "3.7.0",
+                "3.7.1",
+                "3.7.2",
+                "3.8.0",
+                "3.9.0",
+                "3.9.1",
+                "3.9.2",
+                "4.0.0",
+                "4.0.1",
+                "4.0.2",
+                "4.1.0",
+                "4.10.0",
+                "4.10.1",
+                "4.10.2",
+                "4.11.0",
+                "4.12.0",
+                "4.12.1",
+                "4.13.0",
+                "4.14.0",
+                "4.15.0",
+                "4.16.0",
+                "4.16.1",
+                "4.17.0",
+                "4.17.1",
+                "4.18.0",
+                "4.18.1",
+                "4.18.2",
+                "4.19.0",
+                "4.19.1",
+                "4.2.0",
+                "4.20.0",
+                "4.2.1",
+                "4.21.0",
+                "4.21.1",
+                "4.2.2",
+                "4.22.0",
+                "4.22.1",
+                "4.2.3",
+                "4.23.0",
+                "4.23.1",
+                "4.2.4",
+                "4.24.0",
+                "4.24.1",
+                "4.24.2",
+                "4.24.3",
+                "4.24.4",
+                "4.2.5",
+                "4.25.0",
+                "4.25.1",
+                "4.25.2",
+                "4.26.0",
+                "4.26.1",
+                "4.26.2",
+                "4.27.0",
+                "4.27.1",
+                "4.28.0",
+                "4.28.1",
+                "4.28.2",
+                "4.28.3",
+                "4.28.4",
+                "4.28.5",
+                "4.29.0",
+                "4.29.1",
+                "4.3.0",
+                "4.30.0",
+                "4.31.0",
+                "4.31.1",
+                "4.31.2",
+                "4.32.0",
+                "4.33.0",
+                "4.33.1",
+                "4.33.2",
+                "4.33.3",
+                "4.34.0",
+                "4.34.1",
+                "4.34.2",
+                "4.34.3",
+                "4.34.4",
+                "4.35.0",
+                "4.36.0",
+                "4.37.0",
+                "4.37.1",
+                "4.37.2",
+                "4.37.3",
+                "4.37.4",
+                "4.38.0",
+                "4.38.1.dev0",
+                "4.39.0",
+                "4.39.1",
+                "4.39.2",
+                "4.39.3",
+                "4.39.4",
+                "4.4.0",
+                "4.40.0",
+                "4.4.1",
+                "4.41.0",
+                "4.41.1",
+                "4.4.2",
+                "4.42.0",
+                "4.42.1",
+                "4.4.2.dev0",
+                "4.4.3",
+                "4.43.0",
+                "4.43.1",
+                "4.44.0",
+                "4.44.1",
+                "4.44.3",
+                "4.45.0",
+                "4.45.1",
+                "4.46.0",
+                "4.47.0",
+                "4.47.2",
+                "4.48.1",
+                "4.49.0",
+                "4.5.0",
+                "4.50.0",
+                "4.51.0",
+                "4.52.1",
+                "4.52.3",
+                "4.52.4",
+                "4.53.0",
+                "4.53.1",
+                "4.54.0",
+                "4.54.1",
+                "4.55.0",
+                "4.55.1",
+                "4.55.2",
+                "4.55.3",
+                "4.55.4",
+                "4.55.5",
+                "4.55.6",
+                "4.55.7",
+                "4.55.8",
+                "4.56.0",
+                "4.57.0",
+                "4.58.0",
+                "4.58.1",
+                "4.58.2",
+                "4.58.3",
+                "4.58.4",
+                "4.58.5",
+                "4.59.0",
+                "4.59.1",
+                "4.59.2",
+                "4.6.0",
+                "4.60.0",
+                "4.60.1",
+                "4.60.2",
+                "4.7.0",
+                "4.8.0",
+                "4.8.1",
+                "4.9.0"
+            ],
+            "secure_versions": [
+                "4.61.1",
+                "4.61.0"
+            ],
+            "latest_version_without_known_vulnerabilities": "4.61.1",
+            "latest_version": "4.61.1",
+            "more_info_url": "https://data.safetycli.com/p/pypi/fonttools/97c/"
+        },
+        "filelock": {
+            "name": "filelock",
+            "version": "3.19.1",
+            "requirements": [
+                {
+                    "raw": "filelock==3.19.1",
+                    "extras": [],
+                    "marker": null,
+                    "name": "filelock",
+                    "specifier": "==3.19.1",
+                    "url": null,
+                    "found": "/Users/silasmarkowicz/Library/Python/3.9/lib/python/site-packages/filelock-3.19.1.dist-info"
+                }
+            ],
+            "found": null,
+            "insecure_versions": [
+                "0.2.0",
+                "0.2.1",
+                "0.2.2",
+                "1.0.0",
+                "1.0.1",
+                "1.0.2",
+                "1.0.3",
+                "2.0.0",
+                "2.0.1",
+                "2.0.10",
+                "2.0.11",
+                "2.0.12",
+                "2.0.13",
+                "2.0.4",
+                "2.0.5",
+                "2.0.6",
+                "2.0.7",
+                "2.0.8",
+                "2.0.9",
+                "3.0.0",
+                "3.0.10",
+                "3.0.12",
+                "3.0.2",
+                "3.0.3",
+                "3.0.4",
+                "3.0.6",
+                "3.0.8",
+                "3.0.9",
+                "3.1.0",
+                "3.10.0",
+                "3.10.1",
+                "3.10.2",
+                "3.10.3",
+                "3.10.4",
+                "3.10.5",
+                "3.10.6",
+                "3.10.7",
+                "3.11.0",
+                "3.12.0",
+                "3.12.1",
+                "3.12.2",
+                "3.12.3",
+                "3.12.4",
+                "3.13.0",
+                "3.13.1",
+                "3.13.2",
+                "3.13.3",
+                "3.13.4",
+                "3.14.0",
+                "3.15.0",
+                "3.15.1",
+                "3.15.2",
+                "3.15.3",
+                "3.15.4",
+                "3.16.0",
+                "3.16.1",
+                "3.17.0",
+                "3.18.0",
+                "3.19.1",
+                "3.2.0",
+                "3.20.0",
+                "3.20.1",
+                "3.20.2",
+                "3.2.1",
+                "3.3.0",
+                "3.3.1",
+                "3.3.2",
+                "3.4.0",
+                "3.4.1",
+                "3.4.2",
+                "3.5.0",
+                "3.5.1",
+                "3.6.0",
+                "3.7.0",
+                "3.7.1",
+                "3.8.0",
+                "3.8.1",
+                "3.8.2",
+                "3.9.0",
+                "3.9.1"
+            ],
+            "secure_versions": [
+                "3.24.0",
+                "3.23.0",
+                "3.22.0",
+                "3.21.2",
+                "3.21.1",
+                "3.21.0",
+                "3.20.4",
+                "3.20.3"
+            ],
+            "latest_version_without_known_vulnerabilities": "3.24.0",
+            "latest_version": "3.24.0",
+            "more_info_url": "https://data.safetycli.com/p/pypi/filelock/97c/"
+        },
+        "marshmallow": {
+            "name": "marshmallow",
+            "version": "4.0.1",
+            "requirements": [
+                {
+                    "raw": "marshmallow==4.0.1",
+                    "extras": [],
+                    "marker": null,
+                    "name": "marshmallow",
+                    "specifier": "==4.0.1",
+                    "url": null,
+                    "found": "/Users/silasmarkowicz/Library/Python/3.9/lib/python/site-packages/marshmallow-4.0.1.dist-info"
+                }
+            ],
+            "found": null,
+            "insecure_versions": [
+                "0.1.0",
+                "0.2.0",
+                "0.2.1",
+                "0.3.0",
+                "0.3.1",
+                "0.4.0",
+                "0.4.1",
+                "0.5.0",
+                "0.5.1",
+                "0.5.2",
+                "0.5.3",
+                "0.5.4",
+                "0.5.5",
+                "0.6.0",
+                "0.7.0",
+                "1.0.0",
+                "1.0.0a0",
+                "1.0.1",
+                "1.1.0",
+                "1.2.0",
+                "1.2.1",
+                "1.2.2",
+                "1.2.3",
+                "1.2.4",
+                "1.2.5",
+                "1.2.6",
+                "2.0.0",
+                "2.0.0a1",
+                "2.0.0b1",
+                "2.0.0b2",
+                "2.0.0b3",
+                "2.0.0b4",
+                "2.0.0b5",
+                "2.0.0rc1",
+                "2.0.0rc2",
+                "2.1.0",
+                "2.10.0",
+                "2.10.1",
+                "2.10.2",
+                "2.10.3",
+                "2.10.4",
+                "2.10.5",
+                "2.1.1",
+                "2.11.0",
+                "2.11.1",
+                "2.1.2",
+                "2.12.0",
+                "2.12.1",
+                "2.12.2",
+                "2.1.3",
+                "2.13.0",
+                "2.13.1",
+                "2.13.2",
+                "2.13.3",
+                "2.13.4",
+                "2.13.5",
+                "2.13.6",
+                "2.14.0",
+                "2.15.0",
+                "2.2.0",
+                "2.2.1",
+                "2.3.0",
+                "2.4.0",
+                "2.4.1",
+                "2.4.2",
+                "2.5.0",
+                "2.6.0",
+                "2.6.1",
+                "2.7.0",
+                "2.7.1",
+                "2.7.2",
+                "2.7.3",
+                "2.8.0",
+                "2.9.0",
+                "2.9.1",
+                "3.0.0",
+                "3.0.0a1",
+                "3.0.0b1",
+                "3.0.0b2",
+                "3.0.0b3",
+                "3.0.0b4",
+                "3.0.0b5",
+                "3.0.0b6",
+                "3.0.0b7",
+                "3.0.0b8",
+                "3.0.0rc1",
+                "3.0.0rc2",
+                "3.0.0rc3",
+                "3.0.0rc4",
+                "3.0.0rc5",
+                "3.0.0rc6",
+                "3.0.0rc7",
+                "3.0.0rc8",
+                "3.0.0rc9",
+                "3.0.1",
+                "3.0.2",
+                "3.0.3",
+                "3.0.4",
+                "3.0.5",
+                "3.1.0",
+                "3.10.0",
+                "3.1.1",
+                "3.11.0",
+                "3.11.1",
+                "3.12.0",
+                "3.12.1",
+                "3.12.2",
+                "3.13.0",
+                "3.14.0",
+                "3.14.1",
+                "3.15.0",
+                "3.16.0",
+                "3.17.0",
+                "3.17.1",
+                "3.18.0",
+                "3.19.0",
+                "3.2.0",
+                "3.20.0",
+                "3.20.1",
+                "3.20.2",
+                "3.2.1",
+                "3.21.0",
+                "3.21.1",
+                "3.21.2",
+                "3.21.3",
+                "3.2.2",
+                "3.22.0",
+                "3.23.0",
+                "3.23.1",
+                "3.23.2",
+                "3.23.3",
+                "3.24.0",
+                "3.24.1",
+                "3.24.2",
+                "3.25.0",
+                "3.25.1",
+                "3.26.0",
+                "3.26.1",
+                "3.3.0",
+                "3.4.0",
+                "3.5.0",
+                "3.5.1",
+                "3.5.2",
+                "3.6.0",
+                "3.6.1",
+                "3.7.0",
+                "3.7.1",
+                "3.8.0",
+                "3.9.0",
+                "3.9.1",
+                "4.0.0",
+                "4.0.1",
+                "4.1.0",
+                "4.1.1"
+            ],
+            "secure_versions": [
+                "4.2.2",
+                "4.2.1",
+                "4.2.0",
+                "4.1.2",
+                "3.26.2",
+                "3.0.0b20",
+                "3.0.0b19",
+                "3.0.0b18",
+                "3.0.0b17",
+                "3.0.0b16",
+                "3.0.0b15",
+                "3.0.0b14",
+                "3.0.0b13",
+                "3.0.0b12",
+                "3.0.0b11",
+                "3.0.0b10",
+                "3.0.0b9",
+                "2.21.0",
+                "2.20.5",
+                "2.20.4",
+                "2.20.3",
+                "2.20.2",
+                "2.20.1",
+                "2.20.0",
+                "2.19.5",
+                "2.19.4",
+                "2.19.3",
+                "2.19.2",
+                "2.19.1",
+                "2.19.0",
+                "2.18.1",
+                "2.18.0",
+                "2.17.0",
+                "2.16.3",
+                "2.16.2",
+                "2.16.1",
+                "2.16.0",
+                "2.15.6",
+                "2.15.5",
+                "2.15.4",
+                "2.15.3",
+                "2.15.2",
+                "2.15.1"
+            ],
+            "latest_version_without_known_vulnerabilities": "4.2.2",
+            "latest_version": "4.2.2",
+            "more_info_url": "https://data.safetycli.com/p/pypi/marshmallow/97c/"
+        }
+    },
+    "announcements": [],
+    "vulnerabilities": [
+        {
+            "vulnerability_id": "76752",
+            "package_name": "setuptools",
+            "ignored": {},
+            "ignored_reason": null,
+            "ignored_expires": null,
+            "vulnerable_spec": [
+                "<78.1.1"
+            ],
+            "all_vulnerable_specs": [
+                "<78.1.1"
+            ],
+            "analyzed_version": "58.0.4",
+            "analyzed_requirement": {
+                "raw": "setuptools==58.0.4",
+                "extras": [],
+                "marker": null,
+                "name": "setuptools",
+                "specifier": "==58.0.4",
+                "url": null,
+                "found": "/Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework/Versions/3.9/lib/python3.9/site-packages/setuptools-58.0.4.dist-info"
+            },
+            "advisory": "Affected versions of Setuptools are vulnerable to Path Traversal via PackageIndex.download(). The impact is Arbitrary File Overwrite: An attacker would be allowed to write files to arbitrary locations on the filesystem with the permissions of the process running the Python code, which could escalate to RCE depending on the context.",
+            "is_transitive": false,
+            "published_date": null,
+            "fixed_versions": [],
+            "closest_versions_without_known_vulnerabilities": [],
+            "resources": [],
+            "CVE": "CVE-2025-47273",
+            "severity": null,
+            "affected_versions": [],
+            "more_info_url": "https://data.safetycli.com/v/76752/97c"
+        },
+        {
+            "vulnerability_id": "72236",
+            "package_name": "setuptools",
+            "ignored": {},
+            "ignored_reason": null,
+            "ignored_expires": null,
+            "vulnerable_spec": [
+                "<70.0.0"
+            ],
+            "all_vulnerable_specs": [
+                "<70.0.0"
+            ],
+            "analyzed_version": "58.0.4",
+            "analyzed_requirement": {
+                "raw": "setuptools==58.0.4",
+                "extras": [],
+                "marker": null,
+                "name": "setuptools",
+                "specifier": "==58.0.4",
+                "url": null,
+                "found": "/Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework/Versions/3.9/lib/python3.9/site-packages/setuptools-58.0.4.dist-info"
+            },
+            "advisory": "Affected versions of Setuptools allow for remote code execution via its download functions. These functions, which are used to download packages from URLs provided by users or retrieved from package index servers, are susceptible to code injection. If these functions are exposed to user-controlled inputs, such as package URLs, they can execute arbitrary commands on the system.",
+            "is_transitive": false,
+            "published_date": null,
+            "fixed_versions": [],
+            "closest_versions_without_known_vulnerabilities": [],
+            "resources": [],
+            "CVE": "CVE-2024-6345",
+            "severity": null,
+            "affected_versions": [],
+            "more_info_url": "https://data.safetycli.com/v/72236/97c"
+        },
+        {
+            "vulnerability_id": "52495",
+            "package_name": "setuptools",
+            "ignored": {},
+            "ignored_reason": null,
+            "ignored_expires": null,
+            "vulnerable_spec": [
+                "<65.5.1"
+            ],
+            "all_vulnerable_specs": [
+                "<65.5.1"
+            ],
+            "analyzed_version": "58.0.4",
+            "analyzed_requirement": {
+                "raw": "setuptools==58.0.4",
+                "extras": [],
+                "marker": null,
+                "name": "setuptools",
+                "specifier": "==58.0.4",
+                "url": null,
+                "found": "/Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework/Versions/3.9/lib/python3.9/site-packages/setuptools-58.0.4.dist-info"
+            },
+            "advisory": "Setuptools 65.5.1 includes a fix for CVE-2022-40897: Python Packaging Authority (PyPA) setuptools before 65.5.1 allows remote attackers to cause a denial of service via HTML in a crafted package or custom PackageIndex page. There is a Regular Expression Denial of Service (ReDoS) in package_index.py.",
+            "is_transitive": false,
+            "published_date": null,
+            "fixed_versions": [],
+            "closest_versions_without_known_vulnerabilities": [],
+            "resources": [],
+            "CVE": "CVE-2022-40897",
+            "severity": null,
+            "affected_versions": [],
+            "more_info_url": "https://data.safetycli.com/v/52495/97c"
+        },
+        {
+            "vulnerability_id": "79883",
+            "package_name": "pip",
+            "ignored": {},
+            "ignored_reason": null,
+            "ignored_expires": null,
+            "vulnerable_spec": [
+                "<25.2"
+            ],
+            "all_vulnerable_specs": [
+                "<25.2"
+            ],
+            "analyzed_version": "21.2.4",
+            "analyzed_requirement": {
+                "raw": "pip==21.2.4",
+                "extras": [],
+                "marker": null,
+                "name": "pip",
+                "specifier": "==21.2.4",
+                "url": null,
+                "found": "/Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework/Versions/3.9/lib/python3.9/site-packages/pip-21.2.4.dist-info"
+            },
+            "advisory": "Affected versions of the pip package are vulnerable to Arbitrary File Overwrite due to improper validation of symbolic link targets in the fallback tar extraction code. In src/pip/_internal/utils/unpacking.py, the _untar_without_filter routine used when the Python tarfile module lacks PEP 706 (no tarfile.data_filter) extracted symlink members with tar._extract_member without verifying that link destinations resolve under the extraction root, a check later added via the is_symlink_target_in_tar helper.",
+            "is_transitive": false,
+            "published_date": null,
+            "fixed_versions": [],
+            "closest_versions_without_known_vulnerabilities": [],
+            "resources": [],
+            "CVE": "CVE-2025-8869",
+            "severity": null,
+            "affected_versions": [],
+            "more_info_url": "https://data.safetycli.com/v/79883/97c"
+        },
+        {
+            "vulnerability_id": "75180",
+            "package_name": "pip",
+            "ignored": {},
+            "ignored_reason": null,
+            "ignored_expires": null,
+            "vulnerable_spec": [
+                "<25.0"
+            ],
+            "all_vulnerable_specs": [
+                "<25.0"
+            ],
+            "analyzed_version": "21.2.4",
+            "analyzed_requirement": {
+                "raw": "pip==21.2.4",
+                "extras": [],
+                "marker": null,
+                "name": "pip",
+                "specifier": "==21.2.4",
+                "url": null,
+                "found": "/Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework/Versions/3.9/lib/python3.9/site-packages/pip-21.2.4.dist-info"
+            },
+            "advisory": "Pip solves a security vulnerability that previously allowed maliciously crafted wheel files to execute unauthorized code during installation.",
+            "is_transitive": false,
+            "published_date": null,
+            "fixed_versions": [],
+            "closest_versions_without_known_vulnerabilities": [],
+            "resources": [],
+            "CVE": null,
+            "severity": null,
+            "affected_versions": [],
+            "more_info_url": "https://data.safetycli.com/v/75180/97c"
+        },
+        {
+            "vulnerability_id": "62044",
+            "package_name": "pip",
+            "ignored": {},
+            "ignored_reason": null,
+            "ignored_expires": null,
+            "vulnerable_spec": [
+                "<23.3"
+            ],
+            "all_vulnerable_specs": [
+                "<23.3"
+            ],
+            "analyzed_version": "21.2.4",
+            "analyzed_requirement": {
+                "raw": "pip==21.2.4",
+                "extras": [],
+                "marker": null,
+                "name": "pip",
+                "specifier": "==21.2.4",
+                "url": null,
+                "found": "/Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework/Versions/3.9/lib/python3.9/site-packages/pip-21.2.4.dist-info"
+            },
+            "advisory": "Affected versions of Pip are vulnerable to Command Injection. When installing a package from a Mercurial VCS URL (ie \"pip install hg+...\") with pip prior to v23.3, the specified Mercurial revision could be used to inject arbitrary configuration options to the \"hg clone\" call (ie \"--config\"). Controlling the Mercurial configuration can modify how and which repository is installed. This vulnerability does not affect users who aren't installing from Mercurial.",
+            "is_transitive": false,
+            "published_date": null,
+            "fixed_versions": [],
+            "closest_versions_without_known_vulnerabilities": [],
+            "resources": [],
+            "CVE": "CVE-2023-5752",
+            "severity": null,
+            "affected_versions": [],
+            "more_info_url": "https://data.safetycli.com/v/62044/97c"
+        },
+        {
+            "vulnerability_id": "51499",
+            "package_name": "wheel",
+            "ignored": {},
+            "ignored_reason": null,
+            "ignored_expires": null,
+            "vulnerable_spec": [
+                "<0.38.1"
+            ],
+            "all_vulnerable_specs": [
+                "<0.38.1"
+            ],
+            "analyzed_version": "0.37.0",
+            "analyzed_requirement": {
+                "raw": "wheel==0.37.0",
+                "extras": [],
+                "marker": null,
+                "name": "wheel",
+                "specifier": "==0.37.0",
+                "url": null,
+                "found": "/Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework/Versions/3.9/lib/python3.9/site-packages/wheel-0.37.0.dist-info"
+            },
+            "advisory": "Wheel 0.38.1 includes a fix for CVE-2022-40898: An issue discovered in Python Packaging Authority (PyPA) Wheel 0.37.1 and earlier allows remote attackers to cause a denial of service via attacker controlled input to wheel cli.\r\nhttps://pyup.io/posts/pyup-discovers-redos-vulnerabilities-in-top-python-packages",
+            "is_transitive": false,
+            "published_date": null,
+            "fixed_versions": [],
+            "closest_versions_without_known_vulnerabilities": [],
+            "resources": [],
+            "CVE": "CVE-2022-40898",
+            "severity": null,
+            "affected_versions": [],
+            "more_info_url": "https://data.safetycli.com/v/51499/97c"
+        },
+        {
+            "vulnerability_id": "52510",
+            "package_name": "future",
+            "ignored": {},
+            "ignored_reason": null,
+            "ignored_expires": null,
+            "vulnerable_spec": [
+                "<=0.18.2"
+            ],
+            "all_vulnerable_specs": [
+                "<=0.18.2"
+            ],
+            "analyzed_version": "0.18.2",
+            "analyzed_requirement": {
+                "raw": "future==0.18.2",
+                "extras": [],
+                "marker": null,
+                "name": "future",
+                "specifier": "==0.18.2",
+                "url": null,
+                "found": "/Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework/Versions/3.9/lib/python3.9/site-packages/future-0.18.2.dist-info"
+            },
+            "advisory": "Future 0.18.2 and earlier allows remote attackers to cause a denial of service via crafted Set-Cookie header from malicious web server.\r\nhttps://github.com/PythonCharmers/python-future/blob/master/src/future/backports/http/cookiejar.py#L215\r\nhttps://github.com/python/cpython/pull/17157",
+            "is_transitive": false,
+            "published_date": null,
+            "fixed_versions": [],
+            "closest_versions_without_known_vulnerabilities": [],
+            "resources": [],
+            "CVE": "CVE-2022-40899",
+            "severity": null,
+            "affected_versions": [],
+            "more_info_url": "https://data.safetycli.com/v/52510/97c"
+        },
+        {
+            "vulnerability_id": "82065",
+            "package_name": "fonttools",
+            "ignored": {},
+            "ignored_reason": null,
+            "ignored_expires": null,
+            "vulnerable_spec": [
+                "<4.61.0"
+            ],
+            "all_vulnerable_specs": [
+                "<4.61.0"
+            ],
+            "analyzed_version": "4.60.2",
+            "analyzed_requirement": {
+                "raw": "fonttools==4.60.2",
+                "extras": [],
+                "marker": null,
+                "name": "fonttools",
+                "specifier": "==4.60.2",
+                "url": null,
+                "found": "/Users/silasmarkowicz/Library/Python/3.9/lib/python/site-packages/fonttools-4.60.2.dist-info"
+            },
+            "advisory": "Affected versions of this package are vulnerable to path traversal due to improper handling of file paths. The `varLib.main` function does not correctly sanitize input paths, allowing the use of potentially malicious file paths. An attacker can exploit this vulnerability by crafting a path that traverses directories, potentially accessing unauthorized files or directories on the system.",
+            "is_transitive": false,
+            "published_date": null,
+            "fixed_versions": [],
+            "closest_versions_without_known_vulnerabilities": [],
+            "resources": [],
+            "CVE": "CVE-2025-66034",
+            "severity": null,
+            "affected_versions": [],
+            "more_info_url": "https://data.safetycli.com/v/82065/97c"
+        },
+        {
+            "vulnerability_id": "84415",
+            "package_name": "filelock",
+            "ignored": {},
+            "ignored_reason": null,
+            "ignored_expires": null,
+            "vulnerable_spec": [
+                "<3.20.3"
+            ],
+            "all_vulnerable_specs": [
+                "<3.20.3"
+            ],
+            "analyzed_version": "3.19.1",
+            "analyzed_requirement": {
+                "raw": "filelock==3.19.1",
+                "extras": [],
+                "marker": null,
+                "name": "filelock",
+                "specifier": "==3.19.1",
+                "url": null,
+                "found": "/Users/silasmarkowicz/Library/Python/3.9/lib/python/site-packages/filelock-3.19.1.dist-info"
+            },
+            "advisory": "Affected versions of the filelock package are vulnerable to a Time-of-Check Time-of-Use (TOCTOU) Race Condition due to a race window between a write-permission check and lock file creation that does not prevent symlink substitution. The flaw is in filelock.SoftFileLock in src/filelock/_soft.py, where _acquire() calls raise_on_not_writable_file() and then performs os.open() on the lock path, allowing the filesystem state to change between the check and the use.",
+            "is_transitive": false,
+            "published_date": null,
+            "fixed_versions": [],
+            "closest_versions_without_known_vulnerabilities": [],
+            "resources": [],
+            "CVE": "CVE-2026-22701",
+            "severity": null,
+            "affected_versions": [],
+            "more_info_url": "https://data.safetycli.com/v/84415/97c"
+        },
+        {
+            "vulnerability_id": "84183",
+            "package_name": "filelock",
+            "ignored": {},
+            "ignored_reason": null,
+            "ignored_expires": null,
+            "vulnerable_spec": [
+                "<3.20.3"
+            ],
+            "all_vulnerable_specs": [
+                "<3.20.3"
+            ],
+            "analyzed_version": "3.19.1",
+            "analyzed_requirement": {
+                "raw": "filelock==3.19.1",
+                "extras": [],
+                "marker": null,
+                "name": "filelock",
+                "specifier": "==3.19.1",
+                "url": null,
+                "found": "/Users/silasmarkowicz/Library/Python/3.9/lib/python/site-packages/filelock-3.19.1.dist-info"
+            },
+            "advisory": "Affected versions of this package are vulnerable to Time-of-Check Time-of-Use (TOCTOU) Race Condition. The file locking mechanism in SoftFileLock._acquire() performs permission validation before file creation without using the O_NOFOLLOW flag, leading to a race window where attackers with local access can create symlinks that redirect lock operations to arbitrary files. An attacker can exploit this vulnerability by creating a malicious symlink during the brief window between permission check and file creation, causing the lock to operate on unintended target files and potentially enabling unauthorized access or file corruption.",
+            "is_transitive": false,
+            "published_date": null,
+            "fixed_versions": [],
+            "closest_versions_without_known_vulnerabilities": [],
+            "resources": [],
+            "CVE": null,
+            "severity": null,
+            "affected_versions": [],
+            "more_info_url": "https://data.safetycli.com/v/84183/97c"
+        },
+        {
+            "vulnerability_id": "82754",
+            "package_name": "filelock",
+            "ignored": {},
+            "ignored_reason": null,
+            "ignored_expires": null,
+            "vulnerable_spec": [
+                "<3.20.1"
+            ],
+            "all_vulnerable_specs": [
+                "<3.20.1"
+            ],
+            "analyzed_version": "3.19.1",
+            "analyzed_requirement": {
+                "raw": "filelock==3.19.1",
+                "extras": [],
+                "marker": null,
+                "name": "filelock",
+                "specifier": "==3.19.1",
+                "url": null,
+                "found": "/Users/silasmarkowicz/Library/Python/3.9/lib/python/site-packages/filelock-3.19.1.dist-info"
+            },
+            "advisory": "Affected versions of this package are vulnerable to a TOCTOU (Time-of-Check to Time-of-Use) symlink vulnerability due to improper handling of symlinks during lock file creation. The vulnerability exists because the package does not adequately check for symlink manipulation between the time the lock file path is checked and the time it is used. An attacker can exploit this vulnerability by creating a malicious symlink, potentially leading to unauthorized access or modification of files, which could compromise the integrity and security of the system.",
+            "is_transitive": false,
+            "published_date": null,
+            "fixed_versions": [],
+            "closest_versions_without_known_vulnerabilities": [],
+            "resources": [],
+            "CVE": "CVE-2025-68146",
+            "severity": null,
+            "affected_versions": [],
+            "more_info_url": "https://data.safetycli.com/v/82754/97c"
+        },
+        {
+            "vulnerability_id": "83159",
+            "package_name": "marshmallow",
+            "ignored": {},
+            "ignored_reason": null,
+            "ignored_expires": null,
+            "vulnerable_spec": [
+                ">=4.0.0,<4.1.2"
+            ],
+            "all_vulnerable_specs": [
+                ">=3.0.0rc1,<3.26.2",
+                ">=4.0.0,<4.1.2"
+            ],
+            "analyzed_version": "4.0.1",
+            "analyzed_requirement": {
+                "raw": "marshmallow==4.0.1",
+                "extras": [],
+                "marker": null,
+                "name": "marshmallow",
+                "specifier": "==4.0.1",
+                "url": null,
+                "found": "/Users/silasmarkowicz/Library/Python/3.9/lib/python/site-packages/marshmallow-4.0.1.dist-info"
+            },
+            "advisory": "Affected versions of the marshmallow package are vulnerable to Denial of Service (DoS) due to inefficient merging of validation error structures when deserializing collections with many=True. Specifically, Schema.load(data, many=True) can trigger repeated ErrorStore.store_error() calls that rely on marshmallow.error_store.merge_errors(), performing costly list concatenation and dictionary copying during deep merges, causing disproportionate CPU consumption for moderately sized inputs.",
+            "is_transitive": false,
+            "published_date": null,
+            "fixed_versions": [],
+            "closest_versions_without_known_vulnerabilities": [],
+            "resources": [],
+            "CVE": "CVE-2025-68480",
+            "severity": null,
+            "affected_versions": [],
+            "more_info_url": "https://data.safetycli.com/v/83159/97c"
+        }
+    ],
+    "ignored_vulnerabilities": [],
+    "remediations": {
+        "setuptools": {
+            "requirements": {
+                "==58.0.4": {
+                    "vulnerabilities_found": 3,
+                    "version": "58.0.4",
+                    "requirement": {
+                        "raw": "setuptools==58.0.4",
+                        "extras": [],
+                        "marker": null,
+                        "name": "setuptools",
+                        "specifier": "==58.0.4",
+                        "url": null,
+                        "found": "/Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework/Versions/3.9/lib/python3.9/site-packages/setuptools-58.0.4.dist-info"
+                    },
+                    "more_info_url": "https://data.safetycli.com/p/pypi/setuptools/97c/"
+                }
+            },
+            "current_version": null,
+            "vulnerabilities_found": null,
+            "recommended_version": null,
+            "other_recommended_versions": [],
+            "more_info_url": null
+        },
+        "pip": {
+            "requirements": {
+                "==21.2.4": {
+                    "vulnerabilities_found": 3,
+                    "version": "21.2.4",
+                    "requirement": {
+                        "raw": "pip==21.2.4",
+                        "extras": [],
+                        "marker": null,
+                        "name": "pip",
+                        "specifier": "==21.2.4",
+                        "url": null,
+                        "found": "/Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework/Versions/3.9/lib/python3.9/site-packages/pip-21.2.4.dist-info"
+                    },
+                    "more_info_url": "https://data.safetycli.com/p/pypi/pip/97c/"
+                }
+            },
+            "current_version": null,
+            "vulnerabilities_found": null,
+            "recommended_version": null,
+            "other_recommended_versions": [],
+            "more_info_url": null
+        },
+        "wheel": {
+            "requirements": {
+                "==0.37.0": {
+                    "vulnerabilities_found": 1,
+                    "version": "0.37.0",
+                    "requirement": {
+                        "raw": "wheel==0.37.0",
+                        "extras": [],
+                        "marker": null,
+                        "name": "wheel",
+                        "specifier": "==0.37.0",
+                        "url": null,
+                        "found": "/Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework/Versions/3.9/lib/python3.9/site-packages/wheel-0.37.0.dist-info"
+                    },
+                    "more_info_url": "https://data.safetycli.com/p/pypi/wheel/97c/"
+                }
+            },
+            "current_version": null,
+            "vulnerabilities_found": null,
+            "recommended_version": null,
+            "other_recommended_versions": [],
+            "more_info_url": null
+        },
+        "future": {
+            "requirements": {
+                "==0.18.2": {
+                    "vulnerabilities_found": 1,
+                    "version": "0.18.2",
+                    "requirement": {
+                        "raw": "future==0.18.2",
+                        "extras": [],
+                        "marker": null,
+                        "name": "future",
+                        "specifier": "==0.18.2",
+                        "url": null,
+                        "found": "/Library/Developer/CommandLineTools/Library/Frameworks/Python3.framework/Versions/3.9/lib/python3.9/site-packages/future-0.18.2.dist-info"
+                    },
+                    "more_info_url": "https://data.safetycli.com/p/pypi/future/97c/"
+                }
+            },
+            "current_version": null,
+            "vulnerabilities_found": null,
+            "recommended_version": null,
+            "other_recommended_versions": [],
+            "more_info_url": null
+        },
+        "fonttools": {
+            "requirements": {
+                "==4.60.2": {
+                    "vulnerabilities_found": 1,
+                    "version": "4.60.2",
+                    "requirement": {
+                        "raw": "fonttools==4.60.2",
+                        "extras": [],
+                        "marker": null,
+                        "name": "fonttools",
+                        "specifier": "==4.60.2",
+                        "url": null,
+                        "found": "/Users/silasmarkowicz/Library/Python/3.9/lib/python/site-packages/fonttools-4.60.2.dist-info"
+                    },
+                    "more_info_url": "https://data.safetycli.com/p/pypi/fonttools/97c/"
+                }
+            },
+            "current_version": null,
+            "vulnerabilities_found": null,
+            "recommended_version": null,
+            "other_recommended_versions": [],
+            "more_info_url": null
+        },
+        "filelock": {
+            "requirements": {
+                "==3.19.1": {
+                    "vulnerabilities_found": 3,
+                    "version": "3.19.1",
+                    "requirement": {
+                        "raw": "filelock==3.19.1",
+                        "extras": [],
+                        "marker": null,
+                        "name": "filelock",
+                        "specifier": "==3.19.1",
+                        "url": null,
+                        "found": "/Users/silasmarkowicz/Library/Python/3.9/lib/python/site-packages/filelock-3.19.1.dist-info"
+                    },
+                    "more_info_url": "https://data.safetycli.com/p/pypi/filelock/97c/"
+                }
+            },
+            "current_version": null,
+            "vulnerabilities_found": null,
+            "recommended_version": null,
+            "other_recommended_versions": [],
+            "more_info_url": null
+        },
+        "marshmallow": {
+            "requirements": {
+                "==4.0.1": {
+                    "vulnerabilities_found": 1,
+                    "version": "4.0.1",
+                    "requirement": {
+                        "raw": "marshmallow==4.0.1",
+                        "extras": [],
+                        "marker": null,
+                        "name": "marshmallow",
+                        "specifier": "==4.0.1",
+                        "url": null,
+                        "found": "/Users/silasmarkowicz/Library/Python/3.9/lib/python/site-packages/marshmallow-4.0.1.dist-info"
+                    },
+                    "more_info_url": "https://data.safetycli.com/p/pypi/marshmallow/97c/"
+                }
+            },
+            "current_version": null,
+            "vulnerabilities_found": null,
+            "recommended_version": null,
+            "other_recommended_versions": [],
+            "more_info_url": null
+        }
+    },
+    "remediations_results": {
+        "vulnerabilities_fixed": [],
+        "remediations_applied": {},
+        "remediations_skipped": {}
+    }
+}
+
+
++===========================================================================================================================================================================================+
+
+
+DEPRECATED: this command (`check`) has been DEPRECATED, and will be unsupported beyond 01 June 2024.
+
+
+We highly encourage switching to the new `scan` command which is easier to use, more powerful, and can be set up to mimic the deprecated command if required.
+
+
++===========================================================================================================================================================================================+
+
+

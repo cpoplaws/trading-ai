@@ -1,0 +1,64 @@
+================================================================================
+COMPREHENSIVE STRATEGY BACKTEST RESULTS
+================================================================================
+
+Backtest Period: 365 days
+Initial Capital: $10,000.00
+Strategies Tested: 2
+
+================================================================================
+STRATEGY PERFORMANCE COMPARISON
+================================================================================
+
+Strategy                  Return %     Sharpe     MaxDD %    Trades   Win %   
+--------------------------------------------------------------------------------
+DCA Bot                        65.55%      5.51     99.00%     100    65.0%
+Market Making                   7.29%      0.84      1.61%       8     0.0%
+
+================================================================================
+DETAILED METRICS
+================================================================================
+
+
+DCA Bot
+----------------------------------------
+  Total Return:         65.55%
+  Total P&L:         $ 6,554.81
+  Sharpe Ratio:           5.51
+  Max Drawdown:         99.00%
+  Volatility:          276.64%
+  Total Trades:            100
+  Win Rate:              65.0%
+  Profit Factor:          0.00
+  Avg Trade:         $    65.55
+
+Market Making
+----------------------------------------
+  Total Return:          7.29%
+  Total P&L:         $   729.16
+  Sharpe Ratio:           0.84
+  Max Drawdown:          1.61%
+  Volatility:            6.05%
+  Total Trades:              8
+  Win Rate:               0.0%
+  Profit Factor:          0.00
+  Avg Trade:         $    91.15
+
+================================================================================
+RECOMMENDATIONS
+================================================================================
+
+Best Overall Performance: DCA Bot
+  Return: 65.55%
+
+Best Risk-Adjusted Return: DCA Bot
+  Sharpe Ratio: 5.51
+
+Lowest Drawdown: Market Making
+  Max Drawdown: 1.61%
+
+Suggested Portfolio Allocation:
+  DCA Bot                     86.8%
+  Market Making               13.2%
+
+================================================================================

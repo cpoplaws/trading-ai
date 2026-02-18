@@ -1,0 +1,24 @@
+{
+  "DCA Bot": {
+    "sharpe": 6.572620631331214,
+    "params": {
+      "frequency": "daily",
+      "mode": "fixed_amount",
+      "base_amount": 200.0
+    },
+    "return": 166.7270991052319,
+    "pnl": 16672.70991052319,
+    "trades": 50
+  },
+  "Market Making": {
+    "sharpe": 7.793651346509039,
+    "params": {
+      "base_spread_bps": 10.0,
+      "order_size_usd": 2000.0,
+      "max_inventory_usd": 5000.0
+    },
+    "return": 23.568709019586596,
+    "pnl": 2356.8709019586595,
+    "trades": 6
+  }
+}
