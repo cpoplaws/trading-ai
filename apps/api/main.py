@@ -645,11 +645,11 @@ async def startup_event():
     logger.info("📊 Initializing Supervisor Agent...")
     supervisor_agent = SupervisorAgent(
         total_capital=30000.0,  # $30k total portfolio
-        rebalance_interval_hours=6,
-        max_position_pct=0.50,  # Max 50% in any asset
-        max_single_position_pct=0.10,  # Max 10% per position
-        daily_loss_limit_pct=0.15,  # 15% daily circuit breaker
-        arb_threshold=0.01  # 1% minimum arbitrage profit
+        reallocation_interval_hours=6,
+        max_asset_pct=0.50,  # Max 50% in any asset
+        max_position_pct=0.10,  # Max 10% per position
+        circuit_breaker_daily_loss=0.15,  # 15% daily circuit breaker
+        arbitrage_threshold=0.01  # 1% minimum arbitrage profit
     )
     logger.info("✅ Supervisor Agent initialized")
     logger.info(f"   💰 Total Capital: $30,000")
