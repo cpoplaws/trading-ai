@@ -11,6 +11,20 @@ from datetime import datetime, timedelta
 from typing import List
 import logging
 
+# Import strategy components
+from strategy_runner import StrategyRunner
+from strategies import (
+    MeanReversionStrategy,
+    MomentumStrategy,
+    RSIStrategy,
+    MLEnsembleStrategy,
+    RLAgentStrategy
+)
+from ml import get_model_server
+from swarm import get_swarm_controller
+from intelligence import get_intelligence_service
+from crypto_config import get_strategy_symbols, Chain, CryptoConfig
+
 # Configure logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -31,6 +45,9 @@ app.add_middleware(
 )
 
 # Import Alpaca (install with: pip install alpaca-py)
+trading_client = None
+data_client = None
+
 try:
     from alpaca.trading.client import TradingClient
     from alpaca.data.historical import StockHistoricalDataClient
@@ -42,20 +59,44 @@ try:
     ALPACA_SECRET = os.getenv("ALPACA_SECRET_KEY", "")
 
     if ALPACA_KEY and ALPACA_SECRET:
-        trading_client = TradingClient(ALPACA_KEY, ALPACA_SECRET, paper=True)
-        data_client = StockHistoricalDataClient(ALPACA_KEY, ALPACA_SECRET)
-        logger.info("✅ Connected to Alpaca API")
+        logger.info(f"🔑 Found Alpaca keys: {ALPACA_KEY[:8]}... and secret key (length: {len(ALPACA_SECRET)})")
+        try:
+            trading_client = TradingClient(ALPACA_KEY, ALPACA_SECRET, paper=True)
+            data_client = StockHistoricalDataClient(ALPACA_KEY, ALPACA_SECRET)
+            # Test the connection
+            account = trading_client.get_account()
+            logger.info(f"✅ Connected to Alpaca API - Account Status: {account.status}")
+        except Exception as e:
+            logger.error(f"❌ Failed to connect to Alpaca: {type(e).__name__}: {e}")
+            trading_client = None
+            data_client = None
     else:
-        trading_client = None
-        data_client = None
-        logger.warning("⚠️ Alpaca API keys not found - using demo mode")
-except ImportError:
-    trading_client = None
-    data_client = None
-    logger.warning("⚠️ alpaca-py not installed - using demo mode")
+        logger.warning(f"⚠️ Alpaca API keys not found - ALPACA_KEY: {'SET' if ALPACA_KEY else 'NOT SET'}, ALPACA_SECRET: {'SET' if ALPACA_SECRET else 'NOT SET'}")
+except ImportError as e:
+    logger.warning(f"⚠️ alpaca-py not installed - using demo mode: {e}")
+except Exception as e:
+    logger.error(f"❌ Unexpected error during Alpaca setup: {type(e).__name__}: {e}")
 
 # WebSocket connections
 active_connections: List[WebSocket] = []
+
+# Strategy state management (in-memory for now, will be DB later)
+strategy_states = {
+    "mean_reversion": False,  # Start disabled for safety
+    "momentum": False,
+    "rsi": False,
+    "ml_ensemble": False,
+    "ppo_rl": False,
+    "macd": False,
+    "bollinger": False,
+    "yield_optimizer": False,
+    "multichain_arb": False,
+    "grid": False,
+    "dca": False,
+}
+
+# Strategy runner instance
+strategy_runner: StrategyRunner = None
 
 @app.get("/")
 async def root():
@@ -136,98 +177,75 @@ async def get_portfolio_history(days: int = 30):
 
 @app.get("/api/strategies")
 async def get_strategies():
-    """Get all trading strategies and their performance"""
-    strategies = [
-        {
-            "id": "mean_reversion",
-            "name": "Mean Reversion",
-            "enabled": True,
-            "pnl": 1250.50,
-            "trades": 45,
-            "win_rate": 0.67
-        },
-        {
-            "id": "momentum",
-            "name": "Momentum",
-            "enabled": True,
-            "pnl": 2341.20,
-            "trades": 38,
-            "win_rate": 0.71
-        },
-        {
-            "id": "ml_ensemble",
-            "name": "ML Ensemble",
-            "enabled": True,
-            "pnl": 3450.75,
-            "trades": 52,
-            "win_rate": 0.73
-        },
-        {
-            "id": "ppo_rl",
-            "name": "PPO RL Agent",
-            "enabled": True,
-            "pnl": 1876.30,
-            "trades": 28,
-            "win_rate": 0.68
-        },
-        {
-            "id": "rsi",
-            "name": "RSI",
-            "enabled": True,
-            "pnl": 890.45,
-            "trades": 34,
-            "win_rate": 0.62
-        },
-        {
-            "id": "macd",
-            "name": "MACD",
-            "enabled": True,
-            "pnl": 1120.60,
-            "trades": 31,
-            "win_rate": 0.65
-        },
-        {
-            "id": "bollinger",
-            "name": "Bollinger Bands",
-            "enabled": True,
-            "pnl": 750.20,
-            "trades": 29,
-            "win_rate": 0.59
-        },
-        {
-            "id": "yield_optimizer",
-            "name": "Yield Optimizer",
-            "enabled": True,
-            "pnl": 4200.80,
-            "trades": 12,
-            "win_rate": 0.83
-        },
-        {
-            "id": "multichain_arb",
-            "name": "Multi-Chain Arb",
-            "enabled": False,
-            "pnl": 0.00,
-            "trades": 0,
-            "win_rate": 0.00
-        },
-        {
-            "id": "grid",
-            "name": "Grid Trading",
-            "enabled": False,
-            "pnl": 0.00,
-            "trades": 0,
-            "win_rate": 0.00
-        },
-        {
-            "id": "dca",
-            "name": "DCA",
-            "enabled": True,
-            "pnl": 550.30,
-            "trades": 24,
-            "win_rate": 0.58
-        },
-    ]
+    """Get all crypto trading strategies and their performance"""
+    # Strategy names with chain info
+    strategy_names = {
+        "mean_reversion": "Mean Reversion (Base)",
+        "momentum": "Momentum (Solana)",
+        "rsi": "RSI (Base)",
+        "ml_ensemble": "ML Ensemble (Base)",
+        "ppo_rl": "RL Agent (Solana)",
+        "macd": "MACD (Optimism)",
+        "bollinger": "Bollinger Bands (Base)",
+        "yield_optimizer": "Yield Optimizer (Arbitrum)",
+        "multichain_arb": "Cross-Chain Arb",
+        "grid": "Grid Trading (BSC)",
+        "dca": "DCA (Base)",
+    }
+
+    # Build strategy list with current enabled state and real performance
+    strategies = []
+    for strategy_id, enabled in strategy_states.items():
+        # Get real performance from strategy runner if available
+        if strategy_runner:
+            perf = strategy_runner.get_performance(strategy_id)
+        else:
+            perf = {"pnl": 0.0, "trades": 0, "win_rate": 0.0}
+
+        strategies.append({
+            "id": strategy_id,
+            "name": strategy_names.get(strategy_id, strategy_id.replace("_", " ").title()),
+            "enabled": enabled,
+            "pnl": perf.get("pnl", 0.0),
+            "trades": perf.get("trades", 0),
+            "win_rate": perf.get("win_rate", 0.0)
+        })
+
     return {"strategies": strategies, "total": len(strategies)}
+
+@app.post("/api/strategies/{strategy_id}/toggle")
+async def toggle_strategy(strategy_id: str):
+    """Toggle a strategy on/off"""
+    if strategy_id not in strategy_states:
+        return {"error": f"Strategy '{strategy_id}' not found"}, 404
+
+    # Toggle the strategy state
+    strategy_states[strategy_id] = not strategy_states[strategy_id]
+    new_state = strategy_states[strategy_id]
+
+    logger.info(f"Strategy '{strategy_id}' toggled to: {'ENABLED' if new_state else 'DISABLED'}")
+
+    # Broadcast update to all WebSocket clients
+    update_message = {
+        "type": "strategy_update",
+        "data": {
+            "id": strategy_id,
+            "enabled": new_state,
+            "timestamp": datetime.now().isoformat()
+        }
+    }
+
+    for connection in active_connections:
+        try:
+            await connection.send_json(update_message)
+        except Exception as e:
+            logger.error(f"Error sending WebSocket update: {e}")
+
+    return {
+        "success": True,
+        "strategy_id": strategy_id,
+        "enabled": new_state
+    }
 
 @app.get("/api/trades/recent")
 async def get_recent_trades(limit: int = 20):
@@ -265,6 +283,125 @@ async def get_recent_trades(limit: int = 20):
         return {"trades": trades}
     except Exception as e:
         logger.error(f"Error fetching trades: {e}")
+        return {"error": str(e)}, 500
+
+@app.get("/api/agents/status")
+async def get_agents_status():
+    """Get agent swarm status"""
+    try:
+        swarm = get_swarm_controller()
+        status = swarm.get_status()
+        return status
+    except Exception as e:
+        logger.error(f"Error fetching agent status: {e}")
+        return {"error": str(e)}, 500
+
+@app.post("/api/agents/enable")
+async def enable_swarm():
+    """Enable the agent swarm"""
+    try:
+        swarm = get_swarm_controller()
+        swarm.enabled = True
+        logger.info("Agent swarm enabled")
+        return {"success": True, "enabled": True}
+    except Exception as e:
+        logger.error(f"Error enabling swarm: {e}")
+        return {"error": str(e)}, 500
+
+@app.post("/api/agents/disable")
+async def disable_swarm():
+    """Disable the agent swarm"""
+    try:
+        swarm = get_swarm_controller()
+        swarm.enabled = False
+        logger.info("Agent swarm disabled")
+        return {"success": True, "enabled": False}
+    except Exception as e:
+        logger.error(f"Error disabling swarm: {e}")
+        return {"error": str(e)}, 500
+
+@app.post("/api/agents/{agent_name}/toggle")
+async def toggle_agent(agent_name: str):
+    """Toggle individual agent on/off"""
+    try:
+        swarm = get_swarm_controller()
+
+        if agent_name not in swarm.agents:
+            return {"error": f"Agent '{agent_name}' not found"}, 404
+
+        agent = swarm.agents[agent_name]
+        agent.enabled = not agent.enabled
+
+        logger.info(f"Agent '{agent_name}' toggled to: {'ENABLED' if agent.enabled else 'DISABLED'}")
+
+        return {
+            "success": True,
+            "agent": agent_name,
+            "enabled": agent.enabled
+        }
+    except Exception as e:
+        logger.error(f"Error toggling agent: {e}")
+        return {"error": str(e)}, 500
+
+@app.get("/api/agents/decisions")
+async def get_agent_decisions(limit: int = 20):
+    """Get recent agent decisions"""
+    try:
+        swarm = get_swarm_controller()
+        decisions = swarm.get_recent_decisions(limit=limit)
+        return {"decisions": decisions, "total": len(decisions)}
+    except Exception as e:
+        logger.error(f"Error fetching agent decisions: {e}")
+        return {"error": str(e)}, 500
+
+@app.get("/api/intelligence")
+async def get_market_intelligence():
+    """Get current market intelligence"""
+    try:
+        intel_service = get_intelligence_service()
+
+        # Get current intelligence or analyze if needed
+        intelligence = intel_service.get_current_intelligence()
+
+        if intelligence is None:
+            # Generate intelligence using recent data (placeholder for now)
+            # In production, this would use real market data
+            import numpy as np
+            sample_prices = np.random.randn(100).cumsum() + 100
+            market_data = {
+                "prices": sample_prices.tolist(),
+                "volumes": [1000000] * 100
+            }
+            intelligence = intel_service.analyze(market_data)
+
+        return intelligence
+    except Exception as e:
+        logger.error(f"Error fetching intelligence: {e}")
+        return {"error": str(e)}, 500
+
+@app.post("/api/intelligence/analyze")
+async def analyze_market(symbol: str = "SPY"):
+    """Analyze market for a specific symbol"""
+    try:
+        intel_service = get_intelligence_service()
+
+        # TODO: Fetch real market data from Alpaca for the symbol
+        # For now, use sample data
+        import numpy as np
+        sample_prices = np.random.randn(100).cumsum() + 100
+        market_data = {
+            "prices": sample_prices.tolist(),
+            "volumes": [1000000] * 100,
+            "symbol": symbol
+        }
+
+        intelligence = intel_service.analyze(market_data)
+        intelligence["symbol"] = symbol
+
+        logger.info(f"Market intelligence analyzed for {symbol}")
+        return intelligence
+    except Exception as e:
+        logger.error(f"Error analyzing market: {e}")
         return {"error": str(e)}, 500
 
 @app.websocket("/ws")
@@ -310,13 +447,121 @@ async def websocket_endpoint(websocket: WebSocket):
         if websocket in active_connections:
             active_connections.remove(websocket)
 
+async def intelligence_update_loop():
+    """Background task to update market intelligence every 5 minutes"""
+    logger.info("Intelligence update loop started")
+
+    while True:
+        try:
+            await asyncio.sleep(300)  # Update every 5 minutes
+
+            intel_service = get_intelligence_service()
+
+            # TODO: Fetch real market data from Alpaca
+            # For now, use sample data
+            import numpy as np
+            sample_prices = np.random.randn(100).cumsum() + 100
+            market_data = {
+                "prices": sample_prices.tolist(),
+                "volumes": [1000000] * 100
+            }
+
+            intelligence = intel_service.analyze(market_data)
+            logger.info(f"Intelligence updated: {intelligence['signal']} (confidence: {intelligence['confidence']:.2f})")
+
+            # Broadcast to WebSocket clients
+            update_message = {
+                "type": "intelligence_update",
+                "data": {
+                    "signal": intelligence["signal"],
+                    "regime": intelligence["regime"]["regime"],
+                    "confidence": intelligence["confidence"],
+                    "timestamp": intelligence["timestamp"]
+                }
+            }
+
+            for connection in active_connections:
+                try:
+                    await connection.send_json(update_message)
+                except Exception as e:
+                    logger.error(f"Error sending intelligence update: {e}")
+
+        except Exception as e:
+            logger.error(f"Error in intelligence update loop: {e}")
+
 @app.on_event("startup")
 async def startup_event():
     """Startup tasks"""
+    global strategy_runner
+
     logger.info("🚀 Trading AI API starting up...")
     logger.info(f"Alpaca connected: {trading_client is not None}")
-    if not trading_client:
-        logger.warning("Running in DEMO MODE - connect Alpaca API keys for real data")
+
+    # Initialize ML model server
+    logger.info("Initializing ML Model Server...")
+    model_server = get_model_server()
+    # Try to load models (will gracefully handle if models don't exist)
+    try:
+        model_server.load_all_models()
+    except Exception as e:
+        logger.warning(f"Could not load ML models: {e}")
+        logger.info("ML strategies will use fallback methods")
+
+    # Initialize Agent Swarm
+    logger.info("Initializing Agent Swarm...")
+    swarm = get_swarm_controller()
+    logger.info(f"✅ Agent Swarm initialized with {len(swarm.agents)} agents")
+
+    # Initialize Intelligence Service
+    logger.info("Initializing Intelligence Service...")
+    intel_service = get_intelligence_service()
+    logger.info("✅ Intelligence Service initialized")
+
+    # Start intelligence update loop
+    asyncio.create_task(intelligence_update_loop())
+
+    # Initialize strategy runner
+    if trading_client and data_client:
+        logger.info("Initializing Strategy Runner...")
+        strategy_runner = StrategyRunner(trading_client, data_client, strategy_states)
+
+        # Register crypto strategies
+        logger.info("Registering crypto strategies...")
+
+        # Base Network strategies (PRIMARY)
+        mean_rev = MeanReversionStrategy(symbols=get_strategy_symbols("mean_reversion"))
+        strategy_runner.register_strategy("mean_reversion", mean_rev)
+        logger.info(f"  ✅ Mean Reversion on Base: {get_strategy_symbols('mean_reversion')}")
+
+        rsi = RSIStrategy(symbols=get_strategy_symbols("rsi"))
+        strategy_runner.register_strategy("rsi", rsi)
+        logger.info(f"  ✅ RSI on Base: {get_strategy_symbols('rsi')}")
+
+        # Solana strategies (fast execution)
+        momentum = MomentumStrategy(symbols=get_strategy_symbols("momentum"))
+        strategy_runner.register_strategy("momentum", momentum)
+        logger.info(f"  ✅ Momentum on Solana: {get_strategy_symbols('momentum')}")
+
+        rl_agent = RLAgentStrategy(symbols=get_strategy_symbols("ppo_rl"))
+        strategy_runner.register_strategy("ppo_rl", rl_agent)
+        logger.info(f"  ✅ RL Agent on Solana: {get_strategy_symbols('ppo_rl')}")
+
+        # ML Ensemble on Base (sophisticated)
+        ml_ensemble = MLEnsembleStrategy(symbols=get_strategy_symbols("ml_ensemble"))
+        strategy_runner.register_strategy("ml_ensemble", ml_ensemble)
+        logger.info(f"  ✅ ML Ensemble on Base: {get_strategy_symbols('ml_ensemble')}")
+
+        logger.info("✅ Registered 5 CRYPTO strategies")
+        logger.info("   🔗 Primary: Base Network (Coinbase L2)")
+        logger.info("   🔗 Secondary: Solana")
+        logger.info("   📊 Supported chains: Base, Solana, Optimism, Linea, ZKsync, Arbitrum, BSC, Polygon")
+
+        # Start strategy runner in background
+        logger.info("Starting strategy execution loop...")
+        asyncio.create_task(strategy_runner.start())
+        logger.info("✅ Strategy Runner started")
+    else:
+        logger.warning("⚠️ Running in DEMO MODE - connect Alpaca API keys for real data and strategy execution")
 
 @app.on_event("shutdown")
 async def shutdown_event():

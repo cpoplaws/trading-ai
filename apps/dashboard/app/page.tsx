@@ -1,178 +1,142 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Badge } from '@/components/ui/badge'
-import { Button } from '@/components/ui/button'
-import { ArrowUpRight, ArrowDownRight, TrendingUp, DollarSign, Activity, Zap } from 'lucide-react'
-import { PortfolioChart } from '@/components/dashboard/PortfolioChart'
 import { StrategyGrid } from '@/components/dashboard/StrategyGrid'
+import { AgentSwarm } from '@/components/dashboard/AgentSwarm'
+import { MarketIntelligence } from '@/components/dashboard/MarketIntelligence'
 import { RecentTrades } from '@/components/dashboard/RecentTrades'
-import { BaseIntegration } from '@/components/base/BaseIntegration'
-import { usePortfolio } from '@/hooks/usePortfolio'
-import { useWebSocket } from '@/hooks/useWebSocket'
+import { getPortfolio } from '@/lib/api-client'
+
+interface Portfolio {
+  total_value: number
+  cash: number
+  buying_power: number
+  daily_pnl: number
+  daily_pnl_percent: number
+  positions_count: number
+  sharpe_ratio: number
+  win_rate: number
+  demo_mode?: boolean
+}
 
 export default function Dashboard() {
-  const { portfolio, loading } = usePortfolio()
-  const { connected, data: liveData } = useWebSocket()
-
-  const [stats, setStats] = useState({
-    totalValue: 0,
-    dailyChange: 0,
-    dailyChangePercent: 0,
-    sharpeRatio: 0,
-    winRate: 0,
-  })
+  const [portfolio, setPortfolio] = useState<Portfolio | null>(null)
+  const [activeStrategiesCount, setActiveStrategiesCount] = useState(0)
 
   useEffect(() => {
-    if (portfolio) {
-      setStats({
-        totalValue: portfolio.total_value,
-        dailyChange: portfolio.daily_pnl,
-        dailyChangePercent: portfolio.daily_pnl_percent,
-        sharpeRatio: portfolio.sharpe_ratio,
-        winRate: portfolio.win_rate,
-      })
+    // Fetch portfolio data
+    const fetchPortfolio = async () => {
+      try {
+        const data = await getPortfolio()
+        setPortfolio(data)
+      } catch (error) {
+        console.error('Error fetching portfolio:', error)
+      }
     }
-  }, [portfolio])
 
-  // Update with live data from WebSocket
-  useEffect(() => {
-    if (liveData?.portfolio) {
-      setStats(prev => ({
-        ...prev,
-        totalValue: liveData.portfolio.value,
-        dailyChange: liveData.portfolio.daily_change,
-      }))
-    }
-  }, [liveData])
+    fetchPortfolio()
+    // Refresh every 10 seconds
+    const interval = setInterval(fetchPortfolio, 10000)
+    return () => clearInterval(interval)
+  }, [])
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background via-background to-secondary/20">
+    <div className="min-h-screen bg-gray-950 text-white p-8">
       {/* Header */}
-      <header className="border-b border-border/40 backdrop-blur-xl sticky top-0 z-50">
-        <div className="container mx-auto px-4 py-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <Zap className="w-8 h-8 text-primary" />
-              <h1 className="text-2xl font-bold bg-gradient-to-r from-primary to-blue-400 bg-clip-text text-transparent">
-                Trading AI
-              </h1>
-            </div>
-
-            <div className="flex items-center gap-4">
-              <Badge variant={connected ? "default" : "secondary"} className="gap-1">
-                <div className={`w-2 h-2 rounded-full ${connected ? 'bg-green-500 animate-pulse' : 'bg-gray-500'}`} />
-                {connected ? 'Live' : 'Connecting...'}
-              </Badge>
-
-              <Button variant="outline" size="sm">
-                Paper Trading
-              </Button>
-            </div>
-          </div>
-        </div>
+      <header className="mb-8">
+        <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-500 to-purple-500 bg-clip-text text-transparent">
+          Crypto AI Trading Dashboard
+        </h1>
+        <p className="text-gray-400 mt-2">
+          Multi-Chain Trading • Base • Solana • L2s {portfolio?.demo_mode && '• (Demo Mode)'}
+        </p>
       </header>
 
-      {/* Main Content */}
-      <main className="container mx-auto px-4 py-8">
-        {/* Stats Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-          {/* Total Portfolio */}
-          <Card className="relative overflow-hidden group hover:border-primary/50 transition-all">
-            <div className="absolute inset-0 bg-gradient-to-br from-primary/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
-            <CardHeader className="pb-2">
-              <CardDescription className="flex items-center justify-between">
-                <span>Total Portfolio</span>
-                <DollarSign className="w-4 h-4 text-muted-foreground" />
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="text-3xl font-bold">
-                ${loading ? '...' : stats.totalValue.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-              </div>
-              <div className={`flex items-center gap-1 text-sm mt-1 ${stats.dailyChange >= 0 ? 'text-green-500' : 'text-red-500'}`}>
-                {stats.dailyChange >= 0 ? <ArrowUpRight className="w-4 h-4" /> : <ArrowDownRight className="w-4 h-4" />}
-                <span className="font-medium">
-                  ${Math.abs(stats.dailyChange).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                </span>
-                <span className="text-muted-foreground">({stats.dailyChangePercent.toFixed(2)}%)</span>
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Sharpe Ratio */}
-          <Card className="relative overflow-hidden group hover:border-primary/50 transition-all">
-            <div className="absolute inset-0 bg-gradient-to-br from-blue-500/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
-            <CardHeader className="pb-2">
-              <CardDescription className="flex items-center justify-between">
-                <span>Sharpe Ratio</span>
-                <TrendingUp className="w-4 h-4 text-muted-foreground" />
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="text-3xl font-bold">{loading ? '...' : stats.sharpeRatio.toFixed(2)}</div>
-              <p className="text-sm text-muted-foreground mt-1">Risk-adjusted returns</p>
-            </CardContent>
-          </Card>
-
-          {/* Win Rate */}
-          <Card className="relative overflow-hidden group hover:border-primary/50 transition-all">
-            <div className="absolute inset-0 bg-gradient-to-br from-green-500/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
-            <CardHeader className="pb-2">
-              <CardDescription className="flex items-center justify-between">
-                <span>Win Rate</span>
-                <Activity className="w-4 h-4 text-muted-foreground" />
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="text-3xl font-bold">{loading ? '...' : (stats.winRate * 100).toFixed(1)}%</div>
-              <p className="text-sm text-muted-foreground mt-1">Successful trades</p>
-            </CardContent>
-          </Card>
-
-          {/* Active Strategies */}
-          <Card className="relative overflow-hidden group hover:border-primary/50 transition-all">
-            <div className="absolute inset-0 bg-gradient-to-br from-purple-500/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
-            <CardHeader className="pb-2">
-              <CardDescription>Active Strategies</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="text-3xl font-bold">11</div>
-              <p className="text-sm text-green-500 mt-1">All systems operational</p>
-            </CardContent>
-          </Card>
+      {/* Stats Grid */}
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
+        <div className="bg-gray-900 p-6 rounded-lg border border-gray-800">
+          <p className="text-gray-400 text-sm">Total Portfolio</p>
+          <p className="text-3xl font-bold mt-2">
+            ${portfolio?.total_value.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 }) || '0.00'}
+          </p>
+          <p className={`text-sm mt-1 ${(portfolio?.daily_pnl || 0) >= 0 ? 'text-green-500' : 'text-red-500'}`}>
+            {(portfolio?.daily_pnl || 0) >= 0 ? '+' : ''}${portfolio?.daily_pnl.toFixed(2) || '0.00'}
+            ({(portfolio?.daily_pnl_percent || 0).toFixed(2)}%)
+          </p>
         </div>
 
-        {/* Portfolio Chart */}
-        <Card className="mb-8">
-          <CardHeader>
-            <CardTitle>Portfolio Performance</CardTitle>
-            <CardDescription>Last 30 days</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <PortfolioChart />
-          </CardContent>
-        </Card>
-
-        {/* Strategy Grid */}
-        <div className="mb-8">
-          <h2 className="text-2xl font-bold mb-4">Trading Strategies</h2>
-          <StrategyGrid />
+        <div className="bg-gray-900 p-6 rounded-lg border border-gray-800">
+          <p className="text-gray-400 text-sm">Sharpe Ratio</p>
+          <p className="text-3xl font-bold mt-2">{portfolio?.sharpe_ratio.toFixed(2) || '0.00'}</p>
+          <p className="text-gray-400 text-sm mt-1">Risk-adjusted returns</p>
         </div>
 
-        {/* Recent Trades & Base Integration */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
-          <RecentTrades />
-          <BaseIntegration />
+        <div className="bg-gray-900 p-6 rounded-lg border border-gray-800">
+          <p className="text-gray-400 text-sm">Win Rate</p>
+          <p className="text-3xl font-bold mt-2">
+            {((portfolio?.win_rate || 0) * 100).toFixed(1)}%
+          </p>
+          <p className="text-gray-400 text-sm mt-1">Successful trades</p>
         </div>
-      </main>
+
+        <div className="bg-gray-900 p-6 rounded-lg border border-gray-800">
+          <p className="text-gray-400 text-sm">Cash Available</p>
+          <p className="text-3xl font-bold mt-2">
+            ${portfolio?.cash.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 }) || '0.00'}
+          </p>
+          <p className="text-gray-400 text-sm mt-1">Buying power: ${portfolio?.buying_power.toFixed(0) || '0'}</p>
+        </div>
+      </div>
+
+      {/* Market Intelligence */}
+      <div className="mb-8">
+        <h2 className="text-2xl font-bold mb-4">🧠 Market Intelligence</h2>
+        <MarketIntelligence />
+      </div>
+
+      {/* Strategies */}
+      <div className="mb-8">
+        <h2 className="text-2xl font-bold mb-4">Trading Strategies</h2>
+        <StrategyGrid />
+      </div>
+
+      {/* Agent Swarm */}
+      <div className="mb-8">
+        <h2 className="text-2xl font-bold mb-4">AI Agent Swarm</h2>
+        <AgentSwarm />
+      </div>
+
+      {/* Recent Trades */}
+      <div className="mb-8">
+        <h2 className="text-2xl font-bold mb-4">Recent Trades</h2>
+        <RecentTrades />
+      </div>
+
+      {/* Status */}
+      <div className="bg-gray-900 p-6 rounded-lg border border-gray-800">
+        <h2 className="text-xl font-bold mb-4">System Status</h2>
+        <div className="space-y-2">
+          <div className="flex items-center gap-2">
+            <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+            <span className="text-gray-300">Dashboard Online</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <div className={`w-2 h-2 ${portfolio?.demo_mode ? 'bg-yellow-500' : 'bg-green-500'} rounded-full`}></div>
+            <span className="text-gray-300">
+              Backend: {portfolio?.demo_mode ? 'Demo Mode' : 'Connected to Alpaca'}
+            </span>
+          </div>
+          <div className="flex items-center gap-2">
+            <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+            <span className="text-gray-300">API: Connected</span>
+          </div>
+        </div>
+      </div>
 
       {/* Footer */}
-      <footer className="border-t border-border/40 py-6 mt-12">
-        <div className="container mx-auto px-4 text-center text-sm text-muted-foreground">
-          <p>Trading AI © 2026 • Built with Next.js + Base</p>
-        </div>
+      <footer className="mt-8 text-center text-gray-500 text-sm">
+        <p>Trading AI © 2026 • Built with Next.js</p>
+        <p className="mt-1">🚀 Frontend on Vercel • Backend on Railway</p>
       </footer>
     </div>
   )
