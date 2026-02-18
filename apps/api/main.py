@@ -32,7 +32,7 @@ logger = logging.getLogger(__name__)
 app = FastAPI(
     title="Trading AI API",
     description="Real-time trading AI backend with Alpaca integration",
-    version="1.0.0"
+    version="1.0.1"  # Force Railway redeploy with all crypto features
 )
 
 # CORS - Configure for your domain
