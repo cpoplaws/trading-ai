@@ -70,18 +70,23 @@ class ExecutionRouter:
         self,
         max_gas_pct: float = 0.02,  # 2% max gas as % of trade
         cex_priority: bool = False,  # If true, prefer CEX when equal
+        cex_connector=None,  # CEXConnector instance (Phase 2)
+        dex_connector=None  # DEXConnector instance (Phase 3)
     ):
         self.max_gas_pct = max_gas_pct
         self.cex_priority = cex_priority
 
-        # These will be set by integration with actual connectors
-        self.cex_connector = None
-        self.dex_connector = None
+        # Phase 2: CEX connector integration
+        self.cex_connector = cex_connector
+        # Phase 3: DEX connector integration
+        self.dex_connector = dex_connector
 
         logger.info(
             f"ExecutionRouter initialized | "
             f"Max gas: {max_gas_pct*100:.1f}% | "
-            f"CEX priority: {cex_priority}"
+            f"CEX priority: {cex_priority} | "
+            f"CEX: {'✅' if cex_connector else '❌'} | "
+            f"DEX: {'✅' if dex_connector else '❌'}"
         )
 
     def get_best_route(
@@ -305,21 +310,115 @@ class ExecutionRouter:
         return result
 
     def _execute_via_cex(self, quote: Quote, instance_id: str) -> Dict:
-        """Execute trade via CEX connector (mock for now)"""
-        # TODO: Integrate with CEXConnector
-        return {
-            "success": True,
-            "venue": quote.venue_name,
-            "symbol": quote.symbol,
-            "side": quote.side,
-            "quantity": quote.quantity,
-            "price": quote.price,
-            "fee": quote.fee,
-            "gas": 0.0,
-            "net_output": quote.net_output,
-            "instance_id": instance_id,
-            "mock": True,  # Remove when real integration done
-        }
+        """Execute trade via CEX connector"""
+        if not self.cex_connector:
+            logger.warning("CEX connector not initialized - returning mock result")
+            return {
+                "success": True,
+                "venue": quote.venue_name,
+                "symbol": quote.symbol,
+                "side": quote.side,
+                "quantity": quote.quantity,
+                "price": quote.price,
+                "fee": quote.fee,
+                "gas": 0.0,
+                "net_output": quote.net_output,
+                "instance_id": instance_id,
+                "mock": True,
+            }
+
+        # Real CEX execution (Phase 2)
+        try:
+            from src.execution.cex_connector import Exchange, OrderRequest
+
+            # Determine exchange from venue_name
+            exchange_map = {
+                "Binance": Exchange.BINANCE,
+                "Coinbase": Exchange.COINBASE,
+                "Kraken": Exchange.KRAKEN
+            }
+            exchange = exchange_map.get(quote.venue_name)
+
+            if not exchange or not self.cex_connector.is_exchange_available(exchange):
+                logger.error(f"Exchange {quote.venue_name} not available")
+                return {
+                    "success": False,
+                    "venue": quote.venue_name,
+                    "symbol": quote.symbol,
+                    "side": quote.side,
+                    "quantity": quote.quantity,
+                    "price": quote.price,
+                    "fee": quote.fee,
+                    "gas": 0.0,
+                    "net_output": quote.net_output,
+                    "instance_id": instance_id,
+                    "error": f"Exchange {quote.venue_name} not available",
+                    "mock": False
+                }
+
+            # Create order request
+            order_request = OrderRequest(
+                exchange=exchange,
+                symbol=quote.symbol,
+                side=quote.side,
+                order_type="market",  # Using market orders for now
+                quantity=quote.quantity,
+                price=None  # Market order
+            )
+
+            # Place order
+            logger.info(f"Placing CEX order: {order_request.side} {order_request.quantity} {order_request.symbol} on {exchange.value}")
+            result = self.cex_connector.place_order(order_request, check_balance=True)
+
+            if result.success:
+                logger.info(f"✅ CEX order filled: {result.order_id} | {result.filled_quantity} @ {result.average_fill_price}")
+                return {
+                    "success": True,
+                    "venue": quote.venue_name,
+                    "symbol": quote.symbol,
+                    "side": quote.side,
+                    "quantity": result.filled_quantity,
+                    "price": result.average_fill_price or quote.price,
+                    "fee": result.fees,
+                    "gas": 0.0,
+                    "net_output": (result.filled_quantity * (result.average_fill_price or quote.price)) - result.fees,
+                    "instance_id": instance_id,
+                    "order_id": result.order_id,
+                    "mock": False
+                }
+            else:
+                logger.error(f"❌ CEX order failed: {result.error}")
+                return {
+                    "success": False,
+                    "venue": quote.venue_name,
+                    "symbol": quote.symbol,
+                    "side": quote.side,
+                    "quantity": quote.quantity,
+                    "price": quote.price,
+                    "fee": quote.fee,
+                    "gas": 0.0,
+                    "net_output": quote.net_output,
+                    "instance_id": instance_id,
+                    "error": result.error,
+                    "mock": False
+                }
+
+        except Exception as e:
+            logger.error(f"CEX execution error: {e}", exc_info=True)
+            return {
+                "success": False,
+                "venue": quote.venue_name,
+                "symbol": quote.symbol,
+                "side": quote.side,
+                "quantity": quote.quantity,
+                "price": quote.price,
+                "fee": quote.fee,
+                "gas": 0.0,
+                "net_output": quote.net_output,
+                "instance_id": instance_id,
+                "error": str(e),
+                "mock": False
+            }
 
     def _execute_via_dex(self, quote: Quote, instance_id: str) -> Dict:
         """Execute trade via DEX connector (mock for now)"""

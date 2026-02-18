@@ -718,15 +718,33 @@ async def startup_event():
     for chain, data in summary['by_chain'].items():
         logger.info(f"      {chain}: {data['count']} instances, ${data['capital']:,.2f}")
 
+    # Initialize CEX Connector (Phase 2)
+    logger.info("\n💱 Initializing CEX Connector...")
+    from src.execution.cex_connector import CEXConnector
+    cex_connector = CEXConnector(
+        binance_api_key=os.getenv("BINANCE_API_KEY"),
+        binance_api_secret=os.getenv("BINANCE_API_SECRET"),
+        coinbase_api_key=os.getenv("CB_API_KEY"),
+        coinbase_api_secret=os.getenv("CB_API_SECRET"),
+        coinbase_passphrase=os.getenv("CB_PASSPHRASE"),
+        testnet=True  # IMPORTANT: Use testnet for safety!
+    )
+    available_exchanges = [e.value for e in cex_connector.get_available_exchanges()]
+    logger.info(f"✅ CEX Connector initialized")
+    logger.info(f"   📊 Available Exchanges: {', '.join(available_exchanges) if available_exchanges else 'None (using mock mode)'}")
+    logger.info(f"   {'⚠️  TESTNET MODE - No real money at risk' if True else '🚨 MAINNET MODE - REAL MONEY AT RISK!'}")
+
     # Initialize Execution Router
     logger.info("\n🔀 Initializing Execution Router...")
     execution_router = ExecutionRouter(
         max_gas_pct=0.02,  # 2% max gas
-        cex_priority=False  # Prefer DEX when equal
+        cex_priority=False,  # Prefer DEX when equal
+        cex_connector=cex_connector  # Phase 2: Real CEX integration!
     )
     logger.info("✅ Execution Router initialized")
     logger.info(f"   ⛽ Max Gas Threshold: 2% of trade value")
     logger.info(f"   🎯 Routing Logic: Best net output after fees & gas")
+    logger.info(f"   💱 CEX Connector: {'✅ Connected' if cex_connector.get_available_exchanges() else '❌ No exchanges available'}")
 
     logger.info("\n" + "="*70)
     logger.info("✅ PHASE 1 INITIALIZATION COMPLETE")
