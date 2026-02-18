@@ -3,9 +3,14 @@ SupervisorAgent - The Brain of the Multi-Chain Trading System
 
 Responsibilities:
 1. Performance tracking per strategy-chain combo
-2. Dynamic capital allocation based on Sharpe ratio
+2. Dynamic capital allocation based on Sharpe ratio (or multi-factor if enhanced)
 3. Arbitrage detection across venues
 4. Risk management and circuit breakers
+
+Phase 4 Enhancements:
+- Multi-factor allocation (Sharpe + Sortino + Calmar + consistency)
+- Real-time arbitrage scanning with live prices
+- Advanced risk monitoring with portfolio-wide tracking
 """
 
 from dataclasses import dataclass, field
@@ -14,6 +19,21 @@ from datetime import datetime, timedelta
 from enum import Enum
 import logging
 import numpy as np
+
+# Phase 4: Import enhancements (optional)
+try:
+    from src.agents.supervisor_enhancements import (
+        AllocationOptimizer,
+        ArbitrageScanner,
+        RiskMonitor,
+        PerformanceMetrics,
+        PortfolioPosition,
+        RiskMetrics
+    )
+    ENHANCEMENTS_AVAILABLE = True
+except ImportError:
+    ENHANCEMENTS_AVAILABLE = False
+    logger.warning("Supervisor enhancements not available - using basic mode")
 
 logger = logging.getLogger(__name__)
 
@@ -109,6 +129,11 @@ class SupervisorAgent:
         max_asset_pct: float = 0.50,  # 50% max per asset
         circuit_breaker_daily_loss: float = 0.15,  # 15% daily loss triggers halt
         circuit_breaker_peak_loss: float = 0.25,  # 25% from peak triggers halt
+        use_enhanced_allocation: bool = False,  # Phase 4: Multi-factor allocation
+        use_enhanced_arbitrage: bool = False,  # Phase 4: Real-time arb scanning
+        use_enhanced_risk: bool = False,  # Phase 4: Advanced risk monitoring
+        cex_connector = None,  # Phase 4: For real-time CEX prices
+        dex_connector = None,  # Phase 4: For real-time DEX prices
     ):
         self.total_capital = total_capital
         self.available_capital = total_capital
@@ -128,6 +153,37 @@ class SupervisorAgent:
         self.daily_start_value = total_capital
         self.peak_value = total_capital
         self.circuit_breaker_triggered = False
+
+        # Phase 4: Enhancement modules
+        self.use_enhanced_allocation = use_enhanced_allocation and ENHANCEMENTS_AVAILABLE
+        self.use_enhanced_arbitrage = use_enhanced_arbitrage and ENHANCEMENTS_AVAILABLE
+        self.use_enhanced_risk = use_enhanced_risk and ENHANCEMENTS_AVAILABLE
+        self.cex_connector = cex_connector
+        self.dex_connector = dex_connector
+
+        # Initialize enhancement modules if available
+        if self.use_enhanced_allocation:
+            self.allocation_optimizer = AllocationOptimizer()
+            logger.info("✅ Multi-factor allocation enabled")
+        else:
+            self.allocation_optimizer = None
+
+        if self.use_enhanced_arbitrage:
+            self.arbitrage_scanner = ArbitrageScanner(min_profit_pct=arbitrage_threshold)
+            logger.info("✅ Real-time arbitrage scanning enabled")
+        else:
+            self.arbitrage_scanner = None
+
+        if self.use_enhanced_risk:
+            self.risk_monitor = RiskMonitor(
+                max_position_pct=max_position_pct,
+                max_asset_pct=max_asset_pct,
+                max_daily_loss_pct=circuit_breaker_daily_loss,
+                max_drawdown_pct=circuit_breaker_peak_loss
+            )
+            logger.info("✅ Advanced risk monitoring enabled")
+        else:
+            self.risk_monitor = None
 
         logger.info(f"SupervisorAgent initialized with ${total_capital:,.2f}")
 
@@ -208,12 +264,17 @@ class SupervisorAgent:
         """
         Calculate new capital allocations based on performance.
 
-        Strategy:
+        Basic Strategy (use_enhanced_allocation=False):
         - Rank instances by Sharpe ratio
         - Top performer: 40%
         - Second: 30%
         - Third: 20%
         - Rest: 10% split equally
+
+        Enhanced Strategy (use_enhanced_allocation=True):
+        - Multi-factor scoring (Sharpe + Sortino + Calmar + consistency + trend)
+        - Proportional allocation based on composite scores
+        - Min 5% and max 40% per instance
         """
         if not self.instances:
             return {}
@@ -225,7 +286,36 @@ class SupervisorAgent:
                 for instance_id, perf in self.instances.items()
             }
 
-        # Rank by Sharpe ratio (higher is better)
+        total_available = sum(inst.current_capital for _, inst in self.instances.items())
+
+        # Phase 4: Use enhanced allocation if enabled
+        if self.use_enhanced_allocation and self.allocation_optimizer:
+            # Convert StrategyPerformance to PerformanceMetrics
+            metrics_dict = {}
+            for instance_id, perf in self.instances.items():
+                metrics_dict[instance_id] = self._to_performance_metrics(perf)
+
+            allocations = self.allocation_optimizer.optimize_allocations(
+                metrics_dict,
+                total_available
+            )
+
+            # Update allocated capital
+            for instance_id, new_allocation in allocations.items():
+                old_allocation = self.instances[instance_id].allocated_capital
+                self.instances[instance_id].allocated_capital = new_allocation
+                metrics = metrics_dict[instance_id]
+                logger.info(
+                    f"Reallocation (Enhanced): {instance_id} | "
+                    f"${old_allocation:.0f} → ${new_allocation:.0f} | "
+                    f"Sharpe: {metrics.sharpe_ratio:.2f} | "
+                    f"Sortino: {metrics.sortino_ratio:.2f}"
+                )
+
+            self.last_reallocation = datetime.now()
+            return allocations
+
+        # Basic allocation (original logic)
         ranked = sorted(
             self.instances.items(),
             key=lambda x: x[1].sharpe_ratio,
@@ -233,7 +323,6 @@ class SupervisorAgent:
         )
 
         allocations = {}
-        total_available = sum(inst.current_capital for _, inst in self.instances.items())
 
         if len(ranked) == 1:
             allocations[ranked[0][0]] = total_available
@@ -260,7 +349,7 @@ class SupervisorAgent:
             old_allocation = self.instances[instance_id].allocated_capital
             self.instances[instance_id].allocated_capital = new_allocation
             logger.info(
-                f"Reallocation: {instance_id} | "
+                f"Reallocation (Basic): {instance_id} | "
                 f"${old_allocation:.0f} → ${new_allocation:.0f} | "
                 f"Sharpe: {self.instances[instance_id].sharpe_ratio:.2f}"
             )
@@ -270,13 +359,22 @@ class SupervisorAgent:
 
     def detect_arbitrage(
         self,
-        cex_prices: Dict[str, float],  # {"BTC": 64000}
-        dex_prices: Dict[str, Dict[str, float]],  # {"Base": {"WBTC": 64800}}
+        cex_prices: Dict[str, float] = None,  # {"BTC": 64000}
+        dex_prices: Dict[str, Dict[str, float]] = None,  # {"Base": {"WBTC": 64800}}
         dex_fees: Dict[str, float] = None,  # {"Base": 0.003}
         dex_gas: Dict[str, float] = None,  # {"Base": 10.0}
+        tokens: List[str] = None,  # Phase 4: List of tokens to scan
     ) -> List[ArbitrageOpportunity]:
         """
         Detect arbitrage opportunities across CEX and DEX.
+
+        Basic Mode (use_enhanced_arbitrage=False):
+        - Uses provided price dictionaries
+        - Manual price feeding required
+
+        Enhanced Mode (use_enhanced_arbitrage=True):
+        - Automatically fetches real-time prices from connectors
+        - Continuous scanning across all supported tokens
 
         Example:
         - BTC on Binance: $64,000
@@ -284,6 +382,41 @@ class SupervisorAgent:
         - Spread: 1.25%, Fees: 0.5%, Gas: 0.016%
         - Net: 0.734% (below 1% threshold - don't execute)
         """
+        # Phase 4: Use enhanced arbitrage scanner if enabled
+        if self.use_enhanced_arbitrage and self.arbitrage_scanner:
+            scanner_opportunities = self.arbitrage_scanner.scan_opportunities(
+                self.cex_connector,
+                self.dex_connector,
+                tokens=tokens
+            )
+
+            # Convert to ArbitrageOpportunity format
+            opportunities = []
+            for opp in scanner_opportunities:
+                opportunities.append(
+                    ArbitrageOpportunity(
+                        token=opp['token'],
+                        buy_venue=opp['buy_venue'],
+                        sell_venue=opp['sell_venue'],
+                        buy_price=opp['buy_price'],
+                        sell_price=opp['sell_price'],
+                        spread_percent=opp['spread_pct'] * 100,
+                        estimated_fees=0.4,  # Mock for now
+                        estimated_gas=8.0,  # Mock for now
+                        net_profit_percent=opp['net_profit_pct'] * 100,
+                        trade_size=0.01,
+                        timestamp=opp['timestamp']
+                    )
+                )
+
+            logger.info(f"Enhanced arbitrage scan: Found {len(opportunities)} opportunities")
+            return opportunities
+
+        # Basic mode - use provided prices
+        if cex_prices is None or dex_prices is None:
+            logger.warning("No prices provided for arbitrage detection")
+            return []
+
         dex_fees = dex_fees or {}
         dex_gas = dex_gas or {}
         opportunities = []
@@ -345,6 +478,9 @@ class SupervisorAgent:
         """
         Check if proposed trade violates risk limits.
 
+        Basic Mode: Simple position and loss checks
+        Enhanced Mode: Portfolio-wide risk aggregation and advanced metrics
+
         Returns: (approved, reason)
         """
         # Check circuit breaker
@@ -361,8 +497,48 @@ class SupervisorAgent:
         if instance.current_capital <= 0:
             return False, "Instance has no capital"
 
-        # Check position size limit (10% max per position)
         current_value = sum(inst.current_capital for inst in self.instances.values())
+
+        # Phase 4: Use enhanced risk monitoring if enabled
+        if self.use_enhanced_risk and self.risk_monitor:
+            # Build portfolio positions
+            portfolio_positions = self._build_portfolio_positions()
+
+            # Simulate adding this trade
+            if asset in portfolio_positions:
+                portfolio_positions[asset].total_quantity += trade_size
+                portfolio_positions[asset].total_value_usd += trade_size
+            else:
+                portfolio_positions[asset] = PortfolioPosition(
+                    asset=asset,
+                    total_quantity=trade_size,
+                    total_value_usd=trade_size,
+                    chains={},
+                    percentage_of_portfolio=trade_size / current_value,
+                    cost_basis=trade_size,
+                    unrealized_pnl=0.0
+                )
+
+            # Check enhanced risk limits
+            daily_pnl = current_value - self.daily_start_value
+            is_safe, violations = self.risk_monitor.check_limits(
+                portfolio_positions,
+                current_value,
+                daily_pnl,
+                self.peak_value
+            )
+
+            if not is_safe:
+                self.circuit_breaker_triggered = True
+                return False, "; ".join(violations)
+
+            # Update peak
+            if current_value > self.peak_value:
+                self.peak_value = current_value
+
+            return True, "Approved (Enhanced Risk Check)"
+
+        # Basic risk checks (original logic)
         position_pct = trade_size / current_value
         if position_pct > self.max_position_pct:
             return False, f"Position too large: {position_pct:.1%} > {self.max_position_pct:.1%}"
@@ -400,7 +576,7 @@ class SupervisorAgent:
         winning_trades = sum(inst.winning_trades for inst in self.instances.values())
         current_value = sum(inst.current_capital for inst in self.instances.values())
 
-        return {
+        summary = {
             "total_instances": len(self.instances),
             "total_capital": current_value,
             "total_pnl": total_pnl,
@@ -424,6 +600,62 @@ class SupervisorAgent:
                     reverse=True
                 )[:5]
             ]
+        }
+
+        # Phase 4: Add enhanced metrics if available
+        if self.use_enhanced_risk and self.risk_monitor:
+            portfolio_positions = self._build_portfolio_positions()
+            risk_metrics = self.risk_monitor.calculate_risk_metrics(
+                portfolio_positions,
+                current_value
+            )
+            summary["risk_metrics"] = {
+                "total_exposure": risk_metrics.total_exposure,
+                "max_position_size": risk_metrics.max_position_size,
+                "concentration_risk": risk_metrics.concentration_risk,
+                "daily_var": risk_metrics.daily_var,
+                "sharpe_ratio": risk_metrics.sharpe_ratio,
+                "beta": risk_metrics.beta,
+                "correlation_to_btc": risk_metrics.correlation_to_btc
+            }
+
+        return summary
+
+    def get_risk_metrics(self) -> Optional[Dict]:
+        """
+        Get detailed risk metrics (Phase 4 enhancement).
+
+        Returns:
+            Risk metrics dict or None if enhanced risk not enabled
+        """
+        if not self.use_enhanced_risk or not self.risk_monitor:
+            return None
+
+        current_value = sum(inst.current_capital for inst in self.instances.values())
+        portfolio_positions = self._build_portfolio_positions()
+
+        metrics = self.risk_monitor.calculate_risk_metrics(
+            portfolio_positions,
+            current_value
+        )
+
+        return {
+            "total_exposure": metrics.total_exposure,
+            "max_position_size": metrics.max_position_size,
+            "concentration_risk": metrics.concentration_risk,
+            "daily_var": metrics.daily_var,
+            "sharpe_ratio": metrics.sharpe_ratio,
+            "beta": metrics.beta,
+            "correlation_to_btc": metrics.correlation_to_btc,
+            "positions": {
+                asset: {
+                    "quantity": pos.total_quantity,
+                    "value_usd": pos.total_value_usd,
+                    "percentage": pos.percentage_of_portfolio,
+                    "chains": pos.chains
+                }
+                for asset, pos in portfolio_positions.items()
+            }
         }
 
     def reset_daily_tracking(self) -> None:
@@ -466,3 +698,98 @@ class SupervisorAgent:
             "SOL": {"Solana": "SOL"},
         }
         return mapping.get(token, {}).get(chain, token)
+
+    def _to_performance_metrics(self, perf: StrategyPerformance) -> 'PerformanceMetrics':
+        """
+        Convert StrategyPerformance to PerformanceMetrics for enhanced allocation.
+
+        Calculates:
+        - Sortino ratio (downside deviation)
+        - Calmar ratio (return / max drawdown)
+        - Profit factor
+        - Consistency score
+        """
+        if not ENHANCEMENTS_AVAILABLE:
+            raise RuntimeError("Performance metrics conversion requires enhancements")
+
+        # Calculate Sortino ratio (use only negative returns for denominator)
+        sortino = 0.0
+        if len(perf.trade_returns) >= 2:
+            returns = np.array(perf.trade_returns)
+            negative_returns = returns[returns < 0]
+            if len(negative_returns) > 0 and negative_returns.std() > 0:
+                sortino = (returns.mean() / negative_returns.std()) * np.sqrt(250)
+
+        # Calculate Calmar ratio (return / max drawdown)
+        calmar = 0.0
+        if perf.max_drawdown > 0 and perf.total_trades > 0:
+            annual_return = perf.avg_pnl_per_trade * 250 / perf.allocated_capital
+            calmar = annual_return / perf.max_drawdown
+
+        # Calculate profit factor (total wins / total losses)
+        profit_factor = 1.0
+        if perf.winning_trades > 0 and perf.losing_trades > 0:
+            avg_win = perf.total_pnl / perf.winning_trades if perf.winning_trades > 0 else 0
+            avg_loss = abs(perf.total_pnl) / perf.losing_trades if perf.losing_trades > 0 else 1
+            if avg_loss > 0:
+                profit_factor = avg_win / avg_loss
+
+        # Calculate consistency score (how consistent are returns?)
+        consistency_score = 0.5
+        if len(perf.trade_returns) >= 5:
+            returns = np.array(perf.trade_returns)
+            # Lower variance = higher consistency
+            variance = returns.var()
+            consistency_score = max(0, min(1, 1 - variance * 10))
+
+        return PerformanceMetrics(
+            sharpe_ratio=perf.sharpe_ratio,
+            sortino_ratio=sortino,
+            calmar_ratio=calmar,
+            max_drawdown=perf.max_drawdown,
+            win_rate=perf.win_rate,
+            profit_factor=profit_factor,
+            avg_win=perf.avg_pnl_per_trade if perf.winning_trades > 0 else 0,
+            avg_loss=perf.avg_pnl_per_trade if perf.losing_trades > 0 else 0,
+            consistency_score=consistency_score,
+            total_pnl=perf.total_pnl,
+            total_trades=perf.total_trades
+        )
+
+    def _build_portfolio_positions(self) -> Dict[str, 'PortfolioPosition']:
+        """
+        Build portfolio-wide positions from self.positions dict.
+
+        Returns:
+            Dict of asset -> PortfolioPosition
+        """
+        if not ENHANCEMENTS_AVAILABLE:
+            return {}
+
+        portfolio = {}
+        current_value = sum(inst.current_capital for inst in self.instances.values())
+
+        for asset, quantity in self.positions.items():
+            if quantity > 0:
+                # Mock price for now (TODO: get real prices)
+                mock_price = 100.0
+                if asset in ["BTC", "WBTC"]:
+                    mock_price = 64000.0
+                elif asset in ["ETH", "WETH"]:
+                    mock_price = 3000.0
+                elif asset == "SOL":
+                    mock_price = 120.0
+
+                value_usd = quantity * mock_price
+
+                portfolio[asset] = PortfolioPosition(
+                    asset=asset,
+                    total_quantity=quantity,
+                    total_value_usd=value_usd,
+                    chains={},  # TODO: Track per-chain breakdown
+                    percentage_of_portfolio=value_usd / current_value if current_value > 0 else 0,
+                    cost_basis=value_usd,  # Mock for now
+                    unrealized_pnl=0.0  # Mock for now
+                )
+
+        return portfolio
