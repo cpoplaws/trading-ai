@@ -4,10 +4,10 @@ alpaca-py>=0.21.0
 pytz>=2024.1
 websockets>=12.0
 python-dotenv>=1.0.0
-python-multipart>=0.0.9
+python-multipart>=0.0.0.9
 numpy>=1.24.0
 scikit-learn>=1.3.0
 pandas>=2.0.0
-# Lightweight CPU-only PyTorch for Railway (no CUDA)
---index-url https://download.pytorch.org/whl/cpu
+# CPU-only PyTorch (no CUDA) - uses extra index to get from PyTorch repo
+--extra-index-url https://download.pytorch.org/whl/cpu
 torch>=2.0.0
