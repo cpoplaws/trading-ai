@@ -421,21 +421,105 @@ class ExecutionRouter:
             }
 
     def _execute_via_dex(self, quote: Quote, instance_id: str) -> Dict:
-        """Execute trade via DEX connector (mock for now)"""
-        # TODO: Integrate with DEXConnector
-        return {
-            "success": True,
-            "venue": quote.venue_name,
-            "symbol": quote.symbol,
-            "side": quote.side,
-            "quantity": quote.quantity,
-            "price": quote.price,
-            "fee": quote.fee,
-            "gas": quote.gas,
-            "net_output": quote.net_output,
-            "instance_id": instance_id,
-            "mock": True,  # Remove when real integration done
-        }
+        """Execute trade via DEX connector"""
+        if not self.dex_connector:
+            logger.warning("DEX connector not initialized - returning mock result")
+            return {
+                "success": True,
+                "venue": quote.venue_name,
+                "symbol": quote.symbol,
+                "side": quote.side,
+                "quantity": quote.quantity,
+                "price": quote.price,
+                "fee": quote.fee,
+                "gas": quote.gas,
+                "net_output": quote.net_output,
+                "instance_id": instance_id,
+                "mock": True,
+            }
+
+        # Real DEX execution (Phase 3)
+        try:
+            from src.dex.dex_connector import SwapRequest, Chain as DEXChain
+
+            # Parse chain from venue_name (e.g., "Base:Uniswap")
+            chain_map = {
+                "Base": DEXChain.BASE,
+                "Arbitrum": DEXChain.ARBITRUM,
+                "Optimism": DEXChain.OPTIMISM,
+                "Solana": DEXChain.SOLANA,
+            }
+
+            chain_name = quote.venue_name.split(":")[0] if ":" in quote.venue_name else "Base"
+            chain = chain_map.get(chain_name, DEXChain.BASE)
+
+            # Parse tokens from symbol (e.g., "WETH/USDC")
+            tokens = quote.symbol.split("/")
+            input_token = tokens[0] if quote.side == "sell" else tokens[1]
+            output_token = tokens[1] if quote.side == "sell" else tokens[0]
+
+            # Create swap request
+            swap_request = SwapRequest(
+                chain=chain,
+                input_token=input_token,
+                output_token=output_token,
+                amount_in=quote.quantity if quote.side == "sell" else quote.quantity * quote.price,
+                slippage_pct=0.01  # 1% slippage tolerance
+            )
+
+            # Execute swap
+            logger.info(f"Executing DEX swap: {swap_request.input_token} → {swap_request.output_token} on {chain.value}")
+            result = self.dex_connector.execute_swap(swap_request)
+
+            if result.success:
+                logger.info(f"✅ DEX swap complete: {result.tx_hash[:20]}... | {result.output_amount:.4f} tokens")
+                return {
+                    "success": True,
+                    "venue": quote.venue_name,
+                    "symbol": quote.symbol,
+                    "side": quote.side,
+                    "quantity": result.output_amount,
+                    "price": result.execution_price,
+                    "fee": result.total_cost_usd - result.gas_cost_usd,
+                    "gas": result.gas_cost_usd,
+                    "net_output": result.output_amount,
+                    "instance_id": instance_id,
+                    "tx_hash": result.tx_hash,
+                    "mock": False
+                }
+            else:
+                logger.error(f"❌ DEX swap failed: {result.error}")
+                return {
+                    "success": False,
+                    "venue": quote.venue_name,
+                    "symbol": quote.symbol,
+                    "side": quote.side,
+                    "quantity": quote.quantity,
+                    "price": quote.price,
+                    "fee": quote.fee,
+                    "gas": quote.gas,
+                    "net_output": quote.net_output,
+                    "instance_id": instance_id,
+                    "error": result.error,
+                    "mock": False
+                }
+
+        except Exception as e:
+            logger.error(f"DEX execution error: {e}", exc_info=True)
+            return {
+                "success": False,
+                "venue": quote.venue_name,
+                "symbol": quote.symbol,
+                "side": quote.side,
+                "quantity": quote.quantity,
+                "price": quote.price,
+                "fee": quote.fee,
+                "gas": quote.gas,
+                "net_output": quote.net_output,
+                "instance_id": instance_id,
+                "error": str(e),
+                "mock": False
+            }
 
 
 # Example usage

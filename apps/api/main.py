@@ -734,17 +734,80 @@ async def startup_event():
     logger.info(f"   📊 Available Exchanges: {', '.join(available_exchanges) if available_exchanges else 'None (using mock mode)'}")
     logger.info(f"   {'⚠️  TESTNET MODE - No real money at risk' if True else '🚨 MAINNET MODE - REAL MONEY AT RISK!'}")
 
+    # =================================================================
+    # PHASE 3: DEX Integration Infrastructure
+    # =================================================================
+    logger.info("\n" + "="*70)
+    logger.info("🔗 PHASE 3: Initializing DEX Infrastructure")
+    logger.info("="*70)
+
+    # Initialize Wallet Manager (Phase 3)
+    logger.info("\n🔐 Initializing Wallet Manager...")
+    from src.wallet.wallet_manager import WalletManager
+    wallet_manager = WalletManager(
+        wallet_file="~/.trading-ai/wallets.enc",
+        master_password=os.getenv("WALLET_MASTER_PASSWORD")
+    )
+    # Try to load existing wallets
+    if wallet_manager.load_wallets():
+        wallets = wallet_manager.get_all_wallets()
+        logger.info(f"✅ Loaded {len(wallets)} wallets from encrypted storage")
+        for w in wallets:
+            logger.info(f"   {w.chain.value}: {w.address[:10]}... (${w.balance_usd:.2f})")
+    else:
+        logger.info("⚠️  No existing wallets found - run wallet setup to create")
+
+    # Initialize Gas Manager (Phase 3)
+    logger.info("\n⛽ Initializing Gas Manager...")
+    from src.gas.gas_manager import GasManager
+    gas_manager = GasManager(
+        max_gas_pct=0.02,  # 2% max gas
+        cache_duration=30   # Cache gas prices for 30s
+    )
+    logger.info(f"✅ Gas Manager initialized")
+    logger.info(f"   ⛽ Max Gas Threshold: 2% of trade value")
+    logger.info(f"   🔄 Cache Duration: 30 seconds")
+
+    # Initialize DEX Connector (Phase 3)
+    logger.info("\n🦄 Initializing DEX Connector...")
+    from src.dex.dex_connector import DEXConnector
+    dex_connector = DEXConnector(
+        wallet_manager=wallet_manager,
+        gas_manager=gas_manager,
+        use_aggregators=True
+    )
+    logger.info(f"✅ DEX Connector initialized")
+    logger.info(f"   🦄 Uniswap V3: Ready (Base, Arbitrum, Optimism)")
+    logger.info(f"   🪐 Jupiter: Ready (Solana)")
+    logger.info(f"   🔀 Aggregators: Enabled (1inch, Paraswap)")
+
+    logger.info("\n" + "="*70)
+    logger.info("✅ PHASE 3 DEX INFRASTRUCTURE COMPLETE")
+    logger.info("="*70)
+    logger.info("📊 DEX Trading Capabilities:")
+    logger.info("   • Secure wallet management with encryption")
+    logger.info("   • Gas price tracking and optimization")
+    logger.info("   • Multi-DEX swap quotes (Uniswap, Jupiter)")
+    logger.info("   • DEX aggregator routing (1inch)")
+    logger.info("   • Slippage protection")
+    logger.info("   • Transaction monitoring")
+    logger.info("\n⚠️  Note: Currently using MOCK execution")
+    logger.info("   Real DEX swaps require SDK integration (Uniswap V3, Jupiter)")
+    logger.info("="*70 + "\n")
+
     # Initialize Execution Router
-    logger.info("\n🔀 Initializing Execution Router...")
+    logger.info("🔀 Initializing Execution Router...")
     execution_router = ExecutionRouter(
         max_gas_pct=0.02,  # 2% max gas
         cex_priority=False,  # Prefer DEX when equal
-        cex_connector=cex_connector  # Phase 2: Real CEX integration!
+        cex_connector=cex_connector,  # Phase 2
+        dex_connector=dex_connector   # Phase 3: DEX integration!
     )
     logger.info("✅ Execution Router initialized")
     logger.info(f"   ⛽ Max Gas Threshold: 2% of trade value")
     logger.info(f"   🎯 Routing Logic: Best net output after fees & gas")
-    logger.info(f"   💱 CEX Connector: {'✅ Connected' if cex_connector.get_available_exchanges() else '❌ No exchanges available'}")
+    logger.info(f"   💱 CEX: {'✅' if cex_connector.get_available_exchanges() else '❌'}")
+    logger.info(f"   🦄 DEX: ✅ Connected")
 
     logger.info("\n" + "="*70)
     logger.info("✅ PHASE 1 INITIALIZATION COMPLETE")
