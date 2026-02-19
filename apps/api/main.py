@@ -4,12 +4,15 @@ Multi-chain crypto trading with supervisor agent
 """
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
 import os
 import asyncio
 import json
+import socket
 from datetime import datetime, timedelta
-from typing import List
+from typing import Dict, List, Optional, Tuple
 import logging
+from urllib.parse import urlparse
 
 # Import strategy components
 from strategy_runner import StrategyRunner
@@ -36,16 +39,168 @@ from src.execution.execution_router import ExecutionRouter
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
+CRITICAL_ENV_VARS = [
+    "PORT",
+    "CORS_ALLOW_ORIGINS",
+    "ALPACA_API_KEY",
+    "ALPACA_SECRET_KEY",
+    "BINANCE_API_KEY",
+    "BINANCE_API_SECRET",
+    "BINANCE_SECRET_KEY",
+    "WALLET_MASTER_PASSWORD",
+]
+
+OPTIONAL_DEPENDENCY_VARS = [
+    "DATABASE_URL",
+    "REDIS_URL",
+]
+
+
+def _parse_cors_origins() -> List[str]:
+    """Parse CORS origins from env with safe defaults for local development."""
+    configured = os.getenv("CORS_ALLOW_ORIGINS", "").strip()
+    if configured:
+        origins = [origin.strip() for origin in configured.split(",") if origin.strip()]
+        if origins:
+            return sorted(set(origins))
+
+    return [
+        "http://localhost:3000",
+        "http://127.0.0.1:3000",
+    ]
+
+
+def _safe_env_presence() -> Dict[str, bool]:
+    """Return env var presence without exposing values."""
+    presence: Dict[str, bool] = {}
+    for env_var in CRITICAL_ENV_VARS + OPTIONAL_DEPENDENCY_VARS:
+        presence[env_var] = bool(os.getenv(env_var))
+    return presence
+
+
+def _tcp_check_from_url(url: str, default_port: int) -> Tuple[bool, str]:
+    """
+    Perform a lightweight TCP dependency check for readiness probes.
+
+    Uses URL host/port and avoids protocol-specific handshakes.
+    """
+    parsed = urlparse(url)
+    host: Optional[str] = parsed.hostname
+    port: int = parsed.port or default_port
+
+    if not host:
+        return False, "invalid host"
+
+    try:
+        with socket.create_connection((host, port), timeout=1.5):
+            return True, "reachable"
+    except OSError as exc:
+        return False, f"unreachable ({exc})"
+
+
+def _build_readiness_report() -> Dict[str, Dict[str, object]]:
+    """Build readiness report with required and optional dependency checks."""
+    checks: Dict[str, Dict[str, object]] = {}
+
+    checks["startup_complete"] = {
+        "ok": startup_complete,
+        "required": True,
+        "detail": "startup lifecycle initialized" if startup_complete else "startup lifecycle incomplete",
+    }
+
+    try:
+        swarm = get_swarm_controller()
+        checks["swarm_controller"] = {
+            "ok": swarm is not None,
+            "required": True,
+            "detail": "initialized" if swarm is not None else "not initialized",
+        }
+    except Exception as exc:
+        checks["swarm_controller"] = {
+            "ok": False,
+            "required": True,
+            "detail": f"initialization error ({exc})",
+        }
+
+    try:
+        intel = get_intelligence_service()
+        checks["intelligence_service"] = {
+            "ok": intel is not None,
+            "required": True,
+            "detail": "initialized" if intel is not None else "not initialized",
+        }
+    except Exception as exc:
+        checks["intelligence_service"] = {
+            "ok": False,
+            "required": True,
+            "detail": f"initialization error ({exc})",
+        }
+
+    database_url = os.getenv("DATABASE_URL", "").strip()
+    if database_url:
+        ok, detail = _tcp_check_from_url(database_url, default_port=5432)
+        checks["database"] = {"ok": ok, "required": False, "detail": detail}
+    else:
+        checks["database"] = {
+            "ok": True,
+            "required": False,
+            "detail": "not configured (optional)",
+        }
+
+    redis_url = os.getenv("REDIS_URL", "").strip()
+    if redis_url:
+        ok, detail = _tcp_check_from_url(redis_url, default_port=6379)
+        checks["redis"] = {"ok": ok, "required": False, "detail": detail}
+    else:
+        checks["redis"] = {
+            "ok": True,
+            "required": False,
+            "detail": "not configured (optional)",
+        }
+
+    checks["alpaca_credentials"] = {
+        "ok": bool(os.getenv("ALPACA_API_KEY")) and bool(os.getenv("ALPACA_SECRET_KEY")),
+        "required": False,
+        "detail": "configured" if bool(os.getenv("ALPACA_API_KEY")) and bool(os.getenv("ALPACA_SECRET_KEY")) else "not configured (demo mode)",
+    }
+
+    binance_key = os.getenv("BINANCE_API_KEY")
+    binance_secret = os.getenv("BINANCE_API_SECRET") or os.getenv("BINANCE_SECRET_KEY")
+    checks["cex_credentials"] = {
+        "ok": bool(binance_key) and bool(binance_secret),
+        "required": False,
+        "detail": "configured" if bool(binance_key) and bool(binance_secret) else "not configured",
+    }
+
+    checks["wallet_master_password"] = {
+        "ok": bool(os.getenv("WALLET_MASTER_PASSWORD")),
+        "required": False,
+        "detail": "configured" if bool(os.getenv("WALLET_MASTER_PASSWORD")) else "not configured",
+    }
+
+    return checks
+
+
+def _log_startup_env_banner() -> None:
+    """Log startup env presence for diagnostics without leaking secrets."""
+    logger.info("=" * 70)
+    logger.info("Startup environment presence (secrets redacted)")
+    for env_var, present in _safe_env_presence().items():
+        logger.info("  %s: %s", env_var, "SET" if present else "MISSING")
+    logger.info("=" * 70)
+
+
 app = FastAPI(
     title="Trading AI API",
-    description="Real-time trading AI backend with Alpaca integration",
-    version="1.0.1"  # Force Railway redeploy with all crypto features
+    description="Real-time crypto trading backend with multi-chain execution",
+    version="1.0.2"
 )
 
 # CORS - Configure for your domain
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # TODO: Change to your domain in production
+    allow_origins=_parse_cors_origins(),
+    allow_origin_regex=r"https://.*\.vercel\.app",
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -109,6 +264,7 @@ strategy_runner: StrategyRunner = None
 supervisor_agent: SupervisorAgent = None
 instance_manager: StrategyInstanceManager = None
 execution_router: ExecutionRouter = None
+startup_complete = False
 
 @app.get("/")
 async def root():
@@ -119,6 +275,39 @@ async def root():
         "version": "1.0.0",
         "alpaca_connected": trading_client is not None
     }
+
+
+@app.get("/healthz")
+async def healthz():
+    """Liveness check."""
+    return {
+        "status": "ok",
+        "service": "trading-ai-api",
+        "timestamp": datetime.utcnow().isoformat() + "Z",
+        "version": app.version,
+    }
+
+
+@app.get("/readyz")
+async def readyz():
+    """Readiness check with required + optional dependency checks."""
+    checks = _build_readiness_report()
+    required_failures = [
+        name for name, check in checks.items()
+        if check["required"] and not check["ok"]
+    ]
+    overall_status = "ready" if not required_failures else "not_ready"
+    status_code = 200 if not required_failures else 503
+
+    return JSONResponse(
+        status_code=status_code,
+        content={
+            "status": overall_status,
+            "timestamp": datetime.utcnow().isoformat() + "Z",
+            "required_failures": required_failures,
+            "checks": checks,
+        },
+    )
 
 @app.get("/api/portfolio")
 async def get_portfolio():
@@ -259,6 +448,47 @@ async def toggle_strategy(strategy_id: str):
         "enabled": new_state
     }
 
+
+@app.patch("/api/strategies/{strategy_id}")
+async def set_strategy_state(strategy_id: str, payload: Dict[str, bool]):
+    """Set strategy enabled state (compatibility endpoint)."""
+    if strategy_id not in strategy_states:
+        return {"error": f"Strategy '{strategy_id}' not found"}, 404
+
+    enabled = bool(payload.get("enabled", False))
+    strategy_states[strategy_id] = enabled
+
+    logger.info(f"Strategy '{strategy_id}' set to: {'ENABLED' if enabled else 'DISABLED'}")
+    return {
+        "success": True,
+        "strategy_id": strategy_id,
+        "enabled": enabled,
+    }
+
+
+@app.get("/api/base/balance/{address}")
+async def get_base_balance(address: str):
+    """Return Base wallet balance (mock until on-chain integration is enabled)."""
+    return {
+        "address": address,
+        "network": "base",
+        "balance_usd": 0.0,
+        "balance_eth": 0.0,
+        "mock": True,
+    }
+
+
+@app.post("/api/base/trade")
+async def execute_base_trade(trade: Dict[str, object]):
+    """Submit Base trade request (mock execution for now)."""
+    return {
+        "status": "accepted",
+        "network": "base",
+        "mock_execution": True,
+        "trade": trade,
+        "timestamp": datetime.now().isoformat(),
+    }
+
 @app.get("/api/trades/recent")
 async def get_recent_trades(limit: int = 20):
     """Get recent trades"""
@@ -273,20 +503,20 @@ async def get_recent_trades(limit: int = 20):
         trades = [
             {
                 "id": "1",
-                "symbol": "AAPL",
+                "symbol": "BTC/USD",
                 "side": "buy",
-                "quantity": 10,
-                "price": 185.50,
+                "quantity": 0.025,
+                "price": 67250.50,
                 "timestamp": (datetime.now() - timedelta(hours=2)).isoformat(),
                 "strategy": "momentum",
                 "pnl": 125.40
             },
             {
                 "id": "2",
-                "symbol": "TSLA",
+                "symbol": "ETH/USD",
                 "side": "sell",
-                "quantity": 5,
-                "price": 242.30,
+                "quantity": 0.55,
+                "price": 3521.80,
                 "timestamp": (datetime.now() - timedelta(hours=5)).isoformat(),
                 "strategy": "mean_reversion",
                 "pnl": 87.20
@@ -606,10 +836,11 @@ async def intelligence_update_loop():
 @app.on_event("startup")
 async def startup_event():
     """Startup tasks"""
-    global strategy_runner, supervisor_agent, instance_manager, execution_router
+    global strategy_runner, supervisor_agent, instance_manager, execution_router, startup_complete
 
     logger.info("🚀 Trading AI API starting up...")
     logger.info(f"Alpaca connected: {trading_client is not None}")
+    _log_startup_env_banner()
 
     # Initialize ML model server
     logger.info("Initializing ML Model Server...")
@@ -723,7 +954,7 @@ async def startup_event():
     from src.execution.cex_connector import CEXConnector
     cex_connector = CEXConnector(
         binance_api_key=os.getenv("BINANCE_API_KEY"),
-        binance_api_secret=os.getenv("BINANCE_API_SECRET"),
+        binance_api_secret=os.getenv("BINANCE_API_SECRET") or os.getenv("BINANCE_SECRET_KEY"),
         coinbase_api_key=os.getenv("CB_API_KEY"),
         coinbase_api_secret=os.getenv("CB_API_SECRET"),
         coinbase_passphrase=os.getenv("CB_PASSPHRASE"),
@@ -865,9 +1096,14 @@ async def startup_event():
     else:
         logger.warning("⚠️ Running in DEMO MODE - connect Alpaca API keys for real data and strategy execution")
 
+    startup_complete = True
+    logger.info("✅ Startup lifecycle marked complete")
+
 @app.on_event("shutdown")
 async def shutdown_event():
     """Cleanup on shutdown"""
+    global startup_complete
+    startup_complete = False
     logger.info("👋 Trading AI API shutting down...")
 
 if __name__ == "__main__":

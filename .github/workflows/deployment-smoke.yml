@@ -1,0 +1,40 @@
+name: Deployment Smoke Check
+
+on:
+  push:
+    branches: [main, develop]
+  workflow_dispatch:
+    inputs:
+      base_url:
+        description: "Deployed backend base URL (for example https://api.example.com)"
+        required: false
+        type: string
+
+jobs:
+  smoke:
+    name: Backend smoke checks
+    runs-on: ubuntu-latest
+    env:
+      DEPLOY_SMOKE_BASE_URL: ${{ github.event.inputs.base_url || vars.DEPLOY_SMOKE_BASE_URL || secrets.DEPLOY_SMOKE_BASE_URL }}
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: "3.12"
+
+    - name: Validate smoke target URL
+      run: |
+        if [ -z "${DEPLOY_SMOKE_BASE_URL}" ]; then
+          echo "DEPLOY_SMOKE_BASE_URL is not set."
+          echo "Set repo variable/secret DEPLOY_SMOKE_BASE_URL or run workflow_dispatch with base_url."
+          exit 1
+        fi
+        echo "Running smoke checks against ${DEPLOY_SMOKE_BASE_URL}"
+
+    - name: Run deployment smoke checks
+      run: |
+        python scripts/deployment_smoke_check.py --base-url "${DEPLOY_SMOKE_BASE_URL}"

@@ -10,6 +10,7 @@ venv/
 # Data
 /data/
 *.csv
+!docs/feature-evidence-register.csv
 
 # Models
 /models/
