@@ -1,4 +1,4 @@
-# Trading AI - Advanced Trading Platform
+# Quantlytics - Advanced Trading Platform
 
 **One command. One dashboard. Everything you need.**
 
@@ -407,7 +407,3 @@ python -m safety check
 - ⚠️ **ML Dependencies**: Installed but need system libraries (see DEPENDENCY_STATUS.md)
 
 ---
-
-**Made with ❤️ using Claude Sonnet 4.5**
-
-*One command. One dashboard. Everything you need.*
