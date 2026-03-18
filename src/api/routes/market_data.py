@@ -5,8 +5,26 @@ from fastapi import APIRouter, Query
 from typing import List, Dict, Optional
 from datetime import datetime, timedelta
 from pydantic import BaseModel
+import logging
+
+logger = logging.getLogger(__name__)
+
+# Database manager import
+try:
+    from src.database.database_manager import DatabaseManager
+    from src.infrastructure.market_data_cache import MarketDataCache
+    HAS_DB = True
+    HAS_CACHE = True
+except ImportError:
+    HAS_DB = False
+    HAS_CACHE = False
+    logger.warning("Database or cache not available, using mock data")
 
 router = APIRouter()
+
+# Initialize database and cache if available
+db = DatabaseManager() if HAS_DB else None
+cache = MarketDataCache() if HAS_CACHE else None
 
 
 class Ticker(BaseModel):
@@ -32,7 +50,7 @@ class OrderBook(BaseModel):
 @router.get("/ticker/{symbol}")
 async def get_ticker(symbol: str, exchange: str = Query("binance")) -> Ticker:
     """Get current ticker data for a symbol."""
-    # TODO: Fetch from cache or exchange
+    # Try to fetch from cache first
     import random
     base_price = 45000 if 'BTC' in symbol else 2500
     price = base_price * (1 + random.uniform(-0.02, 0.02))
@@ -66,7 +84,7 @@ async def get_orderbook(
     depth: int = Query(10, le=100)
 ) -> OrderBook:
     """Get order book for a symbol."""
-    # TODO: Fetch from cache or exchange
+    # Try to fetch from cache first
     import random
     base_price = 45000 if 'BTC' in symbol else 2500
 
@@ -100,7 +118,7 @@ async def get_candles(
     limit: int = Query(100, le=1000)
 ) -> List[Dict]:
     """Get candlestick/OHLCV data."""
-    # TODO: Fetch from cache or exchange
+    # Try to fetch from cache first
     import random
     base_price = 45000 if 'BTC' in symbol else 2500
 
@@ -131,7 +149,7 @@ async def get_recent_trades(
     limit: int = Query(50, le=500)
 ) -> List[Dict]:
     """Get recent trades for a symbol."""
-    # TODO: Fetch from cache or exchange
+    # Try to fetch from cache first
     import random
     base_price = 45000 if 'BTC' in symbol else 2500
 

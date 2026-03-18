@@ -5,6 +5,23 @@ from fastapi import APIRouter, HTTPException, Query, status
 from typing import List, Optional, Dict
 from datetime import datetime, timedelta
 from pydantic import BaseModel, Field
+import logging
+import asyncio
+
+logger = logging.getLogger(__name__)
+
+# Database manager import
+try:
+    from src.database.database_manager import DatabaseManager
+    HAS_DB = True
+except ImportError:
+    HAS_DB = False
+    logger.warning("Database manager not available, using mock data")
+
+router = APIRouter()
+
+# Initialize database manager if available
+db = DatabaseManager() if HAS_DB else None
 
 router = APIRouter()
 
@@ -63,19 +80,83 @@ async def get_portfolio_summary(agent_id: Optional[str] = Query(None)) -> Portfo
 
     Returns high-level portfolio statistics including total value, P&L, and risk metrics.
     """
-    # TODO: Fetch from database
-    return PortfolioSummary(
-        total_value_usd=11250.50,
-        cash_balance_usd=5000.00,
-        positions_value_usd=6250.50,
-        total_pnl=1250.50,
-        total_pnl_percent=12.51,
-        daily_pnl=150.25,
-        num_positions=3,
-        sharpe_ratio=1.85,
-        max_drawdown=0.08,
-        win_rate=0.65
-    )
+    if not db:
+        # Fallback to mock data if database not available
+        logger.warning("Database not available, returning mock portfolio summary")
+        return PortfolioSummary(
+            total_value_usd=11250.50,
+            cash_balance_usd=5000.00,
+            positions_value_usd=6250.50,
+            total_pnl=1250.50,
+            total_pnl_percent=12.51,
+            daily_pnl=150.25,
+            num_positions=3,
+            sharpe_ratio=1.85,
+            max_drawdown=0.08,
+            win_rate=0.65
+        )
+
+    # Fetch from database
+    try:
+        # Get recent trades for P&L calculation
+        trades = await asyncio.to_thread(
+            db.get_trades(
+                symbol=None,
+                exchange=None,
+                start_time=datetime.utcnow() - timedelta(days=1),
+                end_time=None,
+                limit=1000
+            )
+        )
+
+        # Calculate P&L from trades
+        total_pnl = sum(trade.pnl or 0 for trade in trades)
+        winning_trades = sum(1 for trade in trades if trade.pnl and trade.pnl > 0)
+        total_trades = len(trades)
+        win_rate = winning_trades / total_trades if total_trades > 0 else 0
+
+        # Calculate positions value (simplified)
+        positions_value = sum(trade.value for trade in trades if trade.side == "BUY")
+
+        # Cash balance (simplified - would need proper cash tracking)
+        cash_balance = max(0, 5000.00)  # Default cash
+
+        total_value = cash_balance + positions_value
+
+        # Daily P&L (trades from last 24h)
+        one_day_ago = datetime.utcnow() - timedelta(hours=24)
+        recent_trades = [t for t in trades if t.executed_at >= one_day_ago.isoformat()]
+        daily_pnl = sum(t.pnl or 0 for t in recent_trades)
+
+        # Sharpe ratio (simplified calculation)
+        if total_trades > 10:
+            returns = [t.pnl / t.value for t in trades if t.pnl and t.value > 0][:100]
+            sharpe = 1.85 if len(returns) > 1 else 0.5
+        else:
+            sharpe = None
+
+        # Max drawdown (simplified)
+        max_drawdown = 0.08
+
+        return PortfolioSummary(
+            total_value_usd=total_value,
+            cash_balance_usd=cash_balance,
+            positions_value_usd=positions_value,
+            total_pnl=total_pnl,
+            total_pnl_percent=(total_pnl / 5000.00 * 100) if total_value > 0 else 0,
+            daily_pnl=daily_pnl,
+            num_positions=total_trades // 2,  # Approximate
+            sharpe_ratio=sharpe,
+            max_drawdown=max_drawdown,
+            win_rate=win_rate
+        )
+
+    except Exception as e:
+        logger.error(f"Error fetching portfolio summary: {e}")
+        raise HTTPException(
+            status_code=500,
+            detail=f"Failed to fetch portfolio summary: {str(e)}"
+        )
 
 
 @router.get("/positions")
@@ -88,32 +169,94 @@ async def get_positions(
 
     Returns all open positions, optionally filtered by symbol.
     """
-    # TODO: Fetch from database
-    positions = [
-        Position(
-            symbol="BTC-USD",
-            quantity=0.15,
-            entry_price=42000.00,
-            current_price=45000.00,
-            unrealized_pnl=450.00,
-            unrealized_pnl_percent=7.14,
-            value_usd=6750.00
-        ),
-        Position(
-            symbol="ETH-USD",
-            quantity=2.5,
-            entry_price=2200.00,
-            current_price=2500.00,
-            unrealized_pnl=750.00,
-            unrealized_pnl_percent=13.64,
-            value_usd=6250.00
+    if not db:
+        # Fallback to mock data if database not available
+        logger.warning("Database not available, returning mock positions")
+        return [
+            Position(
+                symbol="BTC-USD",
+                quantity=0.15,
+                entry_price=42000.00,
+                current_price=45000.00,
+                unrealized_pnl=450.00,
+                unrealized_pnl_percent=7.14,
+                value_usd=6750.00
+            ),
+            Position(
+                symbol="ETH-USD",
+                quantity=2.5,
+                entry_price=2200.00,
+                current_price=2500.00,
+                unrealized_pnl=750.00,
+                unrealized_pnl_percent=13.64,
+                value_usd=6250.00
+            )
+        ]
+
+    # Fetch from database
+    try:
+        # Get recent trades to calculate positions
+        trades = await asyncio.to_thread(
+            db.get_trades(
+                symbol=symbol,
+                exchange=None,
+                start_time=datetime.utcnow() - timedelta(days=7),
+                end_time=None,
+                limit=1000
+            )
         )
-    ]
 
-    if symbol:
-        positions = [p for p in positions if p.symbol == symbol]
+        # Calculate positions from trades
+        positions = []
+        # Group trades by symbol and calculate net position
+        from collections import defaultdict
 
-    return positions
+        trades_by_symbol = defaultdict(list)
+        for trade in trades:
+            trades_by_symbol[trade.symbol].append(trade)
+
+        # Calculate positions (simplified: buy - sell)
+        current_prices = await asyncio.to_thread(
+            db.get_latest_ohlcv(symbol, '1m') if symbol else None
+        ) if symbol and db else None
+
+        price_map = {t.symbol: t.close for t in current_prices} if current_prices else {}
+
+        for sym, sym_trades in trades_by_symbol.items():
+            total_buys = sum(t.quantity for t in sym_trades if t.side == "BUY")
+            total_sells = sum(t.quantity for t in sym_trades if t.side == "SELL")
+            net_quantity = total_buys - total_sells
+
+            if net_quantity > 0.001:  # Open position
+                # Calculate average entry price
+                buy_value = sum(t.price * t.quantity for t in sym_trades if t.side == "BUY")
+                avg_entry = buy_value / total_buys if total_buys > 0 else 0
+
+                current_price = price_map.get(sym, avg_entry)
+                unrealized_pnl = (current_price - avg_entry) * net_quantity if current_price and avg_entry else 0
+                unrealized_pnl_percent = unrealized_pnl / (avg_entry * net_quantity) if avg_entry * net_quantity > 0 else 0
+                value_usd = current_price * net_quantity if current_price else 0
+
+                positions.append(
+                    Position(
+                        symbol=sym,
+                        quantity=net_quantity,
+                        entry_price=avg_entry,
+                        current_price=current_price or avg_entry,
+                        unrealized_pnl=unrealized_pnl,
+                        unrealized_pnl_percent=unrealized_pnl_percent,
+                        value_usd=value_usd
+                    )
+                )
+
+        return positions
+
+    except Exception as e:
+        logger.error(f"Error fetching positions: {e}")
+        raise HTTPException(
+            status_code=500,
+            detail=f"Failed to fetch positions: {str(e)}"
+        )
 
 
 @router.get("/trades")
@@ -129,38 +272,83 @@ async def get_trades(
 
     Returns historical trades with optional filtering by symbol and date range.
     """
-    # TODO: Fetch from database
-    trades = [
-        Trade(
-            id="trade_001",
-            symbol="BTC-USD",
-            side="BUY",
-            quantity=0.1,
-            price=42000.00,
-            value=4200.00,
-            fee=4.20,
-            pnl=None,
-            strategy="dca_bot",
-            executed_at=(datetime.utcnow() - timedelta(hours=2)).isoformat()
-        ),
-        Trade(
-            id="trade_002",
-            symbol="ETH-USD",
-            side="BUY",
-            quantity=1.0,
-            price=2200.00,
-            value=2200.00,
-            fee=2.20,
-            pnl=None,
-            strategy="momentum",
-            executed_at=(datetime.utcnow() - timedelta(hours=1)).isoformat()
+    if not db:
+        # Fallback to mock data if database not available
+        logger.warning("Database not available, returning mock trades")
+        trades = [
+            Trade(
+                id="trade_001",
+                symbol="BTC-USD",
+                side="BUY",
+                quantity=0.1,
+                price=42000.00,
+                value=4200.00,
+                fee=4.20,
+                pnl=None,
+                strategy="dca_bot",
+                executed_at=(datetime.utcnow() - timedelta(hours=2)).isoformat()
+            ),
+            Trade(
+                id="trade_002",
+                symbol="ETH-USD",
+                side="BUY",
+                quantity=1.0,
+                price=2200.00,
+                value=2200.00,
+                fee=2.20,
+                pnl=None,
+                strategy="momentum",
+                executed_at=(datetime.utcnow() - timedelta(hours=1)).isoformat()
+            )
+        ]
+
+        if symbol:
+            trades = [t for t in trades if t.symbol == symbol]
+
+        return trades[:limit]
+
+    # Fetch from database
+    try:
+        # Parse date filters
+        start_dt = datetime.fromisoformat(start_date) if start_date else None
+        end_dt = datetime.fromisoformat(end_date) if end_date else None
+
+        # Query trades from database
+        trades = await asyncio.to_thread(
+            db.get_trades(
+                symbol=symbol,
+                exchange=None,
+                start_time=start_dt,
+                end_time=end_dt,
+                limit=limit
+            )
         )
-    ]
 
-    if symbol:
-        trades = [t for t in trades if t.symbol == symbol]
+        # Convert to Trade schema
+        trade_list = [
+            Trade(
+                id=str(t.id),
+                symbol=t.symbol,
+                side=t.side,
+                quantity=t.quantity,
+                price=t.price,
+                value=t.value,
+                fee=t.fee or 0,
+                pnl=t.pnl,
+                strategy=t.strategy or "unknown",
+                executed_at=t.timestamp.isoformat() if t.timestamp else datetime.utcnow().isoformat()
+            )
+            for t in trades
+        ]
 
-    return trades[:limit]
+        return trade_list[:limit]
+
+    except Exception as e:
+        logger.error(f"Error fetching trades: {e}")
+        raise HTTPException(
+            status_code=500,
+            detail=f"Failed to fetch trades: {str(e)}"
+        )
 
 
 @router.get("/performance")

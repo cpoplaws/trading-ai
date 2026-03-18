@@ -10,6 +10,32 @@ router = APIRouter()
 
 
 class Signal(BaseModel):
+import logging
+import asyncio
+
+logger = logging.getLogger(__name__)
+
+# Database and cache imports
+try:
+    from src.database.database_manager import DatabaseManager
+    from src.infrastructure.market_data_cache import MarketDataCache
+    from src.crypto_strategies.backtest_engine import BacktestEngine
+    HAS_DB = True
+    HAS_CACHE = True
+    HAS_BACKTEST = True
+except ImportError:
+    HAS_DB = False
+    HAS_CACHE = False
+    HAS_BACKTEST = False
+    logger.warning("Database, cache, or backtest not available, using mock data")
+
+router = APIRouter()
+
+# Initialize database, cache, and backtest if available
+db = DatabaseManager() if HAS_DB else None
+cache = MarketDataCache() if HAS_CACHE else None
+backtest = BacktestEngine() if HAS_BACKTEST else None
+
     """Trading signal schema."""
     id: str
     symbol: str
