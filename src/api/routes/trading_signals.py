@@ -1,25 +1,22 @@
 """
 Trading Signals Endpoints
 """
-from fastapi import APIRouter, Query
-from typing import List, Dict, Optional
-from datetime import datetime
-from pydantic import BaseModel
-
-router = APIRouter()
-
-
-class Signal(BaseModel):
-import logging
 import asyncio
+import logging
+from datetime import datetime
+from typing import Dict, List, Optional
+
+from fastapi import APIRouter, Query
+from pydantic import BaseModel
 
 logger = logging.getLogger(__name__)
 
 # Database and cache imports
 try:
+    from src.crypto_strategies.backtest_engine import BacktestEngine
     from src.database.database_manager import DatabaseManager
     from src.infrastructure.market_data_cache import MarketDataCache
-    from src.crypto_strategies.backtest_engine import BacktestEngine
+
     HAS_DB = True
     HAS_CACHE = True
     HAS_BACKTEST = True
@@ -36,7 +33,10 @@ db = DatabaseManager() if HAS_DB else None
 cache = MarketDataCache() if HAS_CACHE else None
 backtest = BacktestEngine() if HAS_BACKTEST else None
 
+
+class Signal(BaseModel):
     """Trading signal schema."""
+
     id: str
     symbol: str
     strategy: str

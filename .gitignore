@@ -42,3 +42,6 @@ docs/phase_guides/ignore_phase_1_base_system.md
 
 #Ignore vscode AI rules
 .github/instructions/codacy.instructions.md
+
+# Frontend artifacts
+src/web-dashboard/node_modules/

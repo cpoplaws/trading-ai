@@ -1,14 +1,13 @@
 version: '3.8'
 
 services:
-  # PostgreSQL + TimescaleDB
   postgres:
     image: timescale/timescaledb:latest-pg15
-    container_name: trading-postgres
+    container_name: quantlytics-postgres
     environment:
       POSTGRES_DB: trading_ai
       POSTGRES_USER: trader
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-changeme}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD}
       POSTGRES_INITDB_ARGS: "-E UTF8"
       POSTGRES_HOST_AUTH_METHOD: md5
     ports:
@@ -21,21 +20,12 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
-    networks:
-      - trading-network
-    deploy:
-      resources:
-        limits:
-          cpus: '2'
-          memory: 2G
-        reservations:
-          cpus: '0.5'
-          memory: 512M
+    networks: [trading-network]
+    restart: unless-stopped
 
-  # Redis (caching & message broker)
   redis:
     image: redis:7-alpine
-    container_name: trading-redis
+    container_name: quantlytics-redis
     command: redis-server --appendonly yes --maxmemory 512mb --maxmemory-policy allkeys-lru
     ports:
       - "6379:6379"
@@ -46,30 +36,22 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
-    networks:
-      - trading-network
-    deploy:
-      resources:
-        limits:
-          cpus: '1'
-          memory: 512M
-        reservations:
-          cpus: '0.25'
-          memory: 128M
+    networks: [trading-network]
+    restart: unless-stopped
 
-  # Trading AI API
   api:
     build:
       context: .
       dockerfile: Dockerfile
-    container_name: trading-api
+    container_name: quantlytics-api
+    command: quantlytics-api
     environment:
-      DATABASE_URL: postgresql://trader:${POSTGRES_PASSWORD:-changeme}@postgres:5432/trading_ai
+      ENVIRONMENT: production
+      DATABASE_URL: postgresql://trader:${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD}@postgres:5432/trading_ai
       REDIS_URL: redis://redis:6379/0
-      JWT_SECRET: ${JWT_SECRET:-your-secret-key-change-me}
-      CB_API_KEY: ${CB_API_KEY}
-      CB_API_SECRET: ${CB_API_SECRET}
-      CB_PASSPHRASE: ${CB_PASSPHRASE}
+      QUANTLYTICS_API_KEYS: ${QUANTLYTICS_API_KEYS:?set QUANTLYTICS_API_KEYS}
+      QUANTLYTICS_CORS_ORIGINS: ${QUANTLYTICS_CORS_ORIGINS:-https://dashboard.quantlytics.io}
+      QUANTLYTICS_RATE_LIMIT_PER_MINUTE: ${QUANTLYTICS_RATE_LIMIT_PER_MINUTE:-120}
     ports:
       - "8000:8000"
     depends_on:
@@ -77,12 +59,7 @@ services:
         condition: service_healthy
       redis:
         condition: service_healthy
-    volumes:
-      - ./src:/app/src
-      - ./data:/app/data
-      - ./logs:/app/logs
-    networks:
-      - trading-network
+    networks: [trading-network]
     restart: unless-stopped
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
@@ -90,88 +67,13 @@ services:
       timeout: 10s
       retries: 3
       start_period: 40s
-    deploy:
-      resources:
-        limits:
-          cpus: '2'
-          memory: 2G
-        reservations:
-          cpus: '0.5'
-          memory: 512M
 
-  # WebSocket Server
-  websocket:
-    build:
-      context: .
-      dockerfile: Dockerfile
-    container_name: trading-websocket
-    command: python -m src.websocket.server
-    environment:
-      REDIS_URL: redis://redis:6379/0
-    ports:
-      - "8765:8765"
-    depends_on:
-      - redis
-    networks:
-      - trading-network
-    restart: unless-stopped
-
-  # Prometheus (monitoring)
-  prometheus:
-    image: prom/prometheus:latest
-    container_name: trading-prometheus
-    ports:
-      - "9090:9090"
-    volumes:
-      - ./infrastructure/prometheus.yml:/etc/prometheus/prometheus.yml
-      - prometheus_data:/prometheus
-    command:
-      - '--config.file=/etc/prometheus/prometheus.yml'
-      - '--storage.tsdb.path=/prometheus'
-    networks:
-      - trading-network
-    restart: unless-stopped
-
-  # Grafana (dashboards)
-  grafana:
-    image: grafana/grafana:latest
-    container_name: trading-grafana
-    environment:
-      GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_PASSWORD:-admin}
-      GF_INSTALL_PLUGINS: grafana-clock-panel
-      GF_SERVER_ROOT_URL: http://localhost:3000
-      GF_ANALYTICS_REPORTING_ENABLED: "false"
-    ports:
-      - "3000:3000"
-    volumes:
-      - grafana_data:/var/lib/grafana
-      - ./infrastructure/grafana:/etc/grafana/provisioning
-    depends_on:
-      - prometheus
-    networks:
-      - trading-network
-    restart: unless-stopped
-    healthcheck:
-      test: ["CMD-SHELL", "curl -f http://localhost:3000/api/health || exit 1"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-    deploy:
-      resources:
-        limits:
-          cpus: '1'
-          memory: 512M
-        reservations:
-          cpus: '0.25'
-          memory: 128M
-
-  # Streamlit Dashboard
   dashboard:
     build:
       context: .
       dockerfile: Dockerfile
-    container_name: trading-dashboard
-    command: streamlit run src/dashboard/unified_dashboard.py --server.port=8501 --server.address=0.0.0.0
+    container_name: quantlytics-dashboard
+    command: quantlytics --mode dashboard
     environment:
       REDIS_ENABLED: "true"
       REDIS_HOST: redis
@@ -181,8 +83,8 @@ services:
       POSTGRES_PORT: "5432"
       POSTGRES_DB: trading_ai
       POSTGRES_USER: trader
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-changeme}
-      DASHBOARD_LIVE_DATA: "true"
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD}
+      DASHBOARD_LIVE_DATA: "false"
     ports:
       - "8501:8501"
     depends_on:
@@ -190,25 +92,12 @@ services:
         condition: service_healthy
       redis:
         condition: service_healthy
-    volumes:
-      - ./src:/app/src
-    networks:
-      - trading-network
+    networks: [trading-network]
     restart: unless-stopped
-    deploy:
-      resources:
-        limits:
-          cpus: '1'
-          memory: 1G
-        reservations:
-          cpus: '0.25'
-          memory: 256M
 
 volumes:
   postgres_data:
   redis_data:
-  prometheus_data:
-  grafana_data:
 
 networks:
   trading-network:
