@@ -18,7 +18,7 @@ certifi>=2024.8.30
 cryptography>=43.0.3,<44.0
 
 # Pillow: Patched CVE-2026-25990 and other image processing vulnerabilities
-pillow>=11.0.0,<12.0
+pillow>=11.0.0,<13.0
 
 # PyYAML: Patched arbitrary code execution vulnerabilities
 pyyaml>=6.0.2,<7.0
