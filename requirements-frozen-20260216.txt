@@ -194,7 +194,7 @@ tomli==2.4.0
 tomlkit==0.14.0
 toolz==1.1.0
 torch==2.8.0
-tornado==6.5.4
+tornado==6.5.5
 tqdm==4.67.3
 transformers==4.57.6
 typer==0.23.1
