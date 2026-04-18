@@ -12,7 +12,7 @@ anyio==4.12.1
 async-timeout==5.0.1
 asyncpg==0.31.0
 attrs==25.4.0
-Authlib==1.6.8
+Authlib==1.6.11
 backports-datetime-fromisoformat==2.0.3
 backports.asyncio.runner==1.2.0
 bandit==1.8.6
