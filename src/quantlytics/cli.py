@@ -9,7 +9,19 @@ import subprocess
 import sys
 from pathlib import Path
 
-PROJECT_ROOT = Path(__file__).resolve().parents[2]
+
+def _find_project_root() -> Path:
+    env_root = os.getenv("QUANTLYTICS_ROOT")
+    if env_root:
+        return Path(env_root).resolve()
+    here = Path(__file__).resolve()
+    for candidate in (here, *here.parents):
+        if (candidate / "pyproject.toml").exists() and (candidate / "examples").exists():
+            return candidate
+    return Path.cwd()
+
+
+PROJECT_ROOT = _find_project_root()
 
 
 def _run_python_script(script_path: Path) -> int:
@@ -70,7 +82,7 @@ def show_status() -> int:
 def run_api() -> None:
     import uvicorn
 
-    uvicorn.run("src.api.main:app", host="0.0.0.0", port=int(os.getenv("PORT", "8000")), reload=False)
+    uvicorn.run("api.main:app", host="0.0.0.0", port=int(os.getenv("PORT", "8000")), reload=False)
 
 
 def build_parser() -> argparse.ArgumentParser:

@@ -374,6 +374,9 @@ class DeepModelTrainer:
             raise ValueError("Model must be trained or loaded before prediction.")
 
         sequences, _, _ = self._prepare_sequences(df, target_col, fit_scaler=False)
+        if len(sequences) == 0:
+            return np.empty((0,), dtype=np.float32)
+
         dataset = SequenceDataset(sequences, np.zeros(len(sequences)))
         loader = DataLoader(dataset, batch_size=64, shuffle=False)
 
