@@ -9,7 +9,7 @@
 # NumPy - Fundamental array computing
 numpy>=2.2.0,<3.0
 # Pandas - Data manipulation and analysis
-pandas>=2.3.0,<3.0
+pandas>=2.3.0,<4.0
 # SciKit-Learn - Machine learning algorithms
 scikit-learn>=1.6.0,<2.0
 # Matplotlib - Plotting and visualization
@@ -36,7 +36,7 @@ keras>=3.13.1,<4.0
 # ==============================================================================
 
 # yfinance - Yahoo Finance data downloader
-yfinance>=0.2.50,<1.0
+yfinance>=0.2.50,<2.0
 # TA-Lib - Technical analysis library (requires binary install)
 TA-Lib>=0.4.28
 
@@ -75,7 +75,7 @@ solders>=0.22.0,<1.0
 # aiohttp - Async HTTP client/server
 aiohttp>=3.13.0,<4.0
 # WebSockets - Async WebSocket client/server
-websockets>=13.0,<14.0
+websockets>=13.0,<17.0
 # requests - HTTP library
 requests>=2.32.0,<3.0
 # urllib3 - HTTP client (with security fixes)
@@ -92,7 +92,7 @@ sqlalchemy>=2.0.0,<3.0
 # PostgreSQL adapter
 psycopg2-binary>=2.9.0,<3.0
 # Redis client
-redis>=5.2.0,<6.0
+redis>=5.2.0,<8.0
 # Alembic - Database migrations
 alembic>=1.13.0,<2.0
 
@@ -149,7 +149,7 @@ beautifulsoup4>=4.14.0,<5.0
 # VADER Sentiment - Social media sentiment
 vaderSentiment>=3.3.2,<4.0
 # lxml - XML/HTML processing
-lxml>=5.3.0,<6.0
+lxml>=5.3.0,<7.0
 
 # ==============================================================================
 # Utilities & Tools
@@ -198,7 +198,7 @@ opentelemetry-sdk>=1.29.0,<2.0
 # pytest - Testing framework
 pytest>=8.4.0,<10.0
 pytest-asyncio>=0.25.0,<1.0
-pytest-cov>=6.0.0,<7.0
+pytest-cov>=6.0.0,<8.0
 pytest-mock>=3.15.0,<4.0
 pytest-timeout>=2.3.0,<3.0
 
@@ -235,7 +235,7 @@ locust>=2.34.0,<3.0
 # ==============================================================================
 
 # Sphinx - Documentation generator
-sphinx>=8.1.0,<9.0
+sphinx>=8.1.0,<10.0
 sphinx-rtd-theme>=3.0.0,<4.0
 # mkdocs - Project documentation
 mkdocs>=1.6.0,<2.0

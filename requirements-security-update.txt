@@ -33,7 +33,7 @@ werkzeug>=3.0.6,<4.0
 # Core Data Science (Security Conscious)
 # ==========================================
 numpy>=1.26.4,<2.0  # Patched buffer overflow issues
-pandas>=2.2.3,<3.0  # Security and stability updates
+pandas>=2.3.0,<4.0  # Security and stability updates
 scikit-learn>=1.5.2,<2.0  # Latest stable with security patches
 
 # ==========================================
@@ -55,7 +55,7 @@ asyncpg>=0.30.0,<1.0  # Async PostgreSQL security
 # Async & Network Libraries
 # ==========================================
 aiohttp>=3.11.10,<4.0  # Multiple security patches
-websockets>=14.1,<15.0  # WebSocket security updates
+websockets>=14.1,<17.0  # WebSocket security updates
 httpx>=0.28.1,<1.0  # Modern HTTP client with security features
 
 # ==========================================
@@ -78,7 +78,7 @@ eth-abi>=5.1.0,<6.0
 # API & Data Libraries
 # ==========================================
 beautifulsoup4>=4.12.3,<5.0  # HTML parsing security
-lxml>=5.3.0,<6.0  # XML security patches
+lxml>=5.3.0,<7.0  # XML security patches
 python-dotenv>=1.0.1,<2.0  # Environment variable security
 
 # ==========================================
@@ -90,14 +90,14 @@ loguru>=0.7.3,<1.0
 # ==========================================
 # Redis & Caching
 # ==========================================
-redis>=5.2.1,<6.0  # Latest with security patches
+redis>=5.2.1,<8.0  # Latest with security patches
 hiredis>=3.0.0,<4.0  # Performance and security
 
 # ==========================================
 # Testing (Secure Versions)
 # ==========================================
 pytest>=8.3.4,<10.0
-pytest-cov>=6.0.0,<7.0
+pytest-cov>=6.0.0,<8.0
 pytest-asyncio>=0.24.0,<1.0
 pytest-mock>=3.14.0,<4.0
 
@@ -117,7 +117,7 @@ safety>=3.2.11,<4.0  # Vulnerability scanner
 # ==========================================
 # Trading & Market Data (Latest Stable)
 # ==========================================
-yfinance>=0.2.50,<1.0
+yfinance>=0.2.50,<2.0
 ccxt>=4.4.42,<5.0
 python-binance>=1.0.22,<2.0
 
