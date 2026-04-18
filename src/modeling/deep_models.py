@@ -175,8 +175,11 @@ class DeepModelTrainer:
         if target_col not in data.columns:
             if "close" not in data.columns:
                 raise ValueError("Data must include a target column or 'close' price.")
-            data[target_col] = (data["close"].shift(-1) > data["close"]).astype(int)
+            future_close = data["close"].shift(-1)
+            data[target_col] = (future_close > data["close"]).astype(float)
+            data.loc[future_close.isna(), target_col] = np.nan
             data = data.dropna(subset=[target_col])
+            data[target_col] = data[target_col].astype(int)
 
         if self.feature_columns:
             features = [f.lower() for f in self.feature_columns if f.lower() in data.columns]

@@ -15,8 +15,8 @@ from fastapi.middleware.gzip import GZipMiddleware
 from fastapi.responses import JSONResponse
 from fastapi.security import APIKeyHeader
 
-from src.api.config import load_api_settings
-from src.api.routes import agents, health, market_data, portfolio, risk_management, trading_signals
+from .config import load_api_settings
+from .routes import agents, health, market_data, portfolio, risk_management, trading_signals
 
 logger = logging.getLogger(__name__)
 settings = load_api_settings()
@@ -165,4 +165,4 @@ async def root():
 if __name__ == "__main__":
     import uvicorn
 
-    uvicorn.run("src.api.main:app", host="0.0.0.0", port=8000, reload=False, log_level="info")
+    uvicorn.run("api.main:app", host="0.0.0.0", port=8000, reload=False, log_level="info")

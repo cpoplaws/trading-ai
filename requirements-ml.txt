@@ -1,6 +1,7 @@
 # Optional ML runtime dependencies
 keras>=3.13.1,<4.0
 tensorflow>=2.16.0
+torch>=2.0.0,<3.0
 matplotlib>=3.7.0,<4.0
 seaborn>=0.12.0,<1.0
 TA-Lib>=0.4.28
