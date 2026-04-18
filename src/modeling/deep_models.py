@@ -259,12 +259,14 @@ class DeepModelTrainer:
         if len(sequences) < 8:
             raise ValueError("Insufficient sequences for training deep model.")
 
+        unique, counts = np.unique(labels, return_counts=True)
+        can_stratify = len(unique) > 1 and counts.min() >= 2
         X_train, X_val, y_train, y_val = train_test_split(
             sequences,
             labels,
             test_size=validation_size,
             random_state=42,
-            stratify=labels if len(np.unique(labels)) > 1 else None,
+            stratify=labels if can_stratify else None,
         )
 
         train_loader = DataLoader(
