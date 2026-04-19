@@ -36,6 +36,7 @@ core = [
 ml = [
   "keras>=3.13.1,<4.0",
   "tensorflow>=2.16.0",
+  "torch>=2.0.0,<3.0",
 ]
 dev = [
   "pytest>=7.4.0,<9.0",
@@ -55,8 +56,8 @@ include-package-data = true
 
 [tool.setuptools.packages.find]
 where = ["src"]
-include = ["quantlytics*", "src*", "api*"]
-exclude = ["web-dashboard*", "mobile-app*"]
+include = ["*"]
+exclude = ["web-dashboard*", "mobile-app*", "tests*"]
 
 [tool.ruff]
 line-length = 100
