@@ -5,11 +5,11 @@ from typing import Optional
 
 import pandas as pd
 
-from ..data_ingestion.macro_data import MacroDataFetcher
-from ..data_ingestion.news_scraper import NewsScraper
-from ..data_ingestion.reddit_sentiment import RedditSentimentAnalyzer
+from data_ingestion.macro_data import MacroDataFetcher
+from data_ingestion.news_scraper import NewsScraper
+from data_ingestion.reddit_sentiment import RedditSentimentAnalyzer
 from .feature_generator import FeatureGenerator
-from ..utils.logger import setup_logger
+from utils.logger import setup_logger
 
 logger = setup_logger(__name__)
 

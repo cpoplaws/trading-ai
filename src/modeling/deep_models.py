@@ -166,7 +166,11 @@ class DeepModelTrainer:
         self.is_fitted = False
 
     def _prepare_sequences(
-        self, df: pd.DataFrame, target_col: str, fit_scaler: bool = True
+        self,
+        df: pd.DataFrame,
+        target_col: str,
+        fit_scaler: bool = True,
+        require_target: bool = True,
     ) -> Tuple[np.ndarray, np.ndarray, List[str]]:
         data = df.copy()
         data.columns = data.columns.str.lower()
@@ -177,8 +181,13 @@ class DeepModelTrainer:
                 raise ValueError("Data must include a target column or 'close' price.")
             future_close = data["close"].shift(-1)
             data[target_col] = (future_close > data["close"]).astype(float)
-            data.loc[future_close.isna(), target_col] = np.nan
-            data = data.dropna(subset=[target_col])
+            if require_target:
+                data.loc[future_close.isna(), target_col] = np.nan
+                data = data.dropna(subset=[target_col])
+            else:
+                # For inference, keep the final (unlabeled) row so the newest
+                # window is still emitted. Label is a placeholder.
+                data[target_col] = data[target_col].fillna(0)
             data[target_col] = data[target_col].astype(int)
 
         if self.feature_columns:
@@ -378,7 +387,9 @@ class DeepModelTrainer:
         if not self.is_fitted or self.model is None or self.scaler is None:
             raise ValueError("Model must be trained or loaded before prediction.")
 
-        sequences, _, _ = self._prepare_sequences(df, target_col, fit_scaler=False)
+        sequences, _, _ = self._prepare_sequences(
+            df, target_col, fit_scaler=False, require_target=False
+        )
         if len(sequences) == 0:
             return np.empty((0,), dtype=np.float32)
 
