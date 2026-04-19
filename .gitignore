@@ -5,6 +5,7 @@ __pycache__/
 *.pyd
 env/
 venv/
+.venv/
 *.env
 
 # Data
@@ -45,3 +46,5 @@ docs/phase_guides/ignore_phase_1_base_system.md
 
 # Frontend artifacts
 src/web-dashboard/node_modules/
+apps/dashboard/node_modules/
+node_modules/
