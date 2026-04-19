@@ -28,7 +28,11 @@ def _run_python_script(script_path: Path) -> int:
     if not script_path.exists():
         print(f"❌ Script not found: {script_path}")
         return 1
-    return subprocess.call([sys.executable, str(script_path)], cwd=PROJECT_ROOT)
+    env = os.environ.copy()
+    existing = env.get("PYTHONPATH", "")
+    prefix = f"{PROJECT_ROOT}{os.pathsep}{PROJECT_ROOT / 'src'}"
+    env["PYTHONPATH"] = f"{prefix}{os.pathsep}{existing}" if existing else prefix
+    return subprocess.call([sys.executable, str(script_path)], cwd=PROJECT_ROOT, env=env)
 
 
 def start_dashboard() -> int:
