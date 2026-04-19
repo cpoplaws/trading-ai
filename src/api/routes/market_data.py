@@ -9,10 +9,14 @@ import logging
 
 logger = logging.getLogger(__name__)
 
-# Database manager import
+# Database manager import (supports both installed-package and src-layout dev paths)
 try:
-    from src.database.database_manager import DatabaseManager
-    from src.infrastructure.market_data_cache import MarketDataCache
+    try:
+        from database.database_manager import DatabaseManager
+        from infrastructure.market_data_cache import MarketDataCache
+    except ImportError:
+        from src.database.database_manager import DatabaseManager
+        from src.infrastructure.market_data_cache import MarketDataCache
     HAS_DB = True
     HAS_CACHE = True
 except ImportError:

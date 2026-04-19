@@ -399,7 +399,7 @@ class DeepModelTrainer:
         """
         Load a saved model checkpoint (.pt file).
         """
-        payload = torch.load(model_path, map_location=self.device)
+        payload = torch.load(model_path, map_location=self.device, weights_only=False)
         self.sequence_length = payload.get("sequence_length", self.sequence_length)
         self.feature_columns = payload.get("feature_columns", self.feature_columns)
         self.scaler = payload.get("scaler")

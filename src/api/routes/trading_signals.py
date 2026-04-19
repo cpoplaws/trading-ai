@@ -11,11 +11,16 @@ from pydantic import BaseModel
 
 logger = logging.getLogger(__name__)
 
-# Database and cache imports
+# Database and cache imports (supports both installed-package and src-layout dev paths)
 try:
-    from src.crypto_strategies.backtest_engine import BacktestEngine
-    from src.database.database_manager import DatabaseManager
-    from src.infrastructure.market_data_cache import MarketDataCache
+    try:
+        from crypto_strategies.backtest_engine import BacktestEngine
+        from database.database_manager import DatabaseManager
+        from infrastructure.market_data_cache import MarketDataCache
+    except ImportError:
+        from src.crypto_strategies.backtest_engine import BacktestEngine
+        from src.database.database_manager import DatabaseManager
+        from src.infrastructure.market_data_cache import MarketDataCache
 
     HAS_DB = True
     HAS_CACHE = True
