@@ -22,7 +22,6 @@ yfinance>=0.2.0
 ccxt>=4.2.0  # Crypto exchange integration
 python-binance>=1.0.19
 coinbase>=2.1.0
-alpaca-trade-api>=3.0.0
 
 # ==========================================
 # Technical Analysis

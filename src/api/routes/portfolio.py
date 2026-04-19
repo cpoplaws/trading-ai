@@ -10,9 +10,12 @@ import asyncio
 
 logger = logging.getLogger(__name__)
 
-# Database manager import
+# Database manager import (supports both installed-package and src-layout dev paths)
 try:
-    from src.database.database_manager import DatabaseManager
+    try:
+        from database.database_manager import DatabaseManager
+    except ImportError:
+        from src.database.database_manager import DatabaseManager
     HAS_DB = True
 except ImportError:
     HAS_DB = False
