@@ -67,6 +67,10 @@ async def process_time_and_rate_limit(request: Request, call_next):
     while window and now - window[0] > 60:
         window.popleft()
 
+    if not window:
+        rate_window.pop(client_id, None)
+        window = rate_window[client_id]
+
     if len(window) >= settings.rate_limit_per_minute:
         return JSONResponse(
             status_code=status.HTTP_429_TOO_MANY_REQUESTS,
@@ -108,6 +112,9 @@ def _is_valid_api_key(api_key: str) -> bool:
 
 
 async def get_api_key(api_key: str = Security(api_key_header)) -> str:
+    if not settings.api_keys and settings.environment == "development":
+        return api_key or "dev"
+
     if not api_key:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="API key required")
 
