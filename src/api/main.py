@@ -2,12 +2,10 @@
 
 from __future__ import annotations
 
-from collections import defaultdict, deque
 from contextlib import asynccontextmanager
 import hmac
 import logging
 import time
-from typing import Deque
 
 from fastapi import Depends, FastAPI, HTTPException, Request, Security, status
 from fastapi.middleware.cors import CORSMiddleware
@@ -16,6 +14,7 @@ from fastapi.responses import JSONResponse
 from fastapi.security import APIKeyHeader
 
 from .config import load_api_settings
+from .rate_limiter import RateLimiter, build_rate_limiter
 from .routes import agents, health, market_data, portfolio, risk_management, trading_signals
 
 logger = logging.getLogger(__name__)
@@ -24,14 +23,24 @@ settings = load_api_settings()
 API_TITLE = "Quantlytics API"
 API_VERSION = "1.1.0"
 
-rate_window: dict[str, Deque[float]] = defaultdict(deque)
+
+def _validate_production_settings() -> None:
+    if settings.environment == "development":
+        return
+    missing = []
+    if not settings.api_keys:
+        missing.append("QUANTLYTICS_API_KEYS")
+    if not settings.cors_origins or settings.cors_origins == ["http://localhost:3000"]:
+        logger.warning("CORS origins look development-flavored in env=%s", settings.environment)
+    if missing:
+        raise RuntimeError(f"Missing required env outside development: {', '.join(missing)}")
 
 
 @asynccontextmanager
-async def lifespan(_: FastAPI):
+async def lifespan(app: FastAPI):
     logger.info("Starting %s v%s (%s)", API_TITLE, API_VERSION, settings.environment)
-    if settings.environment != "development" and not settings.api_keys:
-        raise RuntimeError("QUANTLYTICS_API_KEYS must be configured outside development")
+    _validate_production_settings()
+    app.state.rate_limiter = await build_rate_limiter()
     yield
     logger.info("Shutting down %s", API_TITLE)
 
@@ -60,27 +69,22 @@ app.add_middleware(GZipMiddleware, minimum_size=1000)
 async def process_time_and_rate_limit(request: Request, call_next):
     start_time = time.time()
 
-    client_id = request.client.host if request.client else "unknown"
-    now = time.monotonic()
-    window = rate_window[client_id]
+    limiter: RateLimiter | None = getattr(request.app.state, "rate_limiter", None)
+    if limiter is not None:
+        client_id = request.client.host if request.client else "unknown"
+        allowed = await limiter.allow(client_id, settings.rate_limit_per_minute, window_seconds=60)
+        if not allowed:
+            return JSONResponse(
+                status_code=status.HTTP_429_TOO_MANY_REQUESTS,
+                content={"error": "Rate limit exceeded", "retry_after_seconds": 60},
+                headers={"Retry-After": "60"},
+            )
 
-    while window and now - window[0] > 60:
-        window.popleft()
-
-    if not window:
-        rate_window.pop(client_id, None)
-        window = rate_window[client_id]
-
-    if len(window) >= settings.rate_limit_per_minute:
-        return JSONResponse(
-            status_code=status.HTTP_429_TOO_MANY_REQUESTS,
-            content={"error": "Rate limit exceeded", "retry_after_seconds": 60},
-            headers={"Retry-After": "60"},
-        )
-
-    window.append(now)
     response = await call_next(request)
-    response.headers["X-Process-Time"] = str(time.time() - start_time)
+    response.headers["X-Process-Time"] = f"{time.time() - start_time:.4f}"
+    response.headers["X-Content-Type-Options"] = "nosniff"
+    response.headers["X-Frame-Options"] = "DENY"
+    response.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
     return response
 
 

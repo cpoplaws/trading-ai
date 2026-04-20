@@ -86,7 +86,22 @@ def show_status() -> int:
 def run_api() -> None:
     import uvicorn
 
-    uvicorn.run("api.main:app", host="0.0.0.0", port=int(os.getenv("PORT", "8000")), reload=False)
+    workers_raw = os.getenv("API_WORKERS") or os.getenv("WEB_CONCURRENCY") or "1"
+    try:
+        workers = max(1, int(workers_raw))
+    except ValueError:
+        workers = 1
+
+    uvicorn.run(
+        "api.main:app",
+        host="0.0.0.0",
+        port=int(os.getenv("PORT", "8000")),
+        workers=workers,
+        reload=False,
+        log_level=os.getenv("LOG_LEVEL", "info"),
+        proxy_headers=True,
+        forwarded_allow_ips="*",
+    )
 
 
 def build_parser() -> argparse.ArgumentParser:
