@@ -15,7 +15,7 @@ attrs==25.4.0
 Authlib==1.6.11
 backports-datetime-fromisoformat==2.0.3
 backports.asyncio.runner==1.2.0
-bandit==1.8.6
+bandit==1.9.4
 bcrypt==5.0.0
 beautifulsoup4==4.14.3
 bitarray==3.8.0
