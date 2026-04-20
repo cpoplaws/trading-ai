@@ -133,7 +133,7 @@ py-serializable==2.1.0
 pyarrow==21.0.0
 pyasn1==0.6.3
 pycares==4.11.0
-pycparser==2.23
+pycparser==3.0
 pycryptodome==3.23.0
 pydantic==2.12.5
 pydantic-settings==2.11.0
