@@ -38,6 +38,14 @@ ml = [
   "tensorflow>=2.16.0",
   "torch>=2.0.0,<3.0",
 ]
+research = [
+  "pennylane>=0.35.0,<1.0",
+  "torch>=2.0.0,<3.0",
+  "numpy>=1.24.0,<3.0",
+]
+redis = [
+  "redis>=5.0.0,<6.0",
+]
 dev = [
   "pytest>=7.4.0,<9.0",
   "pytest-asyncio>=0.21.0,<1.0",
