@@ -113,7 +113,7 @@ numpy==1.26.4
 optree==0.18.0
 packageurl-python==0.17.6
 packaging==25.0
-pandas==2.3.3
+pandas==3.0.2
 parsimonious==0.10.0
 passlib==1.7.4
 pathspec==1.0.4
