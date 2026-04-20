@@ -92,7 +92,7 @@ loguru==0.7.3
 lxml==5.4.0
 macholib @ file:///AppleInternal/Library/BuildRoots/4~CDlvugAeMYaHcTWIELyAQ2joHAecmlI0GAlKPsw/Library/Caches/com.apple.xbs/Sources/python3/macholib-1.15.2-py2.py3-none-any.whl
 Mako==1.3.10
-Markdown==3.9
+Markdown==3.10.2
 markdown-it-py==3.0.0
 MarkupSafe==3.0.3
 marshmallow==4.1.2
