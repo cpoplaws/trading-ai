@@ -3,7 +3,7 @@ aiodns==3.6.1
 aiohappyeyeballs==2.6.1
 aiohttp==3.13.5
 aiosignal==1.4.0
-alembic==1.16.5
+alembic==1.18.4
 altair==5.5.0
 altgraph @ file:///AppleInternal/Library/BuildRoots/4~CDlvugAeMYaHcTWIELyAQ2joHAecmlI0GAlKPsw/Library/Caches/com.apple.xbs/Sources/python3/altgraph-0.17.2-py2.py3-none-any.whl
 annotated-doc==0.0.4
