@@ -149,7 +149,7 @@ pytest-cov==6.3.0
 pytest-mock==3.15.1
 python-binance==1.0.34
 python-dateutil==2.9.0.post0
-python-dotenv==1.2.1
+python-dotenv==1.2.2
 python-jose==3.5.0
 python-multipart==0.0.26
 pytz==2025.2
