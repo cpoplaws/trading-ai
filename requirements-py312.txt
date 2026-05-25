@@ -46,9 +46,9 @@ TA-Lib>=0.4.28
 
 # Alpaca - integrated via direct REST in src/execution/alpaca_broker.py (requests)
 # CCXT - Cryptocurrency exchange trading library
-ccxt>=4.4.0,<5.0
+ccxt>=4.5.54,<5.0
 # python-binance - Binance exchange API
-python-binance>=1.0.20,<2.0
+python-binance>=1.0.36,<2.0
 
 # ==============================================================================
 # Web3 & Blockchain
@@ -87,9 +87,9 @@ certifi>=2026.1.0
 # ==============================================================================
 
 # SQLAlchemy - SQL toolkit and ORM
-sqlalchemy>=2.0.0,<3.0
+sqlalchemy>=2.0.50,<3.0
 # PostgreSQL adapter
-psycopg2-binary>=2.9.0,<3.0
+psycopg2-binary>=2.9.12,<3.0
 # Redis client
 redis>=5.2.0,<8.0
 # Alembic - Database migrations
@@ -109,7 +109,7 @@ pydantic-settings>=2.8.0,<3.0
 # Starlette - ASGI framework
 starlette>=0.45.0,<1.0
 # Python multipart - File uploads
-python-multipart>=0.0.20,<1.0
+python-multipart>=0.0.29,<1.0
 
 # Authentication
 python-jose[cryptography]>=3.3.0,<4.0
