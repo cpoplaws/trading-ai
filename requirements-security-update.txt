@@ -41,7 +41,7 @@ scikit-learn>=1.5.2,<2.0  # Latest stable with security patches
 # ==========================================
 fastapi>=0.115.6,<1.0  # Latest with security patches
 uvicorn>=0.34.0,<1.0  # Updated to patch vulnerabilities
-starlette>=0.41.3,<1.0  # Core security updates
+starlette>=1.3.1,<2.0  # Core security updates
 pydantic>=2.10.4,<3.0  # Validation security improvements
 
 # ==========================================
