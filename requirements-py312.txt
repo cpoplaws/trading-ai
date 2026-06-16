@@ -109,7 +109,7 @@ pydantic-settings>=2.8.0,<3.0
 # Starlette - ASGI framework
 starlette>=0.45.0,<1.0
 # Python multipart - File uploads
-python-multipart>=0.0.20,<1.0
+python-multipart>=0.0.31,<1.0
 
 # Authentication
 python-jose[cryptography]>=3.3.0,<4.0
