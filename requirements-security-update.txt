@@ -54,7 +54,7 @@ asyncpg>=0.30.0,<1.0  # Async PostgreSQL security
 # ==========================================
 # Async & Network Libraries
 # ==========================================
-aiohttp>=3.11.10,<4.0  # Multiple security patches
+aiohttp>=3.14.1,<4.0  # Multiple security patches
 websockets>=14.1,<17.0  # WebSocket security updates
 httpx>=0.28.1,<1.0  # Modern HTTP client with security features
 

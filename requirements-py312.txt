@@ -72,7 +72,7 @@ solders>=0.22.0,<1.0
 # ==============================================================================
 
 # aiohttp - Async HTTP client/server
-aiohttp>=3.13.0,<4.0
+aiohttp>=3.14.1,<4.0
 # WebSockets - Async WebSocket client/server
 websockets>=13.0,<17.0
 # requests - HTTP library
