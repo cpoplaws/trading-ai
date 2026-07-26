@@ -1,0 +1,1 @@
+- [Vercel Python+Next.js migration pattern](vercel-python-nextjs.md) — when a Vercel import has a Python backend + Next.js frontend, the frontend ports to Vite+React but the Python backend remains external.

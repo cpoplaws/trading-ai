@@ -1,36 +1,45 @@
-# [Project name]
+# Quantlytics — Crypto AI Trading Dashboard
 
-_Replace the heading above with the project's name, and this line with one sentence describing what this app does for users._
+A multi-chain AI-driven trading platform dashboard. Monitors portfolio performance, AI agent swarm activity, market intelligence signals, and trading strategies across Base, Solana, and L2 chains.
 
 ## Run & Operate
 
-- `pnpm --filter @workspace/api-server run dev` — run the API server (port 5000)
+- `pnpm --filter @workspace/trading-dashboard run dev` — run the dashboard frontend
+- `pnpm --filter @workspace/api-server run dev` — run the API server
 - `pnpm run typecheck` — full typecheck across all packages
-- `pnpm run build` — typecheck + build all packages
 - `pnpm --filter @workspace/api-spec run codegen` — regenerate API hooks and Zod schemas from the OpenAPI spec
-- `pnpm --filter @workspace/db run push` — push DB schema changes (dev only)
-- Required env: `DATABASE_URL` — Postgres connection string
+- Required env: `VITE_API_URL` — URL of the Python trading backend (defaults to `http://localhost:8000`)
+- Required env: `VITE_WS_URL` — WebSocket URL for live updates (defaults to `ws://localhost:8000`)
 
 ## Stack
 
 - pnpm workspaces, Node.js 24, TypeScript 5.9
-- API: Express 5
-- DB: PostgreSQL + Drizzle ORM
-- Validation: Zod (`zod/v4`), `drizzle-zod`
-- API codegen: Orval (from OpenAPI spec)
-- Build: esbuild (CJS bundle)
+- Frontend: Vite + React 18, Tailwind CSS v4, wouter for routing
+- API: Express 5 (scaffold, not yet used by the trading frontend)
+- DB: PostgreSQL + Drizzle ORM (scaffold)
+- Backend trading engine: Python FastAPI (external service in `.migration-backup/`)
 
 ## Where things live
 
-_Populate as you build — short repo map plus pointers to the source-of-truth file for DB schema, API contracts, theme files, etc._
+- `artifacts/trading-dashboard/` — the main dashboard web app
+  - `src/pages/Dashboard.tsx` — main dashboard page
+  - `src/components/dashboard/` — AgentSwarm, MarketIntelligence, StrategyGrid, RecentTrades, PortfolioChart
+  - `src/hooks/` — usePortfolio, useStrategies, useWebSocket
+  - `src/lib/api-client.ts` — axios client pointing at the Python backend
+- `artifacts/api-server/` — Express API scaffold (unused by the trading app; available for future features)
+- `.migration-backup/` — original Vercel/Next.js import (read-only reference)
+- `lib/api-spec/openapi.yaml` — OpenAPI spec (scaffold, extend for new features)
 
 ## Architecture decisions
 
-_Populate as you build — non-obvious choices a reader couldn't infer from the code (3-5 bullets)._
+- The trading frontend connects directly to the external Python FastAPI backend via `VITE_API_URL`. It does NOT use the workspace Express api-server. The api-server is available for future Replit-native features.
+- App is dark-mode only — `dark` class is added to `<html>` in `main.tsx`. All theme CSS vars are set for dark in both `:root` and `.dark`.
+- `process.env.NEXT_PUBLIC_*` vars were converted to `import.meta.env.VITE_*` during migration.
+- No Next.js API routes existed in the original — the app is purely a frontend dashboard consuming an external backend.
 
 ## Product
 
-_Describe the high-level user-facing capabilities of this app once they exist._
+A real-time AI trading dashboard showing: live portfolio value/PnL, AI agent swarm status and decisions, market intelligence signals (regime, sentiment, technical indicators), trading strategy performance, and recent trades feed.
 
 ## User preferences
 
@@ -38,7 +47,9 @@ _Populate as you build — explicit user instructions worth remembering across s
 
 ## Gotchas
 
-_Populate as you build — sharp edges, "always run X before Y" rules._
+- The Python trading backend must be deployed separately and `VITE_API_URL` pointed at it. Without it, all sections show "Failed to fetch" or empty states — this is expected.
+- Do NOT run `pnpm dev` at the workspace root — use `--filter @workspace/trading-dashboard` instead.
+- Tailwind v4 is used (via `@tailwindcss/vite`), not v3. The config is in `vite.config.ts`, not `tailwind.config.js`.
 
 ## Pointers
 
