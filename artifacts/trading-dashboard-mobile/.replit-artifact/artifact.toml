@@ -1,0 +1,24 @@
+kind = "mobile"
+previewPath = "/trading-dashboard-mobile/"
+title = "Quantlytics Mobile"
+description = "A native iOS and Android companion for the Quantlytics AI trading platform, with live portfolio metrics, strategy controls, agent swarm controls, and recent trade activity."
+version = "1.0.0"
+id = "artifacts/trading-dashboard-mobile"
+router = "expo-domain"
+
+[[services]]
+name = "expo"
+ensurePreviewReachable = "/status"
+paths = [ "/trading-dashboard-mobile/" ]
+localPort = 23051
+
+[services.development]
+run = "pnpm --filter @workspace/trading-dashboard-mobile run dev"
+
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/trading-dashboard-mobile", "run", "build" ]
+run = [ "pnpm", "--filter", "@workspace/trading-dashboard-mobile", "run", "serve" ]
+
+[services.env]
+PORT = "23051"
+BASE_PATH = "/trading-dashboard-mobile/"
