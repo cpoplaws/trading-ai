@@ -11,7 +11,7 @@ numpy>=2.2.0,<3.0
 # Pandas - Data manipulation and analysis
 pandas>=2.3.0,<4.0
 # SciKit-Learn - Machine learning algorithms
-scikit-learn>=1.6.0,<2.0
+scikit-learn>=1.9.0,<2.0
 # Matplotlib - Plotting and visualization
 matplotlib>=3.9.0,<4.0
 # Seaborn - Statistical visualization
@@ -26,7 +26,7 @@ scipy>=1.13.0,<2.0
 # TensorFlow - Deep learning framework
 tensorflow>=2.20.0,<3.0
 # Keras - High-level neural networks API (standalone or via TensorFlow)
-keras>=3.13.1,<4.0
+keras>=3.15.1,<4.0
 
 # Note: For CUDA support, install tensorflow-gpu instead
 # tensorflow-gpu>=2.20.0,<3.0
@@ -55,13 +55,13 @@ python-binance>=1.0.20,<2.0
 # ==============================================================================
 
 # Web3.py - Ethereum blockchain interaction
-web3>=7.14.0,<8.0
+web3>=7.16.0,<8.0
 # Ethereum account management
 eth-account>=0.13.0,<1.0
 # Ethereum utilities
 eth-utils>=5.3.0,<6.0
 eth-keys>=0.7.0,<1.0
-eth-abi>=5.2.0,<6.0
+eth-abi>=6.0.0,<7.0
 
 # Solana blockchain
 solana>=0.35.0,<1.0
@@ -72,13 +72,13 @@ solders>=0.22.0,<1.0
 # ==============================================================================
 
 # aiohttp - Async HTTP client/server
-aiohttp>=3.13.0,<4.0
+aiohttp>=3.14.3,<4.0
 # WebSockets - Async WebSocket client/server
 websockets>=13.0,<17.0
 # requests - HTTP library
-requests>=2.32.0,<3.0
+requests>=2.34.2,<3.0
 # urllib3 - HTTP client (with security fixes)
-urllib3>=2.6.3,<3.0
+urllib3>=2.7.0,<3.0
 # certifi - Root certificates
 certifi>=2026.1.0
 
@@ -91,7 +91,7 @@ sqlalchemy>=2.0.0,<3.0
 # PostgreSQL adapter
 psycopg2-binary>=2.9.0,<3.0
 # Redis client
-redis>=5.2.0,<8.0
+redis>=8.1.0,<9.0
 # Alembic - Database migrations
 alembic>=1.13.0,<2.0
 
@@ -100,16 +100,16 @@ alembic>=1.13.0,<2.0
 # ==============================================================================
 
 # FastAPI - Modern web framework
-fastapi>=0.115.0,<1.0
+fastapi>=0.141.1,<1.0
 # Uvicorn - ASGI server
 uvicorn[standard]>=0.34.0,<1.0
 # Pydantic - Data validation
 pydantic>=2.12.0,<3.0
 pydantic-settings>=2.8.0,<3.0
 # Starlette - ASGI framework
-starlette>=0.45.0,<1.0
+starlette>=1.3.1,<2.0
 # Python multipart - File uploads
-python-multipart>=0.0.20,<1.0
+python-multipart>=0.0.32,<1.0
 
 # Authentication
 python-jose[cryptography]>=3.3.0,<4.0
@@ -120,11 +120,11 @@ passlib[bcrypt]>=1.7.4,<2.0
 # ==============================================================================
 
 # Streamlit - Data app framework
-streamlit>=1.50.0,<2.0
+streamlit>=1.62.0,<2.0
 # Plotly - Interactive plotting
 plotly>=6.5.0,<7.0
 # Pillow - Image processing (with security fixes)
-pillow>=12.1.1,<13.0
+pillow>=12.3.0,<13.0
 # Altair - Declarative visualization
 altair>=5.5.0,<6.0
 
@@ -148,14 +148,14 @@ beautifulsoup4>=4.14.0,<5.0
 # VADER Sentiment - Social media sentiment
 vaderSentiment>=3.3.2,<4.0
 # lxml - XML/HTML processing
-lxml>=5.3.0,<7.0
+lxml>=6.1.2,<7.0
 
 # ==============================================================================
 # Utilities & Tools
 # ==============================================================================
 
 # python-dotenv - Environment variable management
-python-dotenv>=1.2.0,<2.0
+python-dotenv>=1.2.3,<2.0
 # loguru - Logging made easy
 loguru>=0.7.3,<1.0
 # python-dateutil - Date utilities
@@ -167,7 +167,7 @@ joblib>=1.5.0,<2.0
 # schedule - Job scheduling
 schedule>=1.2.0,<2.0
 # click - CLI creation
-click>=8.1.0,<9.0
+click>=8.5.0,<9.0
 # rich - Rich text in terminal
 rich>=14.3.0,<15.0
 # tqdm - Progress bars
@@ -185,7 +185,7 @@ orjson>=3.10.0,<4.0  # Fast JSON
 # Prometheus client
 prometheus-client>=0.21.0,<1.0
 # Sentry - Error tracking
-sentry-sdk>=2.20.0,<3.0
+sentry-sdk>=2.68.1,<3.0
 # OpenTelemetry
 opentelemetry-api>=1.29.0,<2.0
 opentelemetry-sdk>=1.29.0,<2.0
@@ -195,14 +195,14 @@ opentelemetry-sdk>=1.29.0,<2.0
 # ==============================================================================
 
 # pytest - Testing framework
-pytest>=8.4.0,<10.0
+pytest>=9.1.1,<10.0
 pytest-asyncio>=0.25.0,<1.0
 pytest-cov>=6.0.0,<8.0
 pytest-mock>=3.15.0,<4.0
 pytest-timeout>=2.3.0,<3.0
 
 # Code Quality
-black>=24.10.0,<27.0  # Code formatter
+black>=26.5.1,<27.0  # Code formatter
 ruff>=0.8.0,<1.0  # Fast linter
 mypy>=1.13.0,<2.0  # Static type checker
 isort>=5.13.0,<6.0  # Import sorter
