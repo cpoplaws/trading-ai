@@ -8,6 +8,7 @@ A multi-chain AI-driven trading platform dashboard. Monitors portfolio performan
 - `pnpm --filter @workspace/api-server run dev` — run the API server
 - `pnpm run typecheck` — full typecheck across all packages
 - `pnpm --filter @workspace/api-spec run codegen` — regenerate API hooks and Zod schemas from the OpenAPI spec
+- `pnpm --filter @workspace/trading-dashboard-mobile run check:trading-api` — contract check for the mobile trading controls against the safe staging mirror (also registered as the `mobile-trading-api` validation command)
 - Required env: `VITE_API_URL` — URL of the Python trading backend (defaults to `http://localhost:8000`)
 - Required env: `VITE_WS_URL` — WebSocket URL for live updates (defaults to `ws://localhost:8000`)
 
@@ -45,9 +46,14 @@ A real-time AI trading dashboard showing: live portfolio value/PnL, AI agent swa
 
 _Populate as you build — explicit user instructions worth remembering across sessions._
 
+## Testing the mobile trading controls
+
+Release checks for the native app must never hit the live Python trading engine. `artifacts/api-server/src/routes/staging-trading.ts` mirrors every endpoint the mobile client calls, backed by deterministic in-memory fixtures, served at `/api/staging-trading` (dev only unless `ENABLE_STAGING_TRADING_API=1`). See `artifacts/trading-dashboard-mobile/testing/README.md` for the contract check and the mobile-width browser pass.
+
 ## Gotchas
 
-- The Python trading backend must be deployed separately and `VITE_API_URL` pointed at it. Without it, all sections show "Failed to fetch" or empty states — this is expected.
+- The Python trading backend must be deployed separately and `VITE_API_URL` pointed at it. Without it, all sections show "Failed to fetch" or empty states — this is expected. For the mobile app, `EXPO_PUBLIC_API_URL` overrides `VITE_API_URL`, which is how the staging mirror is wired in for tests.
+- Do not let a blanket `image-size` override reach Metro. Metro declares `^1.0.2` and calls `imageSize(filePath)`; image-size v2 accepts buffers only, and the mismatch fails every Expo web bundle while transforming app assets. `pnpm-workspace.yaml` pins `metro>image-size: 1.2.1` (the patched v1) to keep both the security fix and a working bundler.
 - Do NOT run `pnpm dev` at the workspace root — use `--filter @workspace/trading-dashboard` instead.
 - Tailwind v4 is used (via `@tailwindcss/vite`), not v3. The config is in `vite.config.ts`, not `tailwind.config.js`.
 
