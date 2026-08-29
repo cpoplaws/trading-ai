@@ -8,3 +8,17 @@ type = "audio"
 title = "background music"
 description = "Generated music: Driving electronic synthwave instrumental background music scoring a fintech AI trading platform product reveal. Pulsing analog synth arpeggios, deep sub bass, crisp electronic percu…"
 logical_id = "43175b21-6793-4b57-82c3-de31eb2f098b"
+
+[[outputs]]
+id = "7HWXml1hGJWHgMsglMHS7"
+uri = "file://.local/outputs/Quantlytics-Pitch-Deck.pdf"
+type = "pdf"
+title = "Quantlytics Pitch Deck (PDF)"
+description = "Eight-slide PDF export of the Quantlytics platform pitch deck."
+logical_id = "d87043e5-6868-4aae-8aa1-5cdb8631dd5d"
+content_hash = "sha256:3fc6e58545b976a4818390aa3ac994e18b0d98d6943dd19f16058491fd92487f"
+size = 998361
+mtime_ms = 1788035368216
+storage_uri = "gcs://replit-rams-assets-janeway/rams/assets/repl:9aaf4ab4-a18f-4b70-babd-eaae0cf624b1/d87043e5-6868-4aae-8aa1-5cdb8631dd5d/89456cf8-e03c-4928-8881-9a6eea8dfe29"
+storage_version_token = "1788035411259597"
+content_type = "application/pdf"

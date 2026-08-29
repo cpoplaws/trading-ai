@@ -1,4 +1,5 @@
 - [Vercel Python+Next.js migration pattern](vercel-python-nextjs.md) — when a Vercel import has a Python backend + Next.js frontend, the frontend ports to Vite+React but the Python backend remains external.
 - [Expo/Metro dependency pin hazards](expo-metro-dependency-pins.md) — blanket transitive pins can hand Metro an incompatible major and blank the Expo web bundle; scope them with `metro>{pkg}`.
 - [Video artifact traps](video-artifact-scaffold-quirks.md) — fresh video scaffolds fail typecheck for a misleading reason, and autoplay policy silently mutes the music bed in preview.
+- [Visual QA for slide decks](slides-visual-qa.md) — tall-viewport screenshots of the all-slides route fake overlaps; QA a deck by exporting a PDF and rasterizing the pages.
 - [Testing against an external trading backend](external-backend-staging-mirror.md) — mirror the external API in the workspace api-server rather than mocking on localhost; https preview blocks http mocks.

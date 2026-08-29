@@ -1,0 +1,66 @@
+[
+  {
+    "id": "6f1c0a92-3b7d-4a41-9c2e-1d5a8b3e0f11",
+    "position": 1,
+    "filepath": "src/pages/slides/Title.tsx",
+    "title": "Quantlytics",
+    "description": "Title slide: Quantlytics wordmark, tagline and multi-chain positioning over a navy lattice hero image.",
+    "speakerNotes": ""
+  },
+  {
+    "id": "2a84c7d1-9e63-4f28-8b0a-7c41d9e2b6a3",
+    "position": 2,
+    "filepath": "src/pages/slides/Problem.tsx",
+    "title": "The problem",
+    "description": "Four structural problems facing crypto trading desks: always-on markets, fragmented liquidity, noisy signals and late risk review.",
+    "speakerNotes": ""
+  },
+  {
+    "id": "b3d5e8f0-1c47-4a92-95d6-2e7b0a4c8d19",
+    "position": 3,
+    "filepath": "src/pages/slides/PlatformOverview.tsx",
+    "title": "Platform overview",
+    "description": "The read-decide-execute loop across market intelligence, the agent swarm and multi-chain routing, with headline demo metrics.",
+    "speakerNotes": ""
+  },
+  {
+    "id": "7c92f4a6-5d38-4b71-a0e3-9f6c1b8d2e40",
+    "position": 4,
+    "filepath": "src/pages/slides/AgentSwarm.tsx",
+    "title": "AI agent swarm",
+    "description": "The four specialist agents with their accuracy and decision counts, coordinated by consensus voting.",
+    "speakerNotes": ""
+  },
+  {
+    "id": "d1e6b0c3-8a24-4f95-b7d8-3c0a5e9f4b62",
+    "position": 5,
+    "filepath": "src/pages/slides/MultiChainExecution.tsx",
+    "title": "Multi-chain execution",
+    "description": "Routing across Base, Solana, Arbitrum and Optimism with a recent fills panel from the demo environment.",
+    "speakerNotes": ""
+  },
+  {
+    "id": "5b0d9e2f-6c17-4a83-92b4-8d3f7a1c0e56",
+    "position": 6,
+    "filepath": "src/pages/slides/MarketIntelligence.tsx",
+    "title": "Market intelligence",
+    "description": "Composite signal score with regime, momentum, volatility and alert readings.",
+    "speakerNotes": ""
+  },
+  {
+    "id": "e8f3a1b7-4d92-4c06-85a1-6b2d0c9e3f74",
+    "position": 7,
+    "filepath": "src/pages/slides/DemoFlow.tsx",
+    "title": "Live demo flow",
+    "description": "The five-step walkthrough of the live dashboard demo, from opening the portfolio to cutting risk mid-session.",
+    "speakerNotes": ""
+  },
+  {
+    "id": "9a4c2e70-7b58-4d13-8f6c-0e5b1d8a2c93",
+    "position": 8,
+    "filepath": "src/pages/slides/NextSteps.tsx",
+    "title": "Next steps",
+    "description": "Closing slide: three next steps toward live capital, with the Quantlytics tagline lockup.",
+    "speakerNotes": ""
+  }
+]
