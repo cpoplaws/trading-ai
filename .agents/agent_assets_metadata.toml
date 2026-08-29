@@ -1,0 +1,9 @@
+uploads = []
+generated = []
+
+[[outputs]]
+id = "jcaUswliALe3OWt8nSid2"
+uri = "file://artifacts/promo-video/public/audio/bg_music.mp3"
+type = "audio"
+title = "background music"
+description = "Generated music: Driving electronic synthwave instrumental background music scoring a fintech AI trading platform product reveal. Pulsing analog synth arpeggios, deep sub bass, crisp electronic percu…"
