@@ -4,9 +4,10 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "vite --config vite.config.ts --host 0.0.0.0",
+    "dev": "VITE_API_URL=\"${DASHBOARD_API_URL:-${VITE_API_URL:-}}\" VITE_WS_URL=\"${DASHBOARD_WS_URL:-${VITE_WS_URL:-}}\" vite --config vite.config.ts --host 0.0.0.0",
     "build": "vite build --config vite.config.ts",
     "serve": "vite preview --config vite.config.ts --host 0.0.0.0",
+    "check:trading-api": "node testing/dashboard-api-contract.mjs",
     "typecheck": "tsc -p tsconfig.json --noEmit"
   },
   "devDependencies": {

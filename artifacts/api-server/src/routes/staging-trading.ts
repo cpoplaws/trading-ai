@@ -1,19 +1,26 @@
 import { Router, type IRouter } from "express";
+import type { Server as HttpServer } from "node:http";
+import { Server as SocketIOServer } from "socket.io";
 
 /**
  * Safe staging mirror of the external Python trading API.
  *
- * The Quantlytics mobile app talks directly to the Python trading engine via
- * `EXPO_PUBLIC_API_URL`. Pointing automated checks at that engine would place
- * real orders, so this router reproduces the exact endpoints and response
- * shapes the mobile client consumes, backed by deterministic in-memory
- * fixtures. Nothing here touches live trading, brokerage credentials, or the
- * database.
+ * The Quantlytics mobile app (`EXPO_PUBLIC_API_URL`) and the web dashboard
+ * (`VITE_API_URL` / `VITE_WS_URL`) both talk directly to the Python trading
+ * engine. Pointing automated checks at that engine would place real orders, so
+ * this router reproduces the exact endpoints and response shapes those clients
+ * consume, backed by deterministic in-memory fixtures. Nothing here touches
+ * live trading, brokerage credentials, or the database.
  *
- * Mounted under `/api/staging-trading`, so the mobile client can be pointed at
+ * Mounted under `/api/staging-trading`, so a client can be pointed at
  * `<origin>/api/staging-trading` and keep using its real request paths
  * (`/api/portfolio`, `/api/strategies/:id/toggle`, ...) unchanged. That is what
  * makes the checks able to catch endpoint or response-shape regressions.
+ *
+ * The dashboard's live-update channel is mirrored too: a Socket.IO server on
+ * the same origin, served under the mirror's prefix
+ * (`/api/staging-trading/socket.io`), emitting the same events the dashboard's
+ * `useWebSocket` hook subscribes to.
  */
 
 interface Portfolio {
@@ -73,12 +80,44 @@ interface Trade {
   pnl?: number;
 }
 
+/** Shape read by the dashboard's `MarketIntelligence` component. */
+interface Intelligence {
+  signal: string;
+  composite_score: number;
+  confidence: number;
+  regime: {
+    regime: string;
+    confidence: number;
+    momentum: number;
+    volatility: number;
+  };
+  sentiment: {
+    sentiment: string;
+    score: number;
+  };
+  technical: {
+    rsi: number;
+    macd: number;
+    bb_position: number;
+  };
+  macro: {
+    trend: string;
+  };
+  recommendations: string[];
+  alerts: Array<{
+    type: string;
+    message: string;
+    severity: string;
+  }>;
+}
+
 interface StagingState {
   portfolio: Portfolio;
   strategies: Strategy[];
   swarm: SwarmStatus;
   decisions: Decision[];
   trades: Trade[];
+  intelligence: Intelligence;
 }
 
 const TRADE_SEEDS: Array<{
@@ -169,6 +208,51 @@ function buildInitialState(): StagingState {
       strategy: seed.strategy,
       pnl: seed.pnl,
     })),
+    intelligence: {
+      // `signal` must contain "buy"/"sell" — the dashboard colours the badge
+      // by substring — and is rendered as `signal.replace('_', ' ')`.
+      signal: "moderate_buy",
+      // -1..1: the dashboard renders `Math.abs(score) * 100` as a bar width.
+      composite_score: 0.42,
+      confidence: 0.68,
+      regime: {
+        // One of the keys the dashboard has an emoji/colour for.
+        regime: "bull_trend",
+        confidence: 0.71,
+        momentum: 0.36,
+        volatility: 0.22,
+      },
+      sentiment: {
+        sentiment: "bullish",
+        score: 0.54,
+      },
+      technical: {
+        rsi: 61.4,
+        macd: 0.148,
+        // 0..1: rendered as a percentage.
+        bb_position: 0.73,
+      },
+      macro: {
+        trend: "risk_on",
+      },
+      recommendations: [
+        "Momentum breakout remains the highest-conviction allocation this session",
+        "Trim SOL exposure back toward the 15% position cap",
+        "Hold cash buffer above $40k while realized volatility stays elevated",
+      ],
+      alerts: [
+        {
+          type: "warning",
+          message: "Realized volatility up 2.3x over the trailing hour",
+          severity: "medium",
+        },
+        {
+          type: "info",
+          message: "Cross-chain spread on ARB narrowed below the arbitrage threshold",
+          severity: "low",
+        },
+      ],
+    },
   };
 }
 
@@ -270,6 +354,68 @@ api.get("/trades/recent", (req, res) => {
   res.json({ trades: state.trades.slice(0, limit) });
 });
 
+api.get("/intelligence", (_req, res) => {
+  // `timestamp` is generated per request: the dashboard renders it as
+  // "Last updated", so a frozen value would look stale.
+  res.json({ ...state.intelligence, timestamp: new Date().toISOString() });
+});
+
 router.use("/api", api);
+
+/**
+ * Whether the mirror should be served at all. Always on outside production so
+ * checks need no setup; in production it takes an explicit opt-in.
+ */
+export function isStagingTradingEnabled(): boolean {
+  return (
+    process.env["ENABLE_STAGING_TRADING_API"] === "1" ||
+    process.env["NODE_ENV"] !== "production"
+  );
+}
+
+/**
+ * Socket.IO is served under the mirror's own prefix rather than the default
+ * root `/socket.io`, because only `/api/*` reaches this service through the
+ * workspace proxy. Clients pass the prefixed URL in `VITE_WS_URL`.
+ */
+export const STAGING_SOCKET_PATH = "/api/staging-trading/socket.io";
+
+const LIVE_UPDATE_INTERVAL_MS = 2000;
+
+/**
+ * Mirror of the live-update channel the dashboard's `useWebSocket` hook
+ * subscribes to (`portfolio_update`, `trade_update`, `strategy_update`).
+ *
+ * Every payload is a slice of the same in-memory fixtures the REST mirror
+ * serves, so a shape regression shows up identically on both channels. A
+ * snapshot is emitted immediately on connect so checks do not have to wait for
+ * the first tick.
+ */
+export function attachStagingTradingSocket(httpServer: HttpServer): SocketIOServer {
+  const io = new SocketIOServer(httpServer, {
+    path: STAGING_SOCKET_PATH,
+    serveClient: false,
+    cors: { origin: true },
+  });
+
+  io.on("connection", (socket) => {
+    const emitSnapshot = () => {
+      socket.emit("portfolio_update", { ...state.portfolio });
+
+      const latestTrade = state.trades[0];
+      if (latestTrade) socket.emit("trade_update", { ...latestTrade });
+
+      const latestStrategy = state.strategies[0];
+      if (latestStrategy) socket.emit("strategy_update", { ...latestStrategy });
+    };
+
+    emitSnapshot();
+
+    const interval = setInterval(emitSnapshot, LIVE_UPDATE_INTERVAL_MS);
+    socket.on("disconnect", () => clearInterval(interval));
+  });
+
+  return io;
+}
 
 export default router;

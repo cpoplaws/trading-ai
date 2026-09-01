@@ -31,3 +31,17 @@ to catch endpoint regressions, which is the main thing they exist for.
   mutations at the real backend.
 - Point the client at it with a client-specific env var that takes precedence
   over the shared one, so tests never disturb sibling artifacts' config.
+
+## Socket.IO channels cannot follow the byte-identical-path rule
+
+Socket.IO connects to `<origin>` + its `path` option and treats any path in the
+URL it is handed as a *namespace*, not a prefix. So a mirrored realtime channel
+cannot live under the mirror's prefix while the client passes only a base URL —
+and it cannot live at the default root `/socket.io` either, because only the
+artifact's own preview prefix is routed to its service through the proxy.
+
+Resolve it on the client, not by rewriting the mount: have the hook split the
+configured URL into origin + `<pathname>/socket.io` and pass the latter as
+`path`. Against a root-mounted real backend this collapses to the default
+`/socket.io`, so live behaviour is untouched, and the mirror stays reachable
+under its prefix. Do not add a dev-server proxy to reach a sibling service.
